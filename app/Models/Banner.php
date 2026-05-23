@@ -2,34 +2,26 @@
 
 namespace App\Models;
 
-use Database\Factories\BannerFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Banner extends Model
 {
-    /** @use HasFactory<BannerFactory> */
-    use HasFactory;
-
     protected $fillable = [
         'title',
         'subtitle',
-        'badge',
+        'button_text',
+        'button_url',
         'image',
-        'cta_label',
-        'cta_url',
         'is_active',
-        'starts_at',
-        'ends_at',
         'sort_order',
     ];
 
-    protected function casts(): array
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
+    public function scopeActive($query)
     {
-        return [
-            'is_active' => 'boolean',
-            'starts_at' => 'datetime',
-            'ends_at' => 'datetime',
-        ];
+        return $query->where('is_active', true);
     }
 }
