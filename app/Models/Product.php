@@ -19,6 +19,7 @@ class Product extends Model
         'stock',
         'image',
         'is_featured',
+        'is_new',
         'is_active',
         'sort_order',
     ];
@@ -27,6 +28,7 @@ class Product extends Model
         'price' => 'decimal:2',
         'sale_price' => 'decimal:2',
         'is_featured' => 'boolean',
+        'is_new' => 'boolean',
         'is_active' => 'boolean',
     ];
 

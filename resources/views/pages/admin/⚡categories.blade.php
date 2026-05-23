@@ -1,7 +1,9 @@
 <?php
 
 use App\Models\Category;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -15,25 +17,51 @@ class extends Component {
     use WithFileUploads;
 
     public ?int $editingId = null;
+
+    public string $parent_id = '';
     public string $name = '';
     public string $description = '';
     public bool $is_active = true;
     public int $sort_order = 0;
+
     public $imageFile = null;
+    public ?string $currentImage = null;
 
     #[Computed]
     public function categories()
     {
-        return Category::orderBy('sort_order')->latest()->get();
+        return Category::with('parent')
+            ->orderByRaw('parent_id IS NOT NULL')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+    }
+
+    #[Computed]
+    public function parentOptions()
+    {
+        return Category::query()
+            ->whereNull('parent_id')
+            ->when($this->editingId, function ($query) {
+                $query->where('id', '!=', $this->editingId);
+            })
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
     }
 
     public function save(): void
     {
-        $data = $this->validate([
-            'name' => ['required', 'string', 'max:255'],
+        $this->validate([
+            'parent_id' => ['nullable', 'exists:categories,id'],
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
             'description' => ['nullable', 'string'],
             'is_active' => ['boolean'],
-            'sort_order' => ['integer', 'min:0'],
+            'sort_order' => ['required', 'integer', 'min:0'],
             'imageFile' => ['nullable', 'image', 'max:2048'],
         ]);
 
@@ -44,21 +72,28 @@ class extends Component {
         }
 
         $payload = [
+            'parent_id' => $this->parent_id !== '' ? (int) $this->parent_id : null,
             'name' => $this->name,
             'slug' => $slug,
-            'description' => $this->description,
-            'is_active' => $this->is_active,
+            'description' => $this->description ?: null,
+            'is_active' => (bool) $this->is_active,
             'sort_order' => $this->sort_order,
         ];
 
         if ($this->imageFile) {
+            if ($this->currentImage && Storage::disk('public')->exists($this->currentImage)) {
+                Storage::disk('public')->delete($this->currentImage);
+            }
+
             $payload['image'] = $this->imageFile->store('categories', 'public');
         }
 
-        Category::updateOrCreate(
-            ['id' => $this->editingId],
-            $payload
-        );
+        if ($this->editingId) {
+            $category = Category::findOrFail($this->editingId);
+            $category->update($payload);
+        } else {
+            Category::create($payload);
+        }
 
         session()->flash('success', 'Kategori berhasil disimpan.');
         $this->resetForm();
@@ -69,28 +104,50 @@ class extends Component {
         $category = Category::findOrFail($id);
 
         $this->editingId = $category->id;
+        $this->parent_id = $category->parent_id ? (string) $category->parent_id : '';
         $this->name = $category->name;
         $this->description = $category->description ?? '';
-        $this->is_active = $category->is_active;
+        $this->is_active = (bool) $category->is_active;
         $this->sort_order = $category->sort_order;
+        $this->currentImage = $category->image;
+        $this->imageFile = null;
     }
 
     public function delete(int $id): void
     {
         $category = Category::findOrFail($id);
 
-        if ($category->products()->exists()) {
-            session()->flash('success', 'Kategori masih memiliki produk, nonaktifkan saja jika tidak ingin ditampilkan.');
+        if ($category->children()->exists()) {
+            session()->flash('success', 'Kategori ini masih punya subkategori. Hapus atau pindahkan subkategori dulu.');
             return;
         }
 
+        if ($category->products()->exists()) {
+            session()->flash('success', 'Kategori ini masih punya produk. Pindahkan produk dulu atau nonaktifkan kategori.');
+            return;
+        }
+
+        if ($category->image && Storage::disk('public')->exists($category->image)) {
+            Storage::disk('public')->delete($category->image);
+        }
+
         $category->delete();
+
         session()->flash('success', 'Kategori berhasil dihapus.');
+        $this->resetForm();
     }
 
     public function resetForm(): void
     {
-        $this->reset(['editingId', 'name', 'description', 'imageFile']);
+        $this->reset([
+            'editingId',
+            'parent_id',
+            'name',
+            'description',
+            'imageFile',
+            'currentImage',
+        ]);
+
         $this->is_active = true;
         $this->sort_order = 0;
     }
@@ -109,20 +166,36 @@ class extends Component {
 
         <div class="admin-grid">
             <label>
+                Parent Kategori
+                <select wire:model="parent_id">
+                    <option value="">Kategori Utama</option>
+
+                    @foreach($this->parentOptions as $parent)
+                        <option value="{{ $parent->id }}">{{ $parent->name }}</option>
+                    @endforeach
+                </select>
+
+                @error('parent_id')
+                    <span class="error-text">{{ $message }}</span>
+                @enderror
+            </label>
+
+            <label>
                 Nama Kategori
-                <input type="text" wire:model="name">
-                @error('name') <span class="error-text">{{ $message }}</span> @enderror
+                <input type="text" wire:model="name" placeholder="Contoh: Motherboard">
+
+                @error('name')
+                    <span class="error-text">{{ $message }}</span>
+                @enderror
             </label>
 
             <label>
-                Urutan
-                <input type="number" wire:model="sort_order">
-            </label>
+                Urutan Tampil
+                <input type="number" wire:model="sort_order" min="0">
 
-            <label>
-                Gambar
-                <input type="file" wire:model="imageFile">
-                @error('imageFile') <span class="error-text">{{ $message }}</span> @enderror
+                @error('sort_order')
+                    <span class="error-text">{{ $message }}</span>
+                @enderror
             </label>
 
             <label>
@@ -132,18 +205,46 @@ class extends Component {
                     <option value="0">Nonaktif</option>
                 </select>
             </label>
+
+            <label>
+                Gambar Kategori
+                <input type="file" wire:model="imageFile" accept="image/*">
+
+                @error('imageFile')
+                    <span class="error-text">{{ $message }}</span>
+                @enderror
+            </label>
+
+            <div>
+                @if($imageFile)
+                    <p>Preview gambar baru:</p>
+                    <img src="{{ $imageFile->temporaryUrl() }}" alt="Preview" style="width: 120px; height: 120px; object-fit: cover; border-radius: 12px;">
+                @elseif($currentImage)
+                    <p>Gambar saat ini:</p>
+                    <img src="{{ Storage::url($currentImage) }}" alt="Current Image" style="width: 120px; height: 120px; object-fit: cover; border-radius: 12px;">
+                @endif
+            </div>
         </div>
 
         <br>
 
         <label>
             Deskripsi
-            <textarea wire:model="description" rows="4"></textarea>
+            <textarea wire:model="description" rows="4" placeholder="Deskripsi singkat kategori"></textarea>
+
+            @error('description')
+                <span class="error-text">{{ $message }}</span>
+            @enderror
         </label>
 
         <div class="admin-actions">
-            <button class="admin-btn" type="submit">Simpan</button>
-            <button class="admin-btn secondary" type="button" wire:click="resetForm">Reset</button>
+            <button class="admin-btn" type="submit">
+                {{ $editingId ? 'Update Kategori' : 'Simpan Kategori' }}
+            </button>
+
+            <button class="admin-btn secondary" type="button" wire:click="resetForm">
+                Reset
+            </button>
         </div>
     </form>
 
@@ -154,23 +255,52 @@ class extends Component {
             <thead>
                 <tr>
                     <th>Nama</th>
+                    <th>Parent</th>
                     <th>Status</th>
                     <th>Urutan</th>
+                    <th>Gambar</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
+
             <tbody>
-                @foreach($this->categories as $category)
+                @forelse($this->categories as $category)
                     <tr>
-                        <td>{{ $category->name }}</td>
+                        <td>
+                            @if($category->parent_id)
+                                — {{ $category->name }}
+                            @else
+                                <strong>{{ $category->name }}</strong>
+                            @endif
+                        </td>
+
+                        <td>{{ $category->parent?->name ?? 'Kategori Utama' }}</td>
                         <td>{{ $category->is_active ? 'Aktif' : 'Nonaktif' }}</td>
                         <td>{{ $category->sort_order }}</td>
+
                         <td>
-                            <button class="admin-btn" wire:click="edit({{ $category->id }})">Edit</button>
-                            <button class="admin-btn danger" wire:click="delete({{ $category->id }})">Hapus</button>
+                            @if($category->image)
+                                <img src="{{ Storage::url($category->image) }}" alt="{{ $category->name }}" style="width: 54px; height: 54px; object-fit: cover; border-radius: 10px;">
+                            @else
+                                -
+                            @endif
+                        </td>
+
+                        <td>
+                            <button class="admin-btn" type="button" wire:click="edit({{ $category->id }})">
+                                Edit
+                            </button>
+
+                            <button class="admin-btn danger" type="button" wire:click="delete({{ $category->id }})" wire:confirm="Yakin ingin menghapus kategori ini?">
+                                Hapus
+                            </button>
                         </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="6">Belum ada kategori.</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>

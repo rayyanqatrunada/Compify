@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Models\Product;
 
 Route::livewire('/', 'pages::shop.home')->name('home');
 Route::livewire('/products', 'pages::shop.products')->name('products.index');
@@ -31,3 +32,19 @@ Route::middleware(['auth', 'admin'])
         Route::livewire('/products', 'pages::admin.products')->name('products');
         Route::livewire('/banners', 'pages::admin.banners')->name('banners');
     });
+
+Route::livewire('/wishlist', 'pages::shop.wishlist')->name('wishlist.index');
+
+Route::post('/wishlist/{product}/toggle', function (Product $product) {
+    $wishlist = session()->get('wishlist', []);
+
+    if (in_array($product->id, $wishlist)) {
+        $wishlist = array_values(array_diff($wishlist, [$product->id]));
+    } else {
+        $wishlist[] = $product->id;
+    }
+
+    session()->put('wishlist', $wishlist);
+
+    return back();
+})->name('wishlist.toggle');

@@ -51,18 +51,22 @@ class extends Component {
         return Product::with(['category', 'brand'])
             ->active()
             ->when($this->search, function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('sku', 'like', '%' . $this->search . '%');
+                $query->where(function ($q) {
+                    $q->where('name', 'like', '%' . $this->search . '%')
+                        ->orWhere('sku', 'like', '%' . $this->search . '%');
+                });
             })
             ->when($this->category, function ($query) {
                 $query->whereHas('category', fn ($q) => $q->where('slug', $this->category));
+            })
+            ->when($this->brand, function ($query) {
+                $query->whereHas('brand', fn ($q) => $q->where('slug', $this->brand));
             })
             ->when($this->sort === 'price_low', fn ($query) => $query->orderBy('price'))
             ->when($this->sort === 'price_high', fn ($query) => $query->orderByDesc('price'))
             ->when($this->sort === 'latest', fn ($query) => $query->latest())
             ->paginate(12);
-    }
-};
+    };
 ?>
 
 <section class="section">
@@ -76,6 +80,13 @@ class extends Component {
         <select wire:model.live="category">
             <option value="">Semua Kategori</option>
             @foreach($this->categories as $item)
+                <option value="{{ $item->slug }}">{{ $item->name }}</option>
+            @endforeach
+        </select>
+
+        <select wire:model.live="brand">
+            <option value="">Semua Merk</option>
+            @foreach($this->brands as $item)
                 <option value="{{ $item->slug }}">{{ $item->name }}</option>
             @endforeach
         </select>
