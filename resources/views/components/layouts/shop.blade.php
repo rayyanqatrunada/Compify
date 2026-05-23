@@ -189,19 +189,16 @@
 
             <div>
                 <h3>Support</h3>
-                <a href="#">Contact Us</a>
-                <a href="#">Cara Belanja</a>
-                <a href="#">Garansi Produk</a>
-                <a href="#">Kebijakan Pengiriman</a>
-                <a href="#">Pengembalian Produk</a>
+                <a href="{{ route('contact') }}" wire:navigate>Contact Us</a>
+                <a href="{{ route('shipping') }}" wire:navigate>Kebijakan Pengiriman</a>
+                <a href="{{ route('returns') }}" wire:navigate>Pengembalian Produk</a>
             </div>
 
             <div>
                 <h3>Company</h3>
-                <a href="#">About Us</a>
-                <a href="#">Company Profile</a>
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms & Conditions</a>
+                <a href="{{ route('about') }}" wire:navigate>About Us</a>
+                <a href="{{ route('privacy') }}" wire:navigate>Privacy Policy</a>
+                <a href="{{ route('terms') }}" wire:navigate>Terms & Conditions</a>
             </div>
 
             <div>
