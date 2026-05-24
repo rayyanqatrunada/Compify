@@ -8,6 +8,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use App\Models\HomeSection;
 
 new
 #[Layout('layouts.shop')]
@@ -127,6 +128,159 @@ class extends Component {
             $this->bannerIndex = ($this->bannerIndex - 1 + $count) % $count;
         }
     }
+
+    public array $sectionIndexes = [];
+    public array $galleryIndexes = [];
+
+    #[Computed]
+    public function homeSections()
+    {
+        return HomeSection::with(['category.children', 'product'])
+            ->active()
+            ->orderBy('sort_order')
+            ->get();
+    }
+
+    public function productsForSection(HomeSection $section)
+    {
+        $categoryIds = collect();
+
+        if ($section->category_id) {
+            $categoryIds->push($section->category_id);
+
+            if ($section->category) {
+                $categoryIds = $categoryIds->merge(
+                    $section->category->children()->pluck('id')
+                );
+            }
+        }
+
+        $query = Product::with(['category', 'brand'])
+            ->active()
+            ->orderBy('sort_order')
+            ->latest();
+
+        if ($categoryIds->isNotEmpty()) {
+            $query->whereIn('category_id', $categoryIds->unique()->values());
+        }
+
+        $index = $this->sectionIndexes[$section->id] ?? 0;
+
+        return $query->skip($index)->take(4)->get();
+    }
+
+    public function productCountForSection(HomeSection $section): int
+    {
+        $categoryIds = collect();
+
+        if ($section->category_id) {
+            $categoryIds->push($section->category_id);
+
+            if ($section->category) {
+                $categoryIds = $categoryIds->merge(
+                    $section->category->children()->pluck('id')
+                );
+            }
+        }
+
+        $query = Product::active();
+
+        if ($categoryIds->isNotEmpty()) {
+            $query->whereIn('category_id', $categoryIds->unique()->values());
+        }
+
+        return $query->count();
+    }
+
+    public function nextSectionProducts(int $sectionId): void
+    {
+        $section = HomeSection::with('category.children')->find($sectionId);
+
+        if (! $section) {
+            return;
+        }
+
+        $count = $this->productCountForSection($section);
+        $maxIndex = max(0, $count - 4);
+
+        $current = $this->sectionIndexes[$sectionId] ?? 0;
+        $this->sectionIndexes[$sectionId] = $current >= $maxIndex ? 0 : $current + 1;
+    }
+
+    public function prevSectionProducts(int $sectionId): void
+    {
+        $section = HomeSection::with('category.children')->find($sectionId);
+
+        if (! $section) {
+            return;
+        }
+
+        $count = $this->productCountForSection($section);
+        $maxIndex = max(0, $count - 4);
+
+        $current = $this->sectionIndexes[$sectionId] ?? 0;
+        $this->sectionIndexes[$sectionId] = $current <= 0 ? $maxIndex : $current - 1;
+    }
+
+    public function galleryImages(HomeSection $section): array
+    {
+        $images = collect([
+            $section->image,
+            $section->image_2,
+            $section->image_3,
+        ])->filter()->values()->all();
+
+        if (empty($images) && $section->product?->image) {
+            $images[] = $section->product->image;
+        }
+
+        if (count($images) <= 1) {
+            return $images;
+        }
+
+        $index = $this->galleryIndexes[$section->id] ?? 0;
+
+        return array_values(array_merge(
+            array_slice($images, $index),
+            array_slice($images, 0, $index)
+        ));
+    }
+
+    public function nextGallery(int $sectionId): void
+    {
+        $section = HomeSection::find($sectionId);
+
+        if (! $section) {
+            return;
+        }
+
+        $count = count($this->galleryImages($section));
+
+        if ($count <= 1) {
+            return;
+        }
+
+        $current = $this->galleryIndexes[$sectionId] ?? 0;
+        $this->galleryIndexes[$sectionId] = ($current + 1) % $count;
+    }
+
+    public function prevGallery(int $sectionId): void
+    {
+        $section = HomeSection::find($sectionId);
+
+        if (! $section) {
+            return;
+        }
+
+        $count = count($this->galleryImages($section));
+
+        if ($count <= 1) {
+            return;
+        }
+
+        $current = $this->galleryIndexes[$sectionId] ?? 0;
+        $this->galleryIndexes[$sectionId] = ($current - 1 + $count) % $count;
+    }
 };
 ?>
 
@@ -184,198 +338,174 @@ class extends Component {
         </div>
     </section>
 
-    <section class="section">
-        <div class="section-title">
-            <h2>Kategori</h2>
+    <section class="home-category-strip">
+        <div class="home-category-strip-head">
+            <p>Kategori</p>
+            <a href="{{ route('products.index') }}" wire:navigate>Lihat Semua ></a>
         </div>
 
-        <div class="product-grid">
+        <div class="home-category-list">
             @foreach($this->categories as $category)
-                <a href="{{ route('categories.show', $category) }}" class="product-card" wire:navigate>
-                    <div class="product-image">
-                        <div class="product-placeholder">{{ strtoupper(substr($category->name, 0, 2)) }}</div>
-                    </div>
-                    <h3 class="product-name">{{ $category->name }}</h3>
+                <a href="{{ route('categories.show', $category) }}" wire:navigate>
+                    <strong>{{ $category->name }}</strong>
+                    <span>{{ $category->children->count() }} subkategori</span>
                 </a>
             @endforeach
         </div>
     </section>
 
-    @php
-        $featuredWindow = $this->featuredProducts->slice($featuredProductIndex)->values();
+    @foreach($this->homeSections as $section)
+        @if($section->section_type === 'category_products')
+            @php
+                $products = $this->productsForSection($section);
+            @endphp
 
-        $promoOne = $featuredWindow->get(0) ?? $this->featuredProducts->get(0);
-        $promoTwo = $featuredWindow->get(1) ?? $this->featuredProducts->get(1) ?? $promoOne;
-
-        $spotlightMain = $featuredWindow->get(2) ?? $this->featuredProducts->get(2) ?? $promoOne;
-        $spotlightSideTop = $featuredWindow->get(3) ?? $this->featuredProducts->get(3) ?? $promoTwo;
-        $spotlightSideBottom = $featuredWindow->get(4) ?? $this->featuredProducts->get(4) ?? $promoOne;
-
-        $gridProducts = $this->featuredProducts->slice($featuredProductIndex + 5, 8);
-
-        if ($gridProducts->isEmpty()) {
-            $gridProducts = $this->featuredProducts->slice(0, 8);
-        }
-
-        $promoOneImage = $promoOne?->image ? Storage::url($promoOne->image) : null;
-        $promoTwoImage = $promoTwo?->image ? Storage::url($promoTwo->image) : null;
-        $spotlightMainImage = $spotlightMain?->image ? Storage::url($spotlightMain->image) : null;
-        $spotlightSideTopImage = $spotlightSideTop?->image ? Storage::url($spotlightSideTop->image) : null;
-        $spotlightSideBottomImage = $spotlightSideBottom?->image ? Storage::url($spotlightSideBottom->image) : null;
-    @endphp
-
-    @if($promoOne)
-    <section class="after-hero-showcase">
-        {{-- Preview 1 --}}
-        <div class="showcase-split-card reverse-text">
-            <div class="showcase-split-copy">
-                <h3>{{ $promoOne->name }}</h3>
-
-                <ul class="showcase-points">
-                    <li>Kategori: {{ $promoOne->category?->name ?? 'Produk Unggulan' }}</li>
-                    <li>Merk: {{ $promoOne->brand?->name ?? 'Compify Choice' }}</li>
-                    <li>
-                        Harga:
-                        Rp {{ number_format($promoOne->sale_price ?: $promoOne->price, 0, ',', '.') }}
-                    </li>
-                </ul>
-
-                <a href="{{ route('products.show', $promoOne) }}" class="showcase-pill-button" wire:navigate>
-                    Learn More
-                </a>
-            </div>
-
-            <a href="{{ route('products.show', $promoOne) }}" class="showcase-split-image" wire:navigate>
-                @if($promoOneImage)
-                    <img src="{{ $promoOneImage }}" alt="{{ $promoOne->name }}">
-                @else
-                    <div class="showcase-image-placeholder">
-                        {{ strtoupper(substr($promoOne->name, 0, 2)) }}
-                    </div>
-                @endif
-            </a>
-        </div>
-
-        {{-- Preview 2 --}}
-        @if($promoTwo)
-        <div class="showcase-split-card">
-            <a href="{{ route('products.show', $promoTwo) }}" class="showcase-split-image" wire:navigate>
-                @if($promoTwoImage)
-                    <img src="{{ $promoTwoImage }}" alt="{{ $promoTwo->name }}">
-                @else
-                    <div class="showcase-image-placeholder">
-                        {{ strtoupper(substr($promoTwo->name, 0, 2)) }}
-                    </div>
-                @endif
-            </a>
-
-            <div class="showcase-split-copy">
-                <h3>{{ $promoTwo->name }}</h3>
-
-                <p class="showcase-description">
-                    {{ \Illuminate\Support\Str::limit($promoTwo->description ?: 'Produk pilihan Compify yang bisa diatur langsung dari admin site dan ditampilkan dari database asli.', 180) }}
-                </p>
-
-                <a href="{{ route('products.show', $promoTwo) }}" class="showcase-pill-button" wire:navigate>
-                    Learn More
-                </a>
-            </div>
-        </div>
-        @endif
-
-        {{-- Products showcase --}}
-        @if($spotlightMain)
-        <div class="products-preview-section">
-            <div class="products-preview-head">
-                <h2>Products</h2>
-                <a href="{{ route('products.index') }}" wire:navigate>View More ></a>
-            </div>
-
-            <div class="products-preview-card">
-                <button type="button" class="products-preview-arrow left" wire:click="prevFeaturedProducts">‹</button>
-                <button type="button" class="products-preview-arrow right" wire:click="nextFeaturedProducts">›</button>
-
-                <a href="{{ route('products.show', $spotlightMain) }}" class="products-preview-main" wire:navigate>
-                    @if($spotlightMainImage)
-                        <img src="{{ $spotlightMainImage }}" alt="{{ $spotlightMain->name }}">
-                    @else
-                        <div class="showcase-image-placeholder">
-                            {{ strtoupper(substr($spotlightMain->name, 0, 2)) }}
-                        </div>
-                    @endif
-                </a>
-
-                <div class="products-preview-side">
-                    <a href="{{ route('products.show', $spotlightSideTop) }}" class="products-preview-side-item" wire:navigate>
-                        @if($spotlightSideTopImage)
-                            <img src="{{ $spotlightSideTopImage }}" alt="{{ $spotlightSideTop->name }}">
-                        @else
-                            <div class="showcase-image-placeholder">
-                                {{ strtoupper(substr($spotlightSideTop->name, 0, 2)) }}
-                            </div>
-                        @endif
-                    </a>
-
-                    <a href="{{ route('products.show', $spotlightSideBottom) }}" class="products-preview-side-item" wire:navigate>
-                        @if($spotlightSideBottomImage)
-                            <img src="{{ $spotlightSideBottomImage }}" alt="{{ $spotlightSideBottom->name }}">
-                        @else
-                            <div class="showcase-image-placeholder">
-                                {{ strtoupper(substr($spotlightSideBottom->name, 0, 2)) }}
-                            </div>
-                        @endif
-                    </a>
-                </div>
-
-                <div class="products-preview-info">
+            <section class="home-category-products-section">
+                <div class="home-display-head">
                     <div>
-                        <h3>{{ $spotlightMain->name }}</h3>
-                        <p>
-                            Rp {{ number_format($spotlightMain->sale_price ?: $spotlightMain->price, 0, ',', '.') }}
-                        </p>
+                        <p>{{ $section->subtitle ?: 'Display Produk' }}</p>
+                        <h2>{{ $section->title ?: $section->category?->name }}</h2>
                     </div>
 
-                    <div class="preview-dots">
-                        <span class="active"></span>
-                        <span></span>
-                        <span></span>
-                    </div>
+                    <div class="home-display-actions">
+                        <button type="button" wire:click="prevSectionProducts({{ $section->id }})">‹</button>
+                        <button type="button" wire:click="nextSectionProducts({{ $section->id }})">›</button>
 
-                    <a href="{{ route('products.show', $spotlightMain) }}" class="showcase-pill-button" wire:navigate>
-                        Learn More
-                    </a>
+                        @if($section->category)
+                            <a href="{{ route('categories.show', $section->category) }}" wire:navigate>
+                                Lihat Semua >
+                            </a>
+                        @endif
+                    </div>
                 </div>
-            </div>
-        </div>
+
+                <div class="product-grid modern-product-grid">
+                    @forelse($products as $product)
+                        <x-product-card :product="$product" />
+                    @empty
+                        <div class="empty-state">
+                            <h3>Belum ada produk</h3>
+                            <p>Tambahkan produk ke kategori ini dari admin.</p>
+                        </div>
+                    @endforelse
+                </div>
+            </section>
         @endif
 
-        {{-- Grid produk --}}
-        <div class="showcase-grid-products">
-            @foreach($gridProducts as $product)
-                @php
-                    $image = $product->image ? Storage::url($product->image) : null;
-                    $finalPrice = $product->sale_price ?: $product->price;
-                @endphp
+        @if($section->section_type === 'story')
+            @php
+                $storyImage = $section->image ? Storage::url($section->image) : null;
+                $buttonUrl = $section->button_url ?: ($section->product ? route('products.show', $section->product) : route('products.index'));
+            @endphp
 
-                <article class="showcase-grid-card">
-                    <a href="{{ route('products.show', $product) }}" class="showcase-grid-image" wire:navigate>
-                        @if($image)
-                            <img src="{{ $image }}" alt="{{ $product->name }}">
+            <section class="home-story-section {{ $section->image_position === 'left' ? 'image-left' : 'image-right' }} {{ $loop->first ? 'story-hero-full' : '' }}">
+                <div class="home-story-copy">
+                    @if($section->subtitle)
+                        <p>{{ $section->subtitle }}</p>
+                    @endif
+
+                    <h2>{{ $section->title ?: $section->product?->name }}</h2>
+
+                    <div class="home-story-description">
+                        {!! nl2br(e($section->description ?: $section->product?->description)) !!}
+                    </div>
+
+                    <a href="{{ $buttonUrl }}" wire:navigate>
+                        {{ $section->button_text ?: 'Learn More' }}
+                    </a>
+                </div>
+
+                <div class="home-story-image">
+                    @if($storyImage)
+                        <img src="{{ $storyImage }}" alt="{{ $section->title }}">
+                    @elseif($section->product?->image)
+                        <img src="{{ Storage::url($section->product->image) }}" alt="{{ $section->product->name }}">
+                    @else
+                        <span>{{ strtoupper(substr($section->title ?: 'CP', 0, 2)) }}</span>
+                    @endif
+                </div>
+            </section>
+        @endif
+
+        @if($section->section_type === 'gallery')
+            @php
+                $images = $this->galleryImages($section);
+                $mainImage = $images[0] ?? null;
+                $sideImageOne = $images[1] ?? $mainImage;
+                $sideImageTwo = $images[2] ?? $mainImage;
+
+                $galleryUrl = $section->button_url ?: ($section->product ? route('products.show', $section->product) : route('products.index'));
+            @endphp
+
+            <section
+                class="home-gallery-product-section"
+                @if($section->auto_slide)
+                    wire:poll.6000ms="nextGallery({{ $section->id }})"
+                @endif
+            >
+                <div class="products-preview-head">
+                    <h2>{{ $section->title ?: 'Products' }}</h2>
+
+                    <a href="{{ route('products.index') }}" wire:navigate>
+                        View More >
+                    </a>
+                </div>
+
+                <div class="home-gallery-card">
+                    <button type="button" class="gallery-arrow left" wire:click="prevGallery({{ $section->id }})">‹</button>
+                    <button type="button" class="gallery-arrow right" wire:click="nextGallery({{ $section->id }})">›</button>
+
+                    <a href="{{ $galleryUrl }}" class="gallery-main-image" wire:navigate>
+                        @if($mainImage)
+                            <img src="{{ Storage::url($mainImage) }}" alt="{{ $section->title }}">
                         @else
-                            <div class="showcase-image-placeholder">
-                                {{ strtoupper(substr($product->name, 0, 2)) }}
-                            </div>
+                            <span>CP</span>
                         @endif
                     </a>
 
-                    <div class="showcase-grid-copy">
-                        <small>{{ $product->name }}</small>
-                        <span>{{ $product->category?->name ?? 'Produk' }}</span>
-                        <strong>Rp {{ number_format($finalPrice, 0, ',', '.') }}</strong>
+                    <div class="gallery-side-images">
+                        <a href="{{ $galleryUrl }}" wire:navigate>
+                            @if($sideImageOne)
+                                <img src="{{ Storage::url($sideImageOne) }}" alt="{{ $section->title }}">
+                            @else
+                                <span>CP</span>
+                            @endif
+                        </a>
+
+                        <a href="{{ $galleryUrl }}" wire:navigate>
+                            @if($sideImageTwo)
+                                <img src="{{ Storage::url($sideImageTwo) }}" alt="{{ $section->title }}">
+                            @else
+                                <span>CP</span>
+                            @endif
+                        </a>
                     </div>
-                </article>
-            @endforeach
-        </div>
-    </section>
-    @endif
+
+                    <div class="gallery-info">
+                        <div>
+                            <h3>{{ $section->product?->name ?? $section->title }}</h3>
+
+                            @if($section->product)
+                                <p>
+                                    Rp {{ number_format($section->product->sale_price ?: $section->product->price, 0, ',', '.') }}
+                                </p>
+                            @else
+                                <p>{{ $section->subtitle }}</p>
+                            @endif
+                        </div>
+
+                        <div class="preview-dots">
+                            @foreach($images as $index => $image)
+                                <span @class(['active' => ($galleryIndexes[$section->id] ?? 0) === $index])></span>
+                            @endforeach
+                        </div>
+
+                        <a href="{{ $galleryUrl }}" class="showcase-pill-button" wire:navigate>
+                            {{ $section->button_text ?: 'Learn More' }}
+                        </a>
+                    </div>
+                </div>
+            </section>
+        @endif
+    @endforeach
 </div>

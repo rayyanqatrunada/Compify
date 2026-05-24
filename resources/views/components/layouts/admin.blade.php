@@ -61,6 +61,11 @@
                 </a>
             </div>
 
+                <a href="{{ route('admin.content.home-sections') }}" wire:navigate
+                    @class(['active' => request()->routeIs('admin.content.home-sections')])>
+                    Home Sections
+                </a>
+
             <div class="admin-nav-group">
                 <p>Sales</p>
 

@@ -1,0 +1,117 @@
+/* =========================================================
+   HERO SLIDER
+========================================================= */
+
+.hero-slider {
+    background: #050505;
+}
+
+.hero-slide {
+    min-height: var(--hero-height);
+    display: flex;
+    align-items: center;
+    position: relative;
+    background: linear-gradient(90deg, #050505, #161616);
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+}
+
+.hero-slide::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 72% 35%, rgba(255,255,255,.12), transparent 28%),
+        linear-gradient(to bottom, transparent, rgba(0,0,0,.18));
+    pointer-events: none;
+}
+
+.hero-copy {
+    position: relative;
+    z-index: 2;
+    width: min(720px, 92%);
+    margin-left: 7%;
+    color: #ffffff;
+}
+
+.hero-eyebrow {
+    margin: 0 0 16px;
+    font-size: 14px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2.8px;
+    color: rgba(255,255,255,.78);
+}
+
+.hero-copy h1 {
+    margin: 0;
+    font-size: var(--hero-title-size);
+    line-height: .95;
+    font-weight: 950;
+    letter-spacing: -2px;
+}
+
+.hero-support {
+    max-width: 620px;
+    margin: 22px 0 34px;
+    font-size: clamp(18px, 2.1vw, 26px);
+    line-height: 1.25;
+    color: rgba(255,255,255,.9);
+}
+
+.hero-button {
+    min-width: 220px;
+    height: 54px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    color: #000000;
+    font-size: 14px;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+}
+
+.hero-controls {
+    position: absolute;
+    z-index: 3;
+    left: 7%;
+    bottom: 34px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.hero-controls > button {
+    width: 42px;
+    height: 42px;
+    border: 1px solid rgba(255,255,255,.35);
+    border-radius: 50%;
+    background: rgba(255,255,255,.1);
+    color: #ffffff;
+    font-size: 28px;
+    line-height: 1;
+}
+
+.hero-dots {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.hero-dots button {
+    width: 9px;
+    height: 9px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255,255,255,.42);
+}
+
+.hero-dots button.active {
+    width: 28px;
+    border-radius: 999px;
+    background: #ffffff;
+}

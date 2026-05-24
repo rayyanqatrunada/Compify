@@ -63,6 +63,7 @@ Route::middleware(['auth', 'admin'])
 
         Route::prefix('content')->name('content.')->group(function () {
             Route::livewire('/banners', 'pages::admin.content.banners.index')->name('banners');
+            Route::livewire('/home-sections', 'pages::admin.content.home-sections.index')->name('home-sections');
             Route::livewire('/pages', 'pages::admin.content.pages.index')->name('pages');
         });
 

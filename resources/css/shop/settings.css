@@ -1,0 +1,68 @@
+/* =========================================================
+   SHOP SETTINGS
+========================================================= */
+
+:root {
+    /* Warna */
+    --shop-bg: #f3f3f3;
+    --shop-white: #ffffff;
+    --shop-black: #050505;
+    --shop-text: #222222;
+    --shop-muted: #777777;
+    --shop-border: #eeeeee;
+
+    /* Spacing halaman */
+    --shop-x: 40px;
+    --shop-section-y: 34px;
+    --shop-section-gap: 18px;
+
+    /* Radius */
+    --radius-small: 8px;
+    --radius-medium: 12px;
+    --radius-large: 14px;
+    --radius-xl: 16px;
+
+    /* Header */
+    --header-height: 74px;
+    --logo-width: 230px;
+    --search-width: 180px;
+    --search-height: 38px;
+
+    /* Navbar */
+    --nav-height: 58px;
+    --nav-gap: 42px;
+
+    /* Hero slider atas */
+    --hero-height: 570px;
+    --hero-title-size: clamp(44px, 6vw, 86px);
+
+    /* Kategori */
+    --category-card-height: 88px;
+    --category-grid-columns: 4;
+    --category-title-size: 14px;
+    --category-subtitle-size: 11px;
+
+    /* Display produk 4 barang */
+    --product-display-gap: 14px;
+    --product-display-columns: 4;
+
+    /* Story preview kanan-kiri */
+    --story-height: 235px;
+    --story-padding-y: 24px;
+    --story-padding-x: 30px;
+    --story-title-size: clamp(22px, 2.5vw, 34px);
+    --story-desc-size: 13px;
+
+    /* Story pertama full image */
+    --story-hero-height: 300px;
+    --story-hero-padding-y: 38px;
+    --story-hero-padding-x: 42px;
+
+    /* Gallery 1 besar + 2 kecil */
+    --gallery-main-height: 190px;
+    --gallery-side-height: 91px;
+    --gallery-gap: 8px;
+    --gallery-radius: 10px;
+    --gallery-left-size: 1.65fr;
+    --gallery-right-size: .95fr;
+}
