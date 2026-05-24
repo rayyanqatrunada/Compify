@@ -1,0 +1,119 @@
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.modern-footer {
+    background: #ffffff;
+    color: #222222;
+    border-top: 1px solid #eeeeee;
+    padding: 0 56px;
+    display: block;
+}
+
+.footer-main {
+    padding: 58px 0;
+    display: grid;
+    grid-template-columns: 1.4fr .9fr .9fr .9fr 1.2fr;
+    gap: 42px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.footer-main h3 {
+    margin: 0 0 22px;
+    color: #111111;
+    font-size: 22px;
+    font-weight: 800;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.footer-main a,
+.footer-main p {
+    display: block;
+    margin: 0 0 13px;
+    color: #777777;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.footer-main a:hover {
+    color: #111111;
+}
+
+.footer-logo img {
+    width: 210px;
+    max-height: 64px;
+    object-fit: contain;
+    margin-bottom: 20px;
+}
+
+.footer-about p {
+    max-width: 360px;
+}
+
+.footer-socials {
+    display: flex;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.footer-socials a {
+    width: 40px;
+    height: 40px;
+    margin: 0;
+    border-radius: 50%;
+    background: #eeeeee;
+    color: #555555;
+    display: grid;
+    place-items: center;
+    transition: .2s ease;
+}
+
+.footer-socials a:hover {
+    background: #111111;
+    color: #ffffff;
+    transform: translateY(-3px);
+}
+
+.footer-socials svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+.newsletter-box {
+    display: flex;
+    height: 48px;
+    margin-top: 18px;
+}
+
+.newsletter-box input {
+    flex: 1;
+    border: 1px solid #dddddd;
+    background: #ffffff;
+    color: #111111;
+    padding: 0 14px;
+    min-width: 0;
+}
+
+.newsletter-box button {
+    border: none;
+    background: #111111;
+    color: #ffffff;
+    padding: 0 20px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.footer-bottom {
+    min-height: 82px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    color: #888888;
+}
+
+.footer-bottom p {
+    margin: 0;
+}
