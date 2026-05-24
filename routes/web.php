@@ -36,8 +36,8 @@ Route::post('/wishlist/{product}/toggle', function (Product $product) {
     return back();
 })->name('wishlist.toggle');
 
-Route::livewire('/admin/login', 'pages::auth.login')
-    ->middleware('guest')
+Route::livewire(config('compify.admin_login_path'), 'pages::auth.admin.login')
+    ->middleware(['guest', 'throttle:5,1'])
     ->name('login');
 
 Route::post('/logout', function (Request $request) {
@@ -46,15 +46,31 @@ Route::post('/logout', function (Request $request) {
     $request->session()->invalidate();
     $request->session()->regenerateToken();
 
-    return redirect()->route('home');
+    return redirect()->route('login');
 })->name('logout');
 
 Route::middleware(['auth', 'admin'])
-    ->prefix('admin')
+    ->prefix(config('compify.admin_panel_path'))
     ->name('admin.')
     ->group(function () {
-        Route::livewire('/', 'pages::admin.dashboard')->name('dashboard');
-        Route::livewire('/categories', 'pages::admin.categories')->name('categories');
-        Route::livewire('/products', 'pages::admin.products')->name('products');
-        Route::livewire('/banners', 'pages::admin.banners')->name('banners');
-});
+        Route::livewire('/', 'pages::admin.dashboard.index')->name('dashboard');
+
+        Route::prefix('catalog')->name('catalog.')->group(function () {
+            Route::livewire('/products', 'pages::admin.catalog.products.index')->name('products');
+            Route::livewire('/categories', 'pages::admin.catalog.categories.index')->name('categories');
+            Route::livewire('/brands', 'pages::admin.catalog.brands.index')->name('brands');
+        });
+
+        Route::prefix('content')->name('content.')->group(function () {
+            Route::livewire('/banners', 'pages::admin.content.banners.index')->name('banners');
+            Route::livewire('/pages', 'pages::admin.content.pages.index')->name('pages');
+        });
+
+        Route::prefix('sales')->name('sales.')->group(function () {
+            Route::livewire('/orders', 'pages::admin.sales.orders.index')->name('orders');
+        });
+
+        Route::prefix('settings')->name('settings.')->group(function () {
+            Route::livewire('/shop', 'pages::admin.settings.shop.index')->name('shop');
+        });
+    });
