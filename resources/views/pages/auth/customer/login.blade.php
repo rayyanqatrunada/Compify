@@ -20,15 +20,20 @@ class extends Component {
             'password' => ['required'],
         ]);
 
-        if (! Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
+        if (! Auth::guard('customer')->attempt([
+            'email' => $this->email,
+            'password' => $this->password,
+        ], $this->remember)) {
             $this->addError('email', 'Email atau password salah.');
             return;
         }
 
         request()->session()->regenerate();
 
-        if (auth()->user()->role === 'admin') {
-            $this->redirectRoute('admin.dashboard', navigate: true);
+        if (Auth::guard('customer')->user()->role === 'admin') {
+            Auth::guard('customer')->logout();
+
+            $this->addError('email', 'Akun admin tidak digunakan untuk login customer.');
             return;
         }
 

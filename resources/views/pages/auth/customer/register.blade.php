@@ -46,7 +46,7 @@ class extends Component {
             'role' => 'customer',
         ]);
 
-        Auth::login($user);
+        Auth::guard('customer')->login($user);
 
         request()->session()->regenerate();
 

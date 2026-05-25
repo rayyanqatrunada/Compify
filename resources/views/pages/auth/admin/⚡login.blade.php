@@ -46,18 +46,15 @@ class extends Component {
             'password' => ['required', 'min:6'],
         ]);
 
-        if (! Auth::attempt($credentials, false)) {
+        if (! Auth::guard('admin')->attempt($credentials, false)) {
             $this->addError('email', 'Email atau password salah.');
             return;
         }
 
         request()->session()->regenerate();
 
-        if (auth()->user()->role !== 'admin') {
-            Auth::logout();
-
-            request()->session()->invalidate();
-            request()->session()->regenerateToken();
+        if (Auth::guard('admin')->user()->role !== 'admin') {
+            Auth::guard('admin')->logout();
 
             $this->addError('email', 'Akun ini tidak memiliki akses admin.');
             return;

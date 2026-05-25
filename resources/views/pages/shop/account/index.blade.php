@@ -7,6 +7,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Auth;
 
 new
 #[Layout('layouts.shop')]
@@ -32,7 +33,7 @@ class extends Component {
 
     public function mount(): void
     {
-        $user = auth()->user();
+        $user = Auth::guard('customer')->user();
 
         $this->name = $user->name;
         $this->email = $user->email;
@@ -48,7 +49,7 @@ class extends Component {
 
     public function saveProfile(): void
     {
-        $user = auth()->user();
+        $user = Auth::guard('customer')->user();
 
         $data = $this->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -87,7 +88,7 @@ class extends Component {
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        auth()->user()->update([
+        Auth::guard('customer')->user()->update([
             'password' => Hash::make($this->password),
         ]);
 
@@ -118,7 +119,7 @@ class extends Component {
             </div>
 
             <h2>{{ $name }}</h2>
-            <p>{{ auth()->user()->role === 'admin' ? 'Admin' : 'Customer' }}</p>
+            <p>{{ Auth::guard('customer')->user()->role === 'admin' ? 'Admin' : 'Customer' }}</p>
 
             <nav>
                 <a href="#personal">Personal Information</a>

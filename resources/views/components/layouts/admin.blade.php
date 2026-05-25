@@ -90,7 +90,7 @@
                 View Shop
             </a>
 
-            <form method="POST" action="{{ route('logout') }}">
+            <form method="POST" action="{{ route('admin.logout') }}">
                 @csrf
                 <button type="submit">Logout</button>
             </form>
@@ -101,7 +101,7 @@
         <header class="admin-topbar">
             <div>
                 <p>Welcome back,</p>
-                <h1>{{ auth()->user()->name }}</h1>
+                <h1>{{ auth('admin')->user()->name }}</h1>
             </div>
 
             <div class="admin-topbar-actions">

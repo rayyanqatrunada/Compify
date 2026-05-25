@@ -7,19 +7,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureUserIsAdmin
+class EnsureCustomerAuthenticated
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (! Auth::guard('admin')->check()) {
-            return redirect()->route('login');
+        if (! Auth::guard('customer')->check()) {
+            return redirect()->route('customer.login');
         }
 
-        if (Auth::guard('admin')->user()->role !== 'admin') {
-            abort(403);
-        }
-
-        Auth::shouldUse('admin');
+        Auth::shouldUse('customer');
 
         return $next($request);
     }

@@ -63,18 +63,12 @@
                     <b>{{ $wishlistCount }}</b>
                 </a>
 
-                @auth
-                    @if(auth()->user()->role === 'admin')
-                        <a href="{{ route('admin.dashboard') }}" class="header-link compact-header-link" wire:navigate>
-                            Admin
-                        </a>
-                    @else
-                        <a href="{{ route('account.index') }}" class="header-link compact-header-link" wire:navigate>
-                            Akun Saya
-                        </a>
-                    @endif
+                @auth('customer')
+                    <a href="{{ route('account.index') }}" class="header-link compact-header-link" wire:navigate>
+                        Akun Saya
+                    </a>
 
-                    <form method="POST" action="{{ route('logout') }}">
+                    <form method="POST" action="{{ route('customer.logout') }}">
                         @csrf
                         <button type="submit" class="plain-button compact-header-link">
                             Keluar
