@@ -22,6 +22,7 @@
             ->get();
 
         $wishlistCount = count(session('wishlist', []));
+        $cartCount = array_sum(session('cart', []));
     @endphp
 
     <header class="shop-header">
@@ -31,12 +32,6 @@
             </a>
 
             <div class="compact-header-actions">
-                {{-- <div class="language-box compact-language">
-                    <span class="flag-dot"></span>
-                    <span>ID</span>
-                    <span>⌄</span>
-                </div> --}}
-
                 <form action="{{ route('products.index') }}" method="GET" class="search-box compact-search-box">
                     <input type="text" name="search" placeholder="Cari">
                     <button type="submit" aria-label="Cari">
@@ -46,14 +41,15 @@
                     </button>
                 </form>
 
-                <a href="{{ route('products.index') }}" class="header-link compact-header-link" wire:navigate>
+                <a href="{{ route('cart.index') }}" class="header-link compact-header-link" wire:navigate>
                     <span class="header-icon">
                         <svg viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M7 7V6a5 5 0 0 1 10 0v1h2a1 1 0 0 1 1 1v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a1 1 0 0 1 1-1h2Zm2 0h6V6a3 3 0 0 0-6 0v1Zm-3 2v11h12V9H6Z"/>
                         </svg>
                     </span>
-                    <span>Keranjang Belanja</span>
-                    <b>0</b>
+
+                    <span>Keranjang</span>
+                    <b>{{ $cartCount }}</b>
                 </a>
 
                 <a href="{{ route('wishlist.index') }}" class="header-link compact-header-link" wire:navigate>
@@ -62,14 +58,33 @@
                             <path d="M12 21s-7.5-4.7-9.4-9.1C1.1 8.5 3.2 5 6.7 5c2 0 3.4 1 4.3 2.2C11.9 6 13.3 5 15.3 5c3.5 0 5.6 3.5 4.1 6.9C19.5 16.3 12 21 12 21Zm0-2.4c2.3-1.6 5.1-4.2 5.8-7.5.9-2-.2-4.1-2.5-4.1-1.7 0-2.7 1.1-3.3 2.4h-2C9.4 8.1 8.4 7 6.7 7 4.4 7 3.3 9.1 4.2 11.1c.7 3.3 3.5 5.9 7.8 7.5Z"/>
                         </svg>
                     </span>
-                    <span>My Wish List</span>
+
+                    <span>Wishlist</span>
                     <b>{{ $wishlistCount }}</b>
                 </a>
 
-                {{-- Jangan arahkan ke admin login. Admin login tetap rahasia. --}}
-                <span class="header-link compact-header-link header-login-future">
-                    Masuk
-                </span>
+                @auth
+                    @if(auth()->user()->role === 'admin')
+                        <a href="{{ route('admin.dashboard') }}" class="header-link compact-header-link" wire:navigate>
+                            Admin
+                        </a>
+                    @else
+                        <a href="{{ route('account.index') }}" class="header-link compact-header-link" wire:navigate>
+                            Akun Saya
+                        </a>
+                    @endif
+
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="plain-button compact-header-link">
+                            Keluar
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ route('customer.login') }}" class="header-link compact-header-link" wire:navigate>
+                        Masuk
+                    </a>
+                @endauth
             </div>
         </div>
 
@@ -84,7 +99,7 @@
 
                     <div class="mega-menu">
                         <div class="mega-menu-inner">
-                            @foreach($menuCategories as $parent)
+                            @forelse($menuCategories as $parent)
                                 <div class="mega-column">
                                     <a href="{{ route('categories.show', $parent) }}" class="mega-title" wire:navigate>
                                         {{ $parent->name }}
@@ -100,7 +115,11 @@
                                         </a>
                                     @endforelse
                                 </div>
-                            @endforeach
+                            @empty
+                                <div class="mega-column">
+                                    <span class="mega-title">Belum ada kategori</span>
+                                </div>
+                            @endforelse
                         </div>
                     </div>
                 </div>
@@ -127,7 +146,7 @@
                 <a href="{{ route('products.index') }}" class="nav-link" wire:navigate>Produk</a>
                 <a href="{{ route('products.index', ['sort' => 'latest']) }}" class="nav-link" wire:navigate>Produk Baru</a>
                 <a href="{{ route('products.index') }}" class="nav-link" wire:navigate>Promo</a>
-                <a href="#about-compify" class="nav-link">About Us</a>
+                <a href="{{ route('about') }}" class="nav-link" wire:navigate>About Us</a>
             </div>
         </nav>
     </header>

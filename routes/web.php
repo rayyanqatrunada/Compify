@@ -41,12 +41,16 @@ Route::livewire(config('compify.admin_login_path'), 'pages::auth.admin.login')
     ->name('login');
 
 Route::post('/logout', function (Request $request) {
+    $wasAdmin = $request->user()?->role === 'admin';
+
     Auth::logout();
 
     $request->session()->invalidate();
     $request->session()->regenerateToken();
 
-    return redirect()->route('login');
+    return $wasAdmin
+        ? redirect()->route('login')
+        : redirect()->route('home');
 })->name('logout');
 
 Route::middleware(['auth', 'admin'])
@@ -75,3 +79,42 @@ Route::middleware(['auth', 'admin'])
             Route::livewire('/shop', 'pages::admin.settings.shop.index')->name('shop');
         });
     });
+
+Route::livewire('/sign-in', 'pages::auth.customer.login')
+    ->middleware('guest')
+    ->name('customer.login');
+
+Route::livewire('/sign-up', 'pages::auth.customer.register')
+    ->middleware('guest')
+    ->name('customer.register');
+
+Route::livewire('/account', 'pages::shop.account.index')
+    ->middleware('auth')
+    ->name('account.index');
+
+Route::livewire('/cart', 'pages::shop.cart.index')
+    ->name('cart.index');
+
+Route::post('/cart/{product}/add', function (Request $request, Product $product) {
+    abort_if(! $product->is_active, 404);
+
+    $data = $request->validate([
+        'quantity' => ['required', 'integer', 'min:1'],
+        'redirect_to_cart' => ['nullable', 'boolean'],
+    ]);
+
+    $quantity = min((int) $data['quantity'], max(1, $product->stock));
+
+    $cart = session()->get('cart', []);
+    $currentQty = $cart[$product->id] ?? 0;
+
+    $cart[$product->id] = min($currentQty + $quantity, max(1, $product->stock));
+
+    session()->put('cart', $cart);
+
+    if ($request->boolean('redirect_to_cart')) {
+        return redirect()->route('cart.index')->with('success', 'Produk masuk ke keranjang.');
+    }
+
+    return back()->with('success', 'Produk berhasil ditambahkan ke keranjang.');
+})->name('cart.add');
