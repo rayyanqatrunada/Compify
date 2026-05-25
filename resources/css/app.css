@@ -8,7 +8,6 @@
 }
 
 @import './base.css';
-/* @import './shop.css'; */
 @import './shop/index.css';
 @import './product.css';
 @import './footer.css';

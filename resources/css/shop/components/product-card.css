@@ -1,0 +1,114 @@
+.shop-product-card {
+    background: #fff;
+    border: 1px solid #e7e7e7;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+.shop-product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.06);
+}
+
+.shop-product-card__image-wrap {
+    position: relative;
+    display: block;
+    aspect-ratio: 1 / 1;
+    background: #fafafa;
+    padding: 18px;
+}
+
+.shop-product-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.shop-product-card__badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: #ea5b4b;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 8px;
+    border-radius: 6px;
+}
+
+.shop-product-card__content {
+    padding: 14px 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.shop-product-card__brand {
+    font-size: 13px;
+    color: #888;
+}
+
+.shop-product-card__title {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #111;
+    text-decoration: none;
+}
+
+.shop-product-card__price {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.shop-product-card__price-old {
+    color: #8b8b8b;
+    text-decoration: line-through;
+    font-size: 14px;
+}
+
+.shop-product-card__price-new {
+    color: #111;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.shop-product-card__actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.shop-product-card__icon-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    border: 1px solid #d6d6d6;
+    background: #fff;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.shop-product-card__cart-form {
+    flex: 1;
+}
+
+.shop-product-card__cart-btn {
+    width: 100%;
+    min-height: 38px;
+    border: none;
+    border-radius: 999px;
+    background: #111;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
