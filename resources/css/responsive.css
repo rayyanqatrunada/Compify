@@ -4,9 +4,12 @@
 
 @media (max-width: 1100px) {
     .top-header {
-        padding: 24px;
-        flex-direction: column;
-        align-items: flex-start;
+        min-height: auto;
+        height: auto;
+        padding: 16px var(--shop-x);
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
     }
 
     .header-right {
@@ -16,8 +19,8 @@
     }
 
     .main-nav-inner {
-        padding: 0 24px;
-        gap: 28px;
+        padding: 0 var(--shop-x);
+        gap: 24px;
         overflow-x: auto;
     }
 
@@ -84,7 +87,7 @@
 
 @media (max-width: 640px) {
     .brand-logo img {
-        width: 210px;
+        width: 172px;
     }
 
     .search-box {
@@ -92,7 +95,7 @@
     }
 
     .header-link {
-        font-size: 16px;
+        font-size: var(--header-link-size);
     }
 
     .mega-menu-inner,
@@ -101,7 +104,7 @@
     }
 
     .hero-slide {
-        min-height: 520px;
+        min-height: var(--hero-height);
     }
 
     .hero-copy {
@@ -133,7 +136,7 @@
     }
 
     .section {
-        padding: 42px 22px;
+        padding: var(--shop-section-y) var(--shop-x) calc(var(--shop-section-y) + 18px);
     }
 
     .section-title {
@@ -161,7 +164,7 @@
     }
 
     .product-detail {
-        padding: 42px 22px;
+        padding: 36px var(--shop-x);
     }
 
     .modern-footer {
@@ -219,10 +222,10 @@
 .static-page h1 {
     margin: 0 0 24px;
     color: #222222;
-    font-size: clamp(38px, 5vw, 68px);
+    font-size: var(--shop-heading-large-size);
     line-height: 1;
     font-weight: 950;
-    letter-spacing: -2px;
+    letter-spacing: 0;
 }
 
 .static-page p {

@@ -7,6 +7,15 @@
         --shop-x: 24px;
         --category-grid-columns: 2;
         --product-display-columns: 2;
+        --shop-product-grid-columns: 2;
+        --shop-category-grid-columns: 3;
+        --shop-product-image-height: 180px;
+        --shop-heading-size: 28px;
+        --shop-heading-large-size: 34px;
+        --hero-title-size: 48px;
+        --story-normal-height: 300px;
+        --story-full-height: 340px;
+        --gallery-main-height: 320px;
     }
 
     .top-header,
@@ -42,6 +51,7 @@
 
     .home-story-section {
         grid-template-columns: 1fr;
+        height: auto;
     }
 
     .home-story-section.image-left .home-story-image,
@@ -55,12 +65,20 @@
     }
 
     .story-hero-full {
+        height: auto;
         min-height: 260px;
     }
 
     .story-hero-full .home-story-copy {
+        height: auto;
         min-height: 260px;
         padding: 28px 24px;
+    }
+
+    .home-story-copy,
+    .home-story-image {
+        height: auto;
+        min-height: 260px;
     }
 
     .home-gallery-card {
@@ -80,19 +98,28 @@
     :root {
         --shop-x: 18px;
         --shop-section-y: 24px;
+        --header-action-gap: 6px;
+        --header-link-size: 12px;
         --category-grid-columns: 2;
         --product-display-columns: 1;
-        --hero-height: 520px;
+        --shop-product-grid-columns: 1;
+        --shop-category-grid-columns: 1;
+        --shop-product-image-height: 168px;
+        --shop-heading-size: 24px;
+        --shop-heading-large-size: 28px;
+        --hero-height: 440px;
+        --hero-title-size: 38px;
+        --hero-support-size: 16px;
 
-        --story-height: 190px;
-        --story-hero-height: 270px;
-        --gallery-main-height: 150px;
-        --gallery-side-height: 90px;
+        --story-normal-height: 240px;
+        --story-full-height: 280px;
+        --story-title-size: 23px;
+        --gallery-main-height: 220px;
     }
 
     .brand-logo img,
     .compact-brand-logo img {
-        width: 205px;
+        width: 172px;
     }
 
     .search-box {
@@ -100,7 +127,30 @@
     }
 
     .header-link {
-        font-size: 15px;
+        font-size: var(--header-link-size);
+    }
+
+    .compact-header-actions {
+        row-gap: 8px;
+    }
+
+    .header-link,
+    .plain-button,
+    .compact-header-link {
+        gap: 6px;
+        padding: 0 6px;
+    }
+
+    .header-icon,
+    .header-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .header-link b {
+        min-width: 20px;
+        height: 20px;
+        font-size: 11px;
     }
 
     .mega-menu-inner,
@@ -125,5 +175,9 @@
 
     .home-story-copy {
         padding: 20px 18px;
+    }
+
+    .category-products.is-list .shop-product-card {
+        grid-template-columns: 1fr;
     }
 }

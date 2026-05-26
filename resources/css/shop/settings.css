@@ -1,157 +1,113 @@
 /* =========================================================
    SHOP SETTINGS
+   Edit this file first when you want the shop larger/smaller.
 ========================================================= */
 
 :root {
-    /* Warna */
-    --shop-bg: #f3f3f3;
+    /* Core theme */
+    --shop-bg: #f5f6f7;
     --shop-white: #ffffff;
     --shop-black: #050505;
     --shop-text: #222222;
-    --shop-muted: #777777;
-    --shop-border: #eeeeee;
+    --shop-muted: #747474;
+    --shop-border: #e7e8ea;
+    --shop-border-strong: #d8dade;
+    --shop-soft: #fafafa;
+    --shop-accent: #111111;
 
-    /* Spacing halaman */
-    --shop-x: 40px;
-    --shop-section-y: 34px;
-    --shop-section-gap: 18px;
+    /* Compact size controls */
+    --shop-page-max: 1160px;
+    --shop-x: clamp(18px, 2.2vw, 28px);
+    --shop-page-padding-y: 24px;
+    --shop-section-y: 22px;
+    --shop-section-gap: 12px;
+    --shop-grid-gap: 12px;
+    --shop-control-height: 36px;
+    --shop-control-radius: 8px;
+    --shop-card-radius: 8px;
+    --shop-card-padding: 12px;
+    --shop-surface-shadow: 0 14px 34px rgba(0, 0, 0, .055);
 
-    /* Radius */
-    --radius-small: 8px;
-    --radius-medium: 12px;
-    --radius-large: 14px;
-    --radius-xl: 16px;
+    /* Type sizes */
+    --shop-heading-size: 32px;
+    --shop-heading-large-size: 38px;
+    --shop-kicker-size: 11px;
+
+    /* Product card / grid */
+    --shop-product-grid-columns: 4;
+    --shop-product-card-padding: 11px;
+    --shop-product-card-gap: 8px;
+    --shop-product-image-height: 168px;
+    --shop-product-image-padding: 12px;
+    --shop-product-brand-size: 10px;
+    --shop-product-title-size: 14px;
+    --shop-product-title-min-height: 36px;
+    --shop-product-price-size: 14px;
+    --shop-product-meta-size: 11px;
+    --shop-product-button-height: 34px;
+    --shop-product-icon-size: 32px;
+    --shop-product-list-image-width: 138px;
+    --shop-product-detail-media-height: 400px;
+    --shop-product-detail-padding: 22px;
+    --shop-product-detail-title-size: 36px;
+
+    /* Category page */
+    --shop-category-sidebar-width: 226px;
+    --shop-category-grid-columns: 4;
+
+    /* Radius aliases used by existing files */
+    --radius-small: 6px;
+    --radius-medium: 8px;
+    --radius-large: 8px;
+    --radius-xl: 10px;
 
     /* Header */
-    --header-height: 74px;
-    --logo-width: 230px;
-    --search-width: 180px;
-    --search-height: 38px;
+    --header-height: 58px;
+    --logo-width: 174px;
+    --search-width: 250px;
+    --search-height: 34px;
+    --header-link-size: 13px;
+    --header-action-gap: 10px;
 
     /* Navbar */
-    --nav-height: 58px;
-    --nav-gap: 42px;
+    --nav-height: 40px;
+    --nav-gap: 24px;
+    --nav-link-size: 12px;
 
-    /* Hero slider atas */
-    --hero-height: 570px;
-    --hero-title-size: clamp(44px, 6vw, 86px);
+    /* Hero */
+    --hero-height: 430px;
+    --hero-title-size: 56px;
+    --hero-support-size: 18px;
+    --hero-button-height: 46px;
 
-    /* Kategori */
-    --category-card-height: 88px;
+    /* Categories */
+    --category-card-height: 66px;
     --category-grid-columns: 4;
-    --category-title-size: 14px;
+    --category-title-size: 13px;
     --category-subtitle-size: 11px;
 
-    /* Display produk 4 barang */
-    --product-display-gap: 14px;
+    /* Product display */
+    --product-display-gap: var(--shop-grid-gap);
     --product-display-columns: 4;
 
-    /* Story preview kanan-kiri */
-    --story-height: 5px;
-    --story-padding-y: 24px;
-    --story-padding-x: 30px;
-    --story-title-size: clamp(22px, 2.5vw, 34px);
+    /* Story sections */
+    --story-normal-height: 340px;
+    --story-full-height: 390px;
+    --story-height: var(--story-normal-height);
+    --story-padding-y: 18px;
+    --story-padding-x: 24px;
+    --story-title-size: 28px;
     --story-desc-size: 13px;
+    --story-hero-height: var(--story-full-height);
+    --story-hero-padding-y: 34px;
+    --story-hero-padding-x: 38px;
 
-    /* Story pertama full image */
-    --story-hero-height: 460px;
-    --story-hero-padding-y: 38px;
-    --story-hero-padding-x: 42px;
-
-    /* Gallery 1 besar + 2 kecil */
-    --gallery-main-height: 90px;
-    --gallery-side-height: 31px;
+    /* Gallery */
+    --gallery-main-height: 360px;
+    --gallery-side-height: calc((var(--gallery-main-height) - var(--gallery-gap)) / 2);
     --gallery-gap: 8px;
-    --gallery-radius: 10px;
+    --gallery-radius: 8px;
     --gallery-left-size: 1.65fr;
     --gallery-right-size: .95fr;
-}
-/* =========================================================
-   FORCE PREVIEW SIZE - MUDAH DIATUR
-========================================================= */
-
-:root {
-    /* UBAH UKURAN DI SINI */
-    --story-normal-height: 380px;
-    --story-full-height: 410px;
-
-    --gallery-main-height: 430px;
-    --gallery-gap: 8px;
-}
-
-/* PREVIEW KANAN-KIRI */
-.home-story-section {
-    height: var(--story-normal-height) !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-}
-
-.home-story-copy,
-.home-story-image {
-    height: var(--story-normal-height) !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-}
-
-.home-story-image img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    object-position: center !important;
-}
-
-/* Biar teks tidak memaksa section membesar */
-.home-story-copy {
-    padding: 18px 24px !important;
-}
-
-.home-story-description {
-    max-height: 62px !important;
-    overflow: hidden !important;
-}
-
-/* PREVIEW PERTAMA FULL IMAGE */
-.story-hero-full {
-    height: var(--story-full-height) !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-}
-
-.story-hero-full .home-story-copy,
-.story-hero-full .home-story-image {
-    height: var(--story-full-height) !important;
-    min-height: 0 !important;
-}
-
-/* GALLERY 1 BESAR + 2 KECIL */
-.home-gallery-card {
-    align-items: start !important;
-    grid-template-columns: 1.65fr .95fr !important;
-    gap: var(--gallery-gap) !important;
-}
-
-.gallery-main-image {
-    height: var(--gallery-main-height) !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-}
-
-.gallery-side-images {
-    display: grid !important;
-    grid-template-rows: repeat(2, calc((var(--gallery-main-height) - var(--gallery-gap)) / 2)) !important;
-    gap: var(--gallery-gap) !important;
-}
-
-.gallery-side-images a {
-    height: 100% !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-}
-
-.gallery-main-image img,
-.gallery-side-images img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    object-position: center !important;
+    --gallery-title-size: 19px;
 }

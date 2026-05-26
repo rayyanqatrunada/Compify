@@ -117,3 +117,34 @@
 .footer-bottom p {
     margin: 0;
 }
+
+/* =========================================================
+   MINIMAL FOOTER - NON HOME PAGE
+========================================================= */
+
+.shop-footer-minimal {
+    min-height: 88px;
+    padding: 0 40px;
+    border-top: 1px solid #eeeeee;
+    background: #ffffff;
+    color: #777777;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    font-size: 16px;
+}
+
+.shop-footer-minimal p {
+    margin: 0;
+}
+
+@media (max-width: 640px) {
+    .shop-footer-minimal {
+        min-height: auto;
+        padding: 22px 18px;
+        align-items: flex-start;
+        flex-direction: column;
+        font-size: 14px;
+    }
+}

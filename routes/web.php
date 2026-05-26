@@ -122,6 +122,10 @@ Route::middleware(['auth:admin', 'admin'])
     ->group(function () {
         Route::livewire('/', 'pages::admin.dashboard.index')->name('dashboard');
 
+        Route::livewire('/analytics', 'pages::admin.analytics.index')->name('analytics.index');
+        Route::livewire('/customers', 'pages::admin.customers.index')->name('customers.index');
+        Route::livewire('/reviews', 'pages::admin.reviews.index')->name('reviews.index');
+
         Route::post('/logout', function (Request $request) {
             Auth::guard('admin')->logout();
 

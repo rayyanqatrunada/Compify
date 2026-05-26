@@ -8,112 +8,159 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="admin-body">
-    <aside class="admin-sidebar">
-        <div class="admin-brand">
-            <div class="admin-brand-mark">C</div>
-            <div>
-                <strong>COMPIFY</strong>
-                <span>Admin Panel</span>
-            </div>
-        </div>
+<body class="admin-body-v2">
+    @php
+        $admin = auth('admin')->user();
+    @endphp
 
-        <nav class="admin-nav">
-            <div class="admin-nav-group">
-                <p>Main</p>
+    <div class="admin-shell-v2" data-admin-theme="light">
+        <aside class="admin-sidebar-v2">
+            <a href="{{ route('admin.dashboard') }}" class="admin-logo-v2" wire:navigate>
+                <img src="{{ asset('assets/brand/compify-logo.svg') }}" alt="Compify">
+                {{-- <span>Compify</span> --}}
+            </a>
 
+            <nav class="admin-menu-v2">
                 <a href="{{ route('admin.dashboard') }}" wire:navigate
                    @class(['active' => request()->routeIs('admin.dashboard')])>
+                    <span>▦</span>
                     Dashboard
                 </a>
-            </div>
 
-            <div class="admin-nav-group">
-                <p>Catalog</p>
-
-                <a href="{{ route('admin.catalog.products') }}" wire:navigate
-                   @class(['active' => request()->routeIs('admin.catalog.products')])>
-                    Products
+                <a href="{{ route('admin.analytics.index') }}" wire:navigate
+                   @class(['active' => request()->routeIs('admin.analytics.*')])>
+                    <span>▥</span>
+                    Analytic
                 </a>
 
-                <a href="{{ route('admin.catalog.categories') }}" wire:navigate
-                   @class(['active' => request()->routeIs('admin.catalog.categories')])>
-                    Categories
-                </a>
+                <details @open(request()->routeIs('admin.catalog.*') || request()->routeIs('admin.content.banners') || request()->routeIs('admin.content.home-sections'))>
+                    <summary>
+                        <span>▤</span>
+                        Product
+                    </summary>
 
-                <a href="{{ route('admin.catalog.brands') }}" wire:navigate
-                   @class(['active' => request()->routeIs('admin.catalog.brands')])>
-                    Brands
-                </a>
-            </div>
+                    <div class="admin-submenu-v2">
+                        <a href="{{ route('admin.catalog.products') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.catalog.products')])>
+                            Products
+                        </a>
 
-            <div class="admin-nav-group">
-                <p>Content</p>
+                        <a href="{{ route('admin.catalog.categories') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.catalog.categories')])>
+                            Categories
+                        </a>
 
-                <a href="{{ route('admin.content.banners') }}" wire:navigate
-                   @class(['active' => request()->routeIs('admin.content.banners')])>
-                    Home Banners
-                </a>
+                        <a href="{{ route('admin.catalog.brands') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.catalog.brands')])>
+                            Brands
+                        </a>
 
-                <a href="{{ route('admin.content.pages') }}" wire:navigate
-                   @class(['active' => request()->routeIs('admin.content.pages')])>
-                    Pages
-                </a>
-            </div>
+                        <a href="{{ route('admin.content.banners') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.content.banners')])>
+                            Banners
+                        </a>
 
-                <a href="{{ route('admin.content.home-sections') }}" wire:navigate
-                    @class(['active' => request()->routeIs('admin.content.home-sections')])>
-                    Home Sections
-                </a>
-
-            <div class="admin-nav-group">
-                <p>Sales</p>
+                        <a href="{{ route('admin.content.home-sections') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.content.home-sections')])>
+                            Home Sections
+                        </a>
+                    </div>
+                </details>
 
                 <a href="{{ route('admin.sales.orders') }}" wire:navigate
                    @class(['active' => request()->routeIs('admin.sales.orders')])>
+                    <span>▧</span>
                     Orders
                 </a>
-            </div>
 
-            <div class="admin-nav-group">
-                <p>Settings</p>
-
-                <a href="{{ route('admin.settings.shop') }}" wire:navigate
-                   @class(['active' => request()->routeIs('admin.settings.shop')])>
-                    Shop Settings
+                <a href="{{ route('admin.customers.index') }}" wire:navigate
+                   @class(['active' => request()->routeIs('admin.customers.*')])>
+                    <span>☻</span>
+                    Customer
                 </a>
-            </div>
-        </nav>
 
-        <div class="admin-sidebar-footer">
-            <a href="{{ route('home') }}" wire:navigate>
-                View Shop
-            </a>
+                <a href="{{ route('admin.reviews.index') }}" wire:navigate
+                   @class(['active' => request()->routeIs('admin.reviews.*')])>
+                    <span>✎</span>
+                    Reviews
+                </a>
 
-            <form method="POST" action="{{ route('admin.logout') }}">
+                <details @open(request()->routeIs('admin.settings.*') || request()->routeIs('admin.content.pages'))>
+                    <summary>
+                        <span>⚙</span>
+                        Configure
+                    </summary>
+
+                    <div class="admin-submenu-v2">
+                        <a href="{{ route('admin.settings.shop') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.settings.shop')])>
+                            Shop Settings
+                        </a>
+
+                        <a href="{{ route('admin.content.pages') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.content.pages')])>
+                            Static Pages
+                        </a>
+                    </div>
+                </details>
+            </nav>
+
+            <form method="POST" action="{{ route('admin.logout') }}" class="admin-logout-v2">
                 @csrf
-                <button type="submit">Logout</button>
+                <button type="submit">
+                    <span>⇥</span>
+                    Logout
+                </button>
             </form>
-        </div>
-    </aside>
+        </aside>
 
-    <main class="admin-shell">
-        <header class="admin-topbar">
-            <div>
-                <p>Welcome back,</p>
-                <h1>{{ auth('admin')->user()->name }}</h1>
-            </div>
+        <section class="admin-main-v2">
+            <header class="admin-topbar-v2">
+                <div>
+                    <p>Admin Panel</p>
+                    <h1>{{ $title ?? 'Dashboard' }}</h1>
+                </div>
 
-            <div class="admin-topbar-actions">
-                <a href="{{ route('home') }}" wire:navigate>Open Store</a>
-                <span>{{ now()->format('d M Y') }}</span>
-            </div>
-        </header>
+                <div class="admin-topbar-actions-v2">
+                    <button type="button" class="admin-icon-btn-v2" title="Notification">🔔</button>
+                    <button type="button" class="admin-icon-btn-v2" title="Message">💬</button>
 
-        <section class="admin-content">
-            {{ $slot }}
+                    <button type="button" class="admin-icon-btn-v2" id="adminThemeToggle" title="Dark Mode">
+                        🌙
+                    </button>
+
+                    <div class="admin-avatar-v2">
+                        <span>{{ strtoupper(substr($admin?->name ?? 'A', 0, 1)) }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="admin-content-v2">
+                {{ $slot }}
+            </main>
         </section>
-    </main>
+    </div>
+
+    <script>
+        const adminShell = document.querySelector('.admin-shell-v2');
+        const adminThemeToggle = document.getElementById('adminThemeToggle');
+
+        const savedAdminTheme = localStorage.getItem('compify_admin_theme') || 'light';
+        adminShell?.setAttribute('data-admin-theme', savedAdminTheme);
+
+        if (adminThemeToggle) {
+            adminThemeToggle.textContent = savedAdminTheme === 'dark' ? '☀️' : '🌙';
+
+            adminThemeToggle.addEventListener('click', () => {
+                const current = adminShell.getAttribute('data-admin-theme') || 'light';
+                const next = current === 'dark' ? 'light' : 'dark';
+
+                adminShell.setAttribute('data-admin-theme', next);
+                localStorage.setItem('compify_admin_theme', next);
+                adminThemeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
+            });
+        }
+    </script>
 
     @livewireScripts
 </body>

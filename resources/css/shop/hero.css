@@ -49,20 +49,20 @@
     font-size: var(--hero-title-size);
     line-height: .95;
     font-weight: 950;
-    letter-spacing: -2px;
+    letter-spacing: 0;
 }
 
 .hero-support {
     max-width: 620px;
     margin: 22px 0 34px;
-    font-size: clamp(18px, 2.1vw, 26px);
+    font-size: var(--hero-support-size);
     line-height: 1.25;
     color: rgba(255,255,255,.9);
 }
 
 .hero-button {
     min-width: 220px;
-    height: 54px;
+    height: var(--hero-button-height);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -71,7 +71,8 @@
     font-size: 14px;
     font-weight: 950;
     text-transform: uppercase;
-    letter-spacing: .4px;
+    letter-spacing: 0;
+    border-radius: var(--shop-control-radius);
 }
 
 .hero-controls {

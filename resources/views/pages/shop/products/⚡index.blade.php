@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use Livewire\Attributes\Computed;
@@ -22,6 +23,9 @@ class extends Component {
     public string $category = '';
 
     #[Url]
+    public string $brand = '';
+
+    #[Url]
     public string $sort = 'latest';
 
     public function updatedSearch(): void
@@ -30,6 +34,11 @@ class extends Component {
     }
 
     public function updatedCategory(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedBrand(): void
     {
         $this->resetPage();
     }
@@ -43,6 +52,12 @@ class extends Component {
     public function categories()
     {
         return Category::active()->orderBy('sort_order')->get();
+    }
+
+    #[Computed]
+    public function brands()
+    {
+        return Brand::active()->orderBy('name')->get();
     }
 
     #[Computed]
@@ -66,7 +81,8 @@ class extends Component {
             ->when($this->sort === 'price_high', fn ($query) => $query->orderByDesc('price'))
             ->when($this->sort === 'latest', fn ($query) => $query->latest())
             ->paginate(12);
-    };
+    }
+};
 ?>
 
 <section class="section">
