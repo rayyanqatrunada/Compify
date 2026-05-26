@@ -9,7 +9,7 @@
         radial-gradient(circle at top left, rgba(133, 92, 248, 0.18), transparent 28%),
         radial-gradient(circle at bottom right, rgba(74, 144, 226, 0.16), transparent 25%),
         linear-gradient(135deg, #efeef8, #dddaf0);
-    font-family: Inter, Arial, sans-serif;
+    font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
     color: #1f2430;
 }
 
@@ -553,7 +553,7 @@
     min-height: 100vh;
     margin: 0;
     background: #2a2538;
-    font-family: Inter, Arial, sans-serif;
+    font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
 }
 
 .customer-auth-v2 {

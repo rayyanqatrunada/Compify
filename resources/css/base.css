@@ -28,7 +28,7 @@ html {
 
 body {
     margin: 0;
-    font-family: Inter, Arial, sans-serif;
+    font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
     color: var(--dark);
     background: var(--white);
 }
