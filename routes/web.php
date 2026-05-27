@@ -45,7 +45,7 @@ Route::livewire('/sign-up', 'pages::auth.customer.register')
     ->name('customer.register');
 
 Route::livewire('/account', 'pages::shop.account.index')
-    ->middleware('customer.auth')
+    ->middleware('auth:customer')
     ->name('account.index');
 
 Route::post('/customer/logout', function (Request $request) {

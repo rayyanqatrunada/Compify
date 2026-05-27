@@ -66,16 +66,30 @@
                 </a>
 
                 @auth('customer')
-                    <a href="{{ route('account.index') }}" class="header-link compact-header-link" wire:navigate>
-                        Akun Saya
-                    </a>
+                    @php
+                        $customer = auth('customer')->user();
+                    @endphp
 
-                    <form method="POST" action="{{ route('customer.logout') }}">
-                        @csrf
-                        <button type="submit" class="plain-button compact-header-link">
-                            Keluar
-                        </button>
-                    </form>
+                    @if($customer)
+                        <a href="{{ route('account.index') }}" class="header-account-link" wire:navigate>
+                            <span class="header-account-avatar">
+                                @if($customer->avatar)
+                                    <img src="{{ Storage::url($customer->avatar) }}" alt="{{ $customer->name }}">
+                                @else
+                                    {{ strtoupper(substr($customer->username ?: $customer->name, 0, 1)) }}
+                                @endif
+                            </span>
+
+                            <span>
+                                {{ $customer->username ?: $customer->name }}
+                            </span>
+                        </a>
+                    @else
+                        <a href="{{ route('customer.login') }}" class="header-account-link" wire:navigate>
+                            Masuk
+                        </a>
+                    @endif
+                    
                 @else
                     <a href="{{ route('customer.login') }}" class="header-link compact-header-link" wire:navigate>
                         Masuk
