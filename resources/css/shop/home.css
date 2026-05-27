@@ -703,3 +703,308 @@
     grid-template-columns: repeat(var(--product-display-columns), minmax(0, 1fr));
     gap: var(--product-display-gap) !important;
 }
+
+.home-custom-image-empty {
+    width: 100%;
+    height: 100%;
+    min-height: inherit;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #111111, #2a2a2a);
+    color: #ffffff;
+    text-align: center;
+}
+
+.home-custom-image-empty span {
+    font-size: 22px;
+    font-weight: 950;
+    letter-spacing: 1px;
+}
+
+.home-custom-image-empty small {
+    color: rgba(255, 255, 255, .65);
+    font-size: 12px;
+}
+
+/* =========================================================
+   FIX FULL BANNER STORY
+   Supaya full banner tidak jadi setengah kanan/kiri
+========================================================= */
+
+.story-hero-full {
+    position: relative !important;
+    display: block !important;
+    width: 100%;
+    height: var(--story-full-height);
+    min-height: var(--story-full-height);
+    border-radius: var(--story-radius);
+    overflow: hidden;
+    background: #000;
+}
+
+/* gambar full menutupi seluruh banner */
+.story-hero-full .home-story-image {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 1;
+    width: 100% !important;
+    height: 100% !important;
+    order: unset !important;
+}
+
+.story-hero-full .home-story-image img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* overlay gelap agar teks kebaca */
+.story-hero-full .home-story-image::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, .78),
+        rgba(0, 0, 0, .42),
+        rgba(0, 0, 0, .08)
+    );
+}
+
+/* teks di atas gambar */
+.story-hero-full .home-story-copy {
+    position: relative !important;
+    z-index: 2;
+    width: min(560px, 92%);
+    height: 100%;
+    padding: var(--story-hero-padding-y) var(--story-hero-padding-x);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    order: unset !important;
+}
+
+/* kalau ada empty state/no image */
+.story-hero-full .home-custom-image-empty {
+    width: 100%;
+    height: 100%;
+}
+
+/* =========================================================
+   GALLERY 3 IMAGE ARROW - SHOW ON HOVER
+========================================================= */
+
+.home-gallery-card {
+    position: relative;
+    overflow: hidden;
+}
+
+/* tombol default disembunyikan */
+.gallery-arrow {
+    position: absolute;
+    top: 42%;
+    z-index: 40;
+
+    width: 68px;
+    height: 68px;
+    border: none;
+    border-radius: 999px;
+
+    background: rgba(0, 0, 0, .68);
+    color: #ffffff;
+
+    display: grid;
+    place-items: center;
+
+    font-size: 62px;
+    font-weight: 300;
+    line-height: 1;
+
+    cursor: pointer;
+
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%) scale(.9);
+
+    transition:
+        opacity .22s ease,
+        transform .22s ease,
+        background .22s ease;
+}
+
+.gallery-arrow.left {
+    left: 22px;
+}
+
+.gallery-arrow.right {
+    right: 22px;
+}
+
+/* muncul saat hover bagian preview 3 gambar */
+.home-gallery-card:hover .gallery-arrow {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(-50%) scale(1);
+}
+
+.gallery-arrow:hover {
+    background: rgba(0, 0, 0, .88);
+    transform: translateY(-50%) scale(1.06);
+}
+
+/* =========================================================
+   GALLERY ARROW - TEXT ONLY + FADE
+========================================================= */
+
+.home-gallery-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.gallery-arrow {
+    position: absolute;
+    top: 42%;
+    z-index: 40;
+
+    width: var(--gallery-arrow-size);
+    height: var(--gallery-arrow-size);
+
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+
+    color: rgba(255, 255, 255, .95);
+    display: grid;
+    place-items: center;
+
+    font-size: 78px;
+    font-weight: 200;
+    line-height: 1;
+
+    cursor: pointer;
+
+    opacity: 0;
+    pointer-events: none;
+    text-shadow: 0 8px 22px rgba(0, 0, 0, .35);
+
+    transition:
+        opacity .35s ease,
+        transform .35s ease,
+        color .25s ease,
+        text-shadow .25s ease;
+}
+
+.gallery-arrow.left {
+    left: var(--gallery-arrow-offset-x);
+    transform: translateY(-50%) translateX(-14px);
+}
+
+.gallery-arrow.right {
+    right: var(--gallery-arrow-offset-x);
+    transform: translateY(-50%) translateX(14px);
+}
+
+.home-gallery-card:hover .gallery-arrow {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(-50%) translateX(0);
+}
+
+/* .gallery-arrow:hover {
+    color: #ffffff;
+    text-shadow: 0 12px 28px rgba(0, 0, 0, .55);
+} */
+
+/* =========================================================
+   GALLERY DOTS - LEFT BOTTOM + ANIMATION
+========================================================= */
+
+.home-gallery-card .preview-dots {
+    position: absolute;
+    left: var(--gallery-dots-left);
+    bottom: var(--gallery-dots-bottom);
+    z-index: 45;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+
+    transition:
+        opacity .35s ease,
+        transform .35s ease;
+}
+
+.home-gallery-card:hover .preview-dots {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.home-gallery-card .preview-dots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, .26);
+
+    transition:
+        width .28s ease,
+        background .28s ease,
+        transform .28s ease;
+}
+
+.home-gallery-card .preview-dots span.active {
+    width: 28px;
+    background: #111111;
+}
+
+.home-gallery-card:hover .preview-dots span.active {
+    background: #000000;
+}
+
+/* =========================================================
+   GALLERY 3 IMAGE SLIDE ANIMATION
+   Gambar geser, info/teks fade.
+========================================================= */
+
+.home-gallery-card {
+    overflow: hidden;
+}
+
+.gallery-slide-animated .gallery-main-image img,
+.gallery-slide-animated .gallery-side-images img {
+    animation: galleryImageSlideIn .58s cubic-bezier(.22, .9, .24, 1) both;
+    will-change: transform, opacity;
+}
+
+.gallery-slide-animated .gallery-info {
+    animation: galleryTextFade .45s ease both;
+}
+
+@keyframes galleryImageSlideIn {
+    from {
+        opacity: .7;
+        transform: translateX(34px) scale(1.02);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes galleryTextFade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

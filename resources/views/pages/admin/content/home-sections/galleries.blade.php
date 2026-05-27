@@ -1,35 +1,31 @@
 <?php
 
-use App\Models\Category;
 use App\Models\HomeSection;
-use App\Models\Product;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Livewire\WithPagination;
 
 new
 #[Layout('components.layouts.admin')]
-#[Title('Home Sections - Admin Compify')]
+#[Title('Gallery 3 Images - Admin Compify')]
 class extends Component {
     use WithFileUploads;
+    use WithPagination;
+
+    public int $perPage = 10;
 
     public ?int $editingId = null;
-
-    public string $section_type = 'category_products';
-    public string $category_id = '';
-    public string $product_id = '';
 
     public string $title = '';
     public string $subtitle = '';
     public string $description = '';
-
     public string $button_text = '';
     public string $button_url = '';
 
-    public string $image_position = 'right';
     public bool $auto_slide = false;
     public bool $is_active = true;
     public int $sort_order = 0;
@@ -42,65 +38,48 @@ class extends Component {
     public ?string $currentImage2 = null;
     public ?string $currentImage3 = null;
 
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
+    }
+
     #[Computed]
     public function sections()
     {
-        return HomeSection::with(['category', 'product'])
+        return HomeSection::query()
+            ->where('section_type', 'gallery')
             ->orderBy('sort_order')
             ->latest()
-            ->get();
-    }
-
-    #[Computed]
-    public function categories()
-    {
-        return Category::active()
-            ->orderByRaw('parent_id IS NOT NULL')
-            ->orderBy('sort_order')
-            ->orderBy('name')
-            ->get();
-    }
-
-    #[Computed]
-    public function products()
-    {
-        return Product::active()
-            ->orderBy('name')
-            ->get();
+            ->paginate($this->perPage);
     }
 
     public function save(): void
     {
         $this->validate([
-            'section_type' => ['required', 'string'],
-            'category_id' => ['nullable'],
-            'product_id' => ['nullable'],
-
             'title' => ['nullable', 'string', 'max:255'],
             'subtitle' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'button_text' => ['nullable', 'string', 'max:100'],
             'button_url' => ['nullable', 'string', 'max:255'],
-            'image_position' => ['nullable', 'string'],
             'auto_slide' => ['boolean'],
             'is_active' => ['boolean'],
             'sort_order' => ['nullable', 'integer'],
-
             'imageFile' => ['nullable', 'image', 'max:4096'],
             'imageFile2' => ['nullable', 'image', 'max:4096'],
             'imageFile3' => ['nullable', 'image', 'max:4096'],
         ]);
 
         $payload = [
-            'section_type' => $this->section_type,
-            'category_id' => $this->category_id !== '' ? (int) $this->category_id : null,
-            'product_id' => $this->product_id !== '' ? (int) $this->product_id : null,
+            'section_type' => 'gallery',
+            'display_style' => 'three_images',
+            'category_id' => null,
+            'product_id' => null,
             'title' => $this->title ?: null,
             'subtitle' => $this->subtitle ?: null,
             'description' => $this->description ?: null,
             'button_text' => $this->button_text ?: null,
             'button_url' => $this->button_url ?: null,
-            'image_position' => $this->image_position,
+            'image_position' => 'right',
             'auto_slide' => $this->auto_slide,
             'is_active' => $this->is_active,
             'sort_order' => $this->sort_order,
@@ -136,7 +115,7 @@ class extends Component {
             HomeSection::create($payload);
         }
 
-        session()->flash('success', 'Home section berhasil disimpan.');
+        session()->flash('success', 'Gallery berhasil disimpan.');
         $this->resetForm();
     }
 
@@ -145,18 +124,12 @@ class extends Component {
         $section = HomeSection::findOrFail($id);
 
         $this->editingId = $section->id;
-        $this->section_type = $section->section_type;
-        $this->category_id = $section->category_id ? (string) $section->category_id : '';
-        $this->product_id = $section->product_id ? (string) $section->product_id : '';
-
         $this->title = $section->title ?? '';
         $this->subtitle = $section->subtitle ?? '';
         $this->description = $section->description ?? '';
-
         $this->button_text = $section->button_text ?? '';
         $this->button_url = $section->button_url ?? '';
 
-        $this->image_position = $section->image_position ?? 'right';
         $this->auto_slide = (bool) $section->auto_slide;
         $this->is_active = (bool) $section->is_active;
         $this->sort_order = $section->sort_order ?? 0;
@@ -182,7 +155,7 @@ class extends Component {
 
         $section->delete();
 
-        session()->flash('success', 'Home section berhasil dihapus.');
+        session()->flash('success', 'Gallery berhasil dihapus.');
         $this->resetForm();
     }
 
@@ -190,18 +163,12 @@ class extends Component {
     {
         $this->editingId = null;
 
-        $this->section_type = 'category_products';
-        $this->category_id = '';
-        $this->product_id = '';
-
         $this->title = '';
         $this->subtitle = '';
         $this->description = '';
-
         $this->button_text = '';
         $this->button_url = '';
 
-        $this->image_position = 'right';
         $this->auto_slide = false;
         $this->is_active = true;
         $this->sort_order = 0;
@@ -219,61 +186,23 @@ class extends Component {
 };
 ?>
 
-<div>
-    <div class="admin-page-head">
-        <div>
-            <p>Content</p>
-            <h2>Home Sections</h2>
-        </div>
+<div class="admin-page-v2">
+    <div class="admin-section-title-v2">
+        <h2>Gallery 3 Images</h2>
+        <p>Mengatur section homepage dengan 1 gambar besar dan 2 gambar kecil.</p>
     </div>
 
     @if(session('success'))
         <div class="flash-success">{{ session('success') }}</div>
     @endif
 
-    <form wire:submit="save" class="admin-card admin-form">
-        <h2>{{ $editingId ? 'Edit Home Section' : 'Tambah Home Section' }}</h2>
+    <form wire:submit="save" class="admin-panel-v2 admin-form">
+        <h2>{{ $editingId ? 'Edit Gallery' : 'Tambah Gallery' }}</h2>
 
         <div class="admin-grid">
             <label>
-                Tipe Section
-                <select wire:model.live="section_type">
-                    <option value="category_products">Display Produk Kategori</option>
-                    <option value="story">Preview / Full Banner Custom</option>
-                    <option value="gallery">Gallery 1 Besar + 2 Kecil</option>
-                </select>
-            </label>
-
-            <label>
-                Kategori untuk Display Produk
-                <select wire:model="category_id">
-                    <option value="">Pilih kategori</option>
-                    @foreach($this->categories as $category)
-                        <option value="{{ $category->id }}">
-                            {{ $category->parent_id ? '— ' : '' }}{{ $category->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </label>
-
-            <label>
-                Produk Utama / Link Produk
-                <select wire:model="product_id">
-                    <option value="">Tidak pakai produk</option>
-                    @foreach($this->products as $product)
-                        <option value="{{ $product->id }}">{{ $product->name }}</option>
-                    @endforeach
-                </select>
-            </label>
-
-            <label>
-                Urutan
-                <input type="number" wire:model="sort_order" min="0">
-            </label>
-
-            <label>
                 Judul
-                <input type="text" wire:model="title" placeholder="Contoh: Build PC Lebih Powerful">
+                <input type="text" wire:model="title" placeholder="Contoh: Best Setup Collection">
             </label>
 
             <label>
@@ -283,27 +212,24 @@ class extends Component {
 
             <label>
                 Button Text
-                <input type="text" wire:model="button_text" placeholder="Contoh: Order Now">
+                <input type="text" wire:model="button_text" placeholder="Contoh: Learn More">
             </label>
 
             <label>
                 Button URL
-                <input type="text" wire:model="button_url" placeholder="/products atau URL lain">
+                <input type="text" wire:model="button_url" placeholder="/products">
             </label>
 
             <label>
-                Posisi Gambar
-                <select wire:model="image_position">
-                    <option value="right">Gambar Kanan</option>
-                    <option value="left">Gambar Kiri</option>
-                </select>
+                Urutan
+                <input type="number" wire:model="sort_order" min="0">
             </label>
 
             <label>
                 Auto Slide
                 <select wire:model="auto_slide">
                     <option value="0">Tidak</option>
-                    <option value="1">Ya, khusus gallery</option>
+                    <option value="1">Ya</option>
                 </select>
             </label>
 
@@ -316,17 +242,17 @@ class extends Component {
             </label>
 
             <label>
-                Gambar 1 / Utama
+                Gambar 1 / Gambar Besar
                 <input type="file" wire:model="imageFile" accept="image/*">
             </label>
 
             <label>
-                Gambar 2 / Gallery Kecil 1
+                Gambar 2 / Kecil Atas
                 <input type="file" wire:model="imageFile2" accept="image/*">
             </label>
 
             <label>
-                Gambar 3 / Gallery Kecil 2
+                Gambar 3 / Kecil Bawah
                 <input type="file" wire:model="imageFile3" accept="image/*">
             </label>
         </div>
@@ -335,14 +261,14 @@ class extends Component {
 
         <label>
             Deskripsi
-            <textarea wire:model="description" rows="5" placeholder="Tulis deskripsi custom section"></textarea>
+            <textarea wire:model="description" rows="4" placeholder="Deskripsi singkat untuk gallery"></textarea>
         </label>
 
         <div class="home-section-preview-grid">
             @foreach([
-                'Gambar 1' => [$imageFile, $currentImage],
-                'Gambar 2' => [$imageFile2, $currentImage2],
-                'Gambar 3' => [$imageFile3, $currentImage3],
+                'Gambar Besar' => [$imageFile, $currentImage],
+                'Kecil Atas' => [$imageFile2, $currentImage2],
+                'Kecil Bawah' => [$imageFile3, $currentImage3],
             ] as $label => [$file, $current])
                 <div>
                     <strong>{{ $label }}</strong>
@@ -350,7 +276,7 @@ class extends Component {
                     @if($file)
                         <img src="{{ $file->temporaryUrl() }}" alt="Preview">
                     @elseif($current)
-                        <img src="{{ Storage::url($current) }}" alt="Current image">
+                        <img src="{{ Storage::url($current) }}" alt="Current Image">
                     @else
                         <span>Belum ada gambar</span>
                     @endif
@@ -360,7 +286,7 @@ class extends Component {
 
         <div class="admin-actions">
             <button class="admin-btn" type="submit">
-                {{ $editingId ? 'Update Section' : 'Simpan Section' }}
+                {{ $editingId ? 'Update Gallery' : 'Simpan Gallery' }}
             </button>
 
             <button class="admin-btn secondary" type="button" wire:click="resetForm">
@@ -369,18 +295,24 @@ class extends Component {
         </div>
     </form>
 
-    <div class="admin-card">
-        <h2>Data Home Sections</h2>
+    <div class="admin-panel-v2">
+        <div class="admin-table-head">
+            <h2>Data Gallery</h2>
 
-        <table class="admin-table">
+            <select wire:model.live="perPage">
+                <option value="10">10 data</option>
+                <option value="20">20 data</option>
+                <option value="50">50 data</option>
+            </select>
+        </div>
+
+        <table class="admin-table-v2">
             <thead>
                 <tr>
                     <th>Urutan</th>
-                    <th>Tipe</th>
-                    <th>Judul</th>
-                    <th>Kategori</th>
-                    <th>Produk</th>
                     <th>Gambar</th>
+                    <th>Judul</th>
+                    <th>Auto Slide</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
@@ -390,17 +322,15 @@ class extends Component {
                 @forelse($this->sections as $section)
                     <tr>
                         <td>{{ $section->sort_order }}</td>
-                        <td>{{ $section->section_type }}</td>
-                        <td>{{ $section->title ?? '-' }}</td>
-                        <td>{{ $section->category?->name ?? '-' }}</td>
-                        <td>{{ $section->product?->name ?? '-' }}</td>
                         <td>
                             @if($section->image)
-                                <img src="{{ Storage::url($section->image) }}" class="admin-table-thumb" alt="Image">
+                                <img src="{{ Storage::url($section->image) }}" class="admin-table-thumb" alt="Gallery">
                             @else
                                 -
                             @endif
                         </td>
+                        <td>{{ $section->title ?? '-' }}</td>
+                        <td>{{ $section->auto_slide ? 'Ya' : 'Tidak' }}</td>
                         <td>{{ $section->is_active ? 'Aktif' : 'Nonaktif' }}</td>
                         <td>
                             <button class="admin-btn" type="button" wire:click="edit({{ $section->id }})">
@@ -411,7 +341,7 @@ class extends Component {
                                 class="admin-btn danger"
                                 type="button"
                                 wire:click="delete({{ $section->id }})"
-                                wire:confirm="Yakin hapus section ini?"
+                                wire:confirm="Yakin hapus gallery ini?"
                             >
                                 Hapus
                             </button>
@@ -419,10 +349,14 @@ class extends Component {
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8">Belum ada home section.</td>
+                        <td colspan="6">Belum ada gallery.</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
+
+        <div class="admin-pagination">
+            {{ $this->sections->links() }}
+        </div>
     </div>
 </div>

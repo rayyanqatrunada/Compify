@@ -145,7 +145,19 @@ Route::middleware(['auth:admin', 'admin'])
 
         Route::prefix('content')->name('content.')->group(function () {
             Route::livewire('/banners', 'pages::admin.content.banners.index')->name('banners');
-            Route::livewire('/home-sections', 'pages::admin.content.home-sections.index')->name('home-sections');
+
+            Route::livewire('/home-category-products', 'pages::admin.content.home-sections.category-products')
+                ->name('home-category-products');
+
+            Route::livewire('/home-full-banners', 'pages::admin.content.home-sections.full-banners')
+                ->name('home-full-banners');
+
+            Route::livewire('/home-split-banners', 'pages::admin.content.home-sections.split-banners')
+                ->name('home-split-banners');
+
+            Route::livewire('/home-galleries', 'pages::admin.content.home-sections.galleries')
+                ->name('home-galleries');
+
             Route::livewire('/pages', 'pages::admin.content.pages.index')->name('pages');
         });
 

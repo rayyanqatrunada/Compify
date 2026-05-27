@@ -246,10 +246,10 @@
     ===================================================== */
 
     /* preview kanan-kiri */
-    --story-normal-height: 310px;
+    --story-normal-height: 410px;
 
     /* preview full image */
-    --story-full-height: 350px;
+    --story-full-height: 450px;
 
     /* alias agar file lama tetap jalan */
     --story-height: var(--story-normal-height);
@@ -261,7 +261,7 @@
     --story-padding-y: 18px;
     --story-padding-x: 24px;
 
-    --story-title-size: 28px;
+    --story-title-size: 34px;
     --story-desc-size: 13px;
     --story-button-height: 38px;
     --story-button-width: 150px;
@@ -274,7 +274,7 @@
        1 foto besar + 2 foto kecil.
     ===================================================== */
 
-    --gallery-main-height: 340px;
+    --gallery-main-height: 440px;
     --gallery-gap: 8px;
     --gallery-side-height: calc((var(--gallery-main-height) - var(--gallery-gap)) / 2);
 
@@ -313,4 +313,16 @@
     --mobile-header-height: 56px;
     --mobile-nav-height: 42px;
     --mobile-hero-height: 360px;
+
+    /* Slider arrow & dots */
+   --slider-arrow-size: 54px;
+   --slider-arrow-offset-x: 28px;
+   --slider-dots-left: 34px;
+   --slider-dots-bottom: 24px;
+
+   --gallery-arrow-size: 54px;
+   --gallery-arrow-offset-x: 28px;
+   --gallery-dots-left: 34px;
+   --gallery-dots-bottom: 82px;
 }
+

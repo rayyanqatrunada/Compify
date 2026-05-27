@@ -11,13 +11,24 @@
 <body class="admin-body-v2">
     @php
         $admin = auth('admin')->user();
+
+        $isProductOpen =
+            request()->routeIs('admin.catalog.*') ||
+            request()->routeIs('admin.content.banners') ||
+            request()->routeIs('admin.content.home-category-products') ||
+            request()->routeIs('admin.content.home-full-banners') ||
+            request()->routeIs('admin.content.home-split-banners') ||
+            request()->routeIs('admin.content.home-galleries');
+
+        $isConfigureOpen =
+            request()->routeIs('admin.settings.*') ||
+            request()->routeIs('admin.content.pages');
     @endphp
 
     <div class="admin-shell-v2" data-admin-theme="light">
         <aside class="admin-sidebar-v2">
             <a href="{{ route('admin.dashboard') }}" class="admin-logo-v2" wire:navigate>
                 <img src="{{ asset('assets/brand/compify-logo.svg') }}" alt="Compify">
-                {{-- <span>Compify</span> --}}
             </a>
 
             <nav class="admin-menu-v2">
@@ -33,7 +44,7 @@
                     Analytic
                 </a>
 
-                <details @open(request()->routeIs('admin.catalog.*') || request()->routeIs('admin.content.banners') || request()->routeIs('admin.content.home-sections'))>
+                <details {{ $isProductOpen ? 'open' : '' }}>
                     <summary>
                         <span>▤</span>
                         Product
@@ -57,12 +68,27 @@
 
                         <a href="{{ route('admin.content.banners') }}" wire:navigate
                            @class(['active' => request()->routeIs('admin.content.banners')])>
-                            Banners
+                            Hero Banners
                         </a>
 
-                        <a href="{{ route('admin.content.home-sections') }}" wire:navigate
-                           @class(['active' => request()->routeIs('admin.content.home-sections')])>
-                            Home Sections
+                        <a href="{{ route('admin.content.home-category-products') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.content.home-category-products')])>
+                            Category Products
+                        </a>
+
+                        <a href="{{ route('admin.content.home-full-banners') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.content.home-full-banners')])>
+                            Full Banners
+                        </a>
+
+                        <a href="{{ route('admin.content.home-split-banners') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.content.home-split-banners')])>
+                            Split Banners
+                        </a>
+
+                        <a href="{{ route('admin.content.home-galleries') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.content.home-galleries')])>
+                            Gallery 3 Images
                         </a>
                     </div>
                 </details>
@@ -85,7 +111,7 @@
                     Reviews
                 </a>
 
-                <details @open(request()->routeIs('admin.settings.*') || request()->routeIs('admin.content.pages'))>
+                <details {{ $isConfigureOpen ? 'open' : '' }}>
                     <summary>
                         <span>⚙</span>
                         Configure
