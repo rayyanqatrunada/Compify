@@ -8,7 +8,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="customer-auth-body-v2">
+<body class="auth-figma-body">
     {{ $slot }}
 
     @livewireScripts

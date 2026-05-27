@@ -116,3 +116,220 @@
     border-radius: 999px;
     background: #ffffff;
 }
+
+/* =========================================================
+   HERO SLIDER ARROWS
+========================================================= */
+
+.hero-slider,
+.hero-section,
+.home-hero {
+    position: relative;
+    height: var(--hero-height);
+    overflow: hidden;
+}
+
+.hero-slide,
+.hero-banner,
+.hero-item {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+}
+
+.hero-slide img,
+.hero-banner img,
+.hero-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* tombol kanan kiri */
+.hero-arrow,
+.hero-slider-button,
+.hero-nav-button {
+    position: absolute;
+    top: 50%;
+    z-index: 20;
+    width: 46px;
+    height: 46px;
+    border: none;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .78);
+    color: #111111;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%) scale(.92);
+    transition: opacity .25s ease, transform .25s ease, background .25s ease;
+    backdrop-filter: blur(10px);
+}
+
+.hero-arrow:hover,
+.hero-slider-button:hover,
+.hero-nav-button:hover {
+    background: #ffffff;
+    transform: translateY(-50%) scale(1);
+}
+
+.hero-arrow.prev,
+.hero-slider-button.prev,
+.hero-nav-button.prev {
+    left: 28px;
+}
+
+.hero-arrow.next,
+.hero-slider-button.next,
+.hero-nav-button.next {
+    right: 28px;
+}
+
+/* tombol hanya muncul saat hover hero */
+.hero-slider:hover .hero-arrow,
+.hero-slider:hover .hero-slider-button,
+.hero-slider:hover .hero-nav-button,
+.hero-section:hover .hero-arrow,
+.hero-section:hover .hero-slider-button,
+.hero-section:hover .hero-nav-button,
+.home-hero:hover .hero-arrow,
+.home-hero:hover .hero-slider-button,
+.home-hero:hover .hero-nav-button {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(-50%) scale(1);
+}
+
+/* =========================================================
+   HERO TEXT ANIMATION
+========================================================= */
+
+.hero-content,
+.hero-banner-content,
+.hero-text {
+    position: relative;
+    z-index: 5;
+}
+
+.hero-content > *,
+.hero-banner-content > *,
+.hero-text > * {
+    opacity: 0;
+    transform: translateY(18px);
+    animation: heroTextUp .7s ease forwards;
+}
+
+.hero-content > *:nth-child(1),
+.hero-banner-content > *:nth-child(1),
+.hero-text > *:nth-child(1) {
+    animation-delay: .12s;
+}
+
+.hero-content > *:nth-child(2),
+.hero-banner-content > *:nth-child(2),
+.hero-text > *:nth-child(2) {
+    animation-delay: .22s;
+}
+
+.hero-content > *:nth-child(3),
+.hero-banner-content > *:nth-child(3),
+.hero-text > *:nth-child(3) {
+    animation-delay: .32s;
+}
+
+.hero-content .hero-button,
+.hero-banner-content .hero-button,
+.hero-text .hero-button,
+.hero-content a,
+.hero-banner-content a,
+.hero-text a {
+    animation-delay: .42s;
+}
+
+@keyframes heroTextUp {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================================================
+   HERO CONTROL FROM settings.css
+========================================================= */
+
+.hero-slider,
+.hero-section,
+.home-hero {
+    position: relative;
+    height: var(--hero-height);
+    border-radius: var(--hero-radius);
+    overflow: hidden;
+}
+
+.hero-slide,
+.hero-banner,
+.hero-item {
+    height: 100%;
+}
+
+.hero-slide img,
+.hero-banner img,
+.hero-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero-content,
+.hero-banner-content,
+.hero-text {
+    max-width: var(--hero-content-width);
+    margin-left: var(--hero-content-left);
+}
+
+.hero-content h1,
+.hero-banner-content h1,
+.hero-text h1 {
+    font-size: var(--hero-title-size);
+}
+
+.hero-content p,
+.hero-banner-content p,
+.hero-text p {
+    font-size: var(--hero-support-size);
+}
+
+.hero-button,
+.hero-content a,
+.hero-banner-content a {
+    min-width: var(--hero-button-width);
+    min-height: var(--hero-button-height);
+}
+
+/* Hero arrows */
+.hero-arrow,
+.hero-slider-button,
+.hero-nav-button {
+    width: var(--hero-arrow-size);
+    height: var(--hero-arrow-size);
+}
+
+.hero-arrow.prev,
+.hero-slider-button.prev,
+.hero-nav-button.prev {
+    left: var(--hero-arrow-offset-x);
+}
+
+.hero-arrow.next,
+.hero-slider-button.next,
+.hero-nav-button.next {
+    right: var(--hero-arrow-offset-x);
+}

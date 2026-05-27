@@ -1,21 +1,53 @@
 /* =========================================================
-   HOME SECTIONS
+   HOME.CSS
+   Semua ukuran utama diatur dari:
+   resources/css/shop/settings.css
 ========================================================= */
+
+
+/* =========================================================
+   1. HOME SECTION BASE
+========================================================= */
+
+.home-page,
+.home-main,
+.home-content {
+    display: grid;
+    gap: var(--home-section-gap);
+    background: var(--shop-bg);
+}
 
 .home-category-strip,
 .home-category-products-section,
-.home-gallery-product-section {
-    padding: var(--shop-section-y) var(--shop-x);
+.home-gallery-product-section,
+.home-story-wrapper,
+.home-gallery-section {
+    padding: var(--home-section-y) var(--home-x);
     background: var(--shop-bg);
 }
 
 .home-category-strip > *,
 .home-category-products-section > *,
-.home-gallery-product-section > * {
+.home-gallery-product-section > *,
+.home-story-wrapper > *,
+.home-gallery-section > * {
     max-width: var(--shop-page-max);
     margin-left: auto;
     margin-right: auto;
 }
+
+.home-category-products-section + .home-category-products-section,
+.home-gallery-product-section + .home-category-products-section,
+.home-category-products-section + .home-story-wrapper,
+.home-story-wrapper + .home-category-products-section,
+.home-story-wrapper + .home-gallery-product-section {
+    margin-top: var(--home-product-section-gap);
+}
+
+
+/* =========================================================
+   2. SECTION HEADERS
+========================================================= */
 
 .home-category-strip-head,
 .home-display-head,
@@ -28,57 +60,69 @@
 }
 
 .home-category-strip-head p,
-.home-display-head p {
+.home-display-head p,
+.products-preview-head p {
     margin: 0 0 5px;
     color: var(--shop-muted);
-    font-size: 11px;
+    font-size: var(--shop-kicker-size);
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 1.4px;
 }
 
+.home-category-strip-head h2,
 .home-display-head h2,
 .products-preview-head h2 {
     margin: 0;
     color: #303030;
-    font-size: var(--shop-heading-size);
+    font-size: var(--product-display-title-size);
     line-height: 1.05;
-    font-weight: 900;
-    letter-spacing: 0;
+    font-weight: 950;
 }
 
+.home-display-head a,
+.products-preview-head a {
+    color: #222222;
+    font-size: var(--product-display-view-size);
+    font-weight: 800;
+    text-decoration: underline;
+}
+
+
 /* =========================================================
-   CATEGORY 4 x 2
+   3. CATEGORY 4 x 2
 ========================================================= */
 
 .home-category-list {
     display: grid;
     grid-template-columns: repeat(var(--category-grid-columns), minmax(0, 1fr));
-    gap: var(--shop-grid-gap);
+    gap: var(--category-grid-gap);
 }
 
 .home-category-list a {
     min-height: var(--category-card-height);
-    padding: var(--shop-card-padding);
-    border-radius: var(--radius-large);
-    background: #ffffff;
-    border: 1px solid #ececec;
+    padding: var(--category-card-padding);
+    border-radius: var(--category-card-radius);
+    background: var(--shop-white);
+    border: 1px solid var(--shop-border);
+    color: var(--shop-text);
     display: flex;
     flex-direction: column;
     justify-content: end;
-    transition: .18s ease;
+    transition: transform .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
 }
 
 .home-category-list a:hover {
     transform: translateY(-3px);
-    background: #111111;
-    color: #ffffff;
+    background: var(--shop-black);
+    border-color: var(--shop-black);
+    color: var(--shop-white);
 }
 
 .home-category-list strong {
     font-size: var(--category-title-size);
     line-height: 1.2;
-    font-weight: 900;
+    font-weight: 950;
 }
 
 .home-category-list span {
@@ -88,8 +132,13 @@
     line-height: 1.3;
 }
 
+.home-category-list a:hover span {
+    color: rgba(255, 255, 255, .75);
+}
+
+
 /* =========================================================
-   PRODUCT DISPLAY ACTIONS
+   4. PRODUCT DISPLAY
 ========================================================= */
 
 .home-display-actions {
@@ -101,38 +150,65 @@
 .home-display-actions button {
     width: 34px;
     height: 34px;
-    border: 1px solid #dddddd;
+    border: 1px solid var(--shop-border-strong);
     border-radius: 50%;
-    background: #ffffff;
-    color: #111111;
+    background: var(--shop-white);
+    color: var(--shop-black);
     font-size: 20px;
     display: grid;
     place-items: center;
+    cursor: pointer;
+    transition: .18s ease;
 }
 
 .home-display-actions button:hover {
-    background: #111111;
-    color: #ffffff;
+    background: var(--shop-black);
+    color: var(--shop-white);
 }
 
 .modern-product-grid,
-.product-grid.modern-product-grid {
+.product-grid.modern-product-grid,
+.home-products-grid,
+.category-products-grid,
+.product-display-grid {
     display: grid;
     grid-template-columns: repeat(var(--product-display-columns), minmax(0, 1fr));
     gap: var(--product-display-gap);
 }
 
+.home-product-card,
+.product-display-card {
+    min-height: var(--product-display-card-min-height);
+    padding: var(--product-display-card-padding);
+    border-radius: var(--product-display-card-radius);
+}
+
+.home-product-card img,
+.product-display-card img {
+    height: var(--product-display-image-height);
+    padding: var(--product-display-image-padding);
+    object-fit: contain;
+}
+
+
 /* =========================================================
-   STORY PREVIEW KANAN-KIRI
+   5. STORY / PREVIEW KANAN-KIRI
 ========================================================= */
 
+.home-story-wrapper,
+.home-story-stack {
+    display: grid;
+    gap: var(--home-preview-gap);
+}
+
 .home-story-section {
-    height: var(--story-height);
+    height: var(--story-normal-height);
     min-height: 0;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    background: #050505;
-    color: #ffffff;
+    border-radius: var(--story-radius);
+    background: var(--shop-black);
+    color: var(--shop-white);
     overflow: hidden;
 }
 
@@ -153,19 +229,20 @@
 }
 
 .home-story-copy {
+    height: 100%;
+    min-height: 0;
     padding: var(--story-padding-y) var(--story-padding-x);
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: 0;
     overflow: hidden;
 }
 
 .home-story-copy p {
     margin: 0 0 7px;
-    color: rgba(255,255,255,.62);
+    color: rgba(255, 255, 255, .62);
     font-size: 10px;
-    font-weight: 900;
+    font-weight: 950;
     text-transform: uppercase;
     letter-spacing: 1.3px;
 }
@@ -173,11 +250,10 @@
 .home-story-copy h2 {
     max-width: 480px;
     margin: 0 0 12px;
-    color: #ffffff;
+    color: var(--shop-white);
     font-size: var(--story-title-size);
     line-height: 1.02;
     font-weight: 950;
-    letter-spacing: 0;
     text-transform: uppercase;
 }
 
@@ -185,26 +261,37 @@
     max-width: 480px;
     max-height: 64px;
     overflow: hidden;
-    color: rgba(255,255,255,.84);
+    color: rgba(255, 255, 255, .84);
     font-size: var(--story-desc-size);
     line-height: 1.55;
 }
 
-.home-story-copy a {
+.home-story-copy a,
+.home-story-copy button {
     margin-top: 16px;
     width: max-content;
-    min-width: 145px;
-    height: 38px;
+    min-width: var(--story-button-width);
+    height: var(--story-button-height);
     padding: 0 16px;
+    border: none;
+    border-radius: var(--radius-small);
+    background: #242424;
+    color: var(--shop-white);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #242424;
-    color: #ffffff;
     font-size: 11px;
-    font-weight: 900;
+    font-weight: 950;
     text-transform: uppercase;
-    border-radius: var(--radius-small);
+    cursor: pointer;
+    transition: transform .25s ease, background .25s ease, box-shadow .25s ease;
+}
+
+.home-story-copy a:hover,
+.home-story-copy button:hover {
+    transform: translateY(-2px);
+    background: #000000;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, .18);
 }
 
 .home-story-image {
@@ -220,27 +307,30 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: grayscale(1);
+    object-position: center;
 }
 
+
 /* =========================================================
-   STORY PERTAMA FULL IMAGE
+   6. STORY FULL IMAGE / PREVIEW FULL
 ========================================================= */
 
 .story-hero-full {
     position: relative;
-    height: var(--story-hero-height);
+    height: var(--story-full-height);
     min-height: 0;
-    display: block;
+    border-radius: var(--story-radius);
     background: #000000;
+    display: block;
+    overflow: hidden;
 }
 
 .story-hero-full .home-story-image {
     position: absolute;
     inset: 0;
-    min-height: 100%;
-    width: 100%;
     z-index: 1;
+    width: 100%;
+    height: 100%;
 }
 
 .story-hero-full .home-story-image img {
@@ -254,42 +344,47 @@
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, rgba(0,0,0,.74), rgba(0,0,0,.42), rgba(0,0,0,.12));
+    background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, .74),
+        rgba(0, 0, 0, .42),
+        rgba(0, 0, 0, .12)
+    );
 }
 
 .story-hero-full .home-story-copy {
     position: relative;
     z-index: 2;
-    height: var(--story-hero-height);
-    min-height: 0;
+    height: 100%;
     max-width: 560px;
     padding: var(--story-hero-padding-y) var(--story-hero-padding-x);
 }
 
+
 /* =========================================================
-   GALLERY 1 BESAR + 2 KECIL
+   7. GALLERY 1 BESAR + 2 KECIL
 ========================================================= */
 
 .home-gallery-card {
     position: relative;
-    background: #ffffff;
-    border-radius: var(--radius-medium);
-    padding: 10px;
+    padding: var(--gallery-padding);
+    border-radius: var(--gallery-radius);
+    background: var(--shop-white);
     display: grid;
     grid-template-columns: var(--gallery-left-size) var(--gallery-right-size);
     gap: var(--gallery-gap);
     overflow: hidden;
-    box-shadow: 0 8px 22px rgba(0,0,0,.04);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .04);
 }
 
 .gallery-main-image {
     height: var(--gallery-main-height);
     min-height: 0;
     border-radius: var(--gallery-radius);
-    overflow: hidden;
     background: #111111;
     display: grid;
     place-items: center;
+    overflow: hidden;
 }
 
 .gallery-side-images {
@@ -302,10 +397,10 @@
     height: 100%;
     min-height: 0;
     border-radius: var(--gallery-radius);
-    overflow: hidden;
     background: #eeeeee;
     display: grid;
     place-items: center;
+    overflow: hidden;
 }
 
 .gallery-main-image img,
@@ -316,6 +411,7 @@
 }
 
 .gallery-info {
+    min-height: var(--gallery-info-height);
     grid-column: 1 / -1;
     padding: 6px 2px 2px;
     display: grid;
@@ -329,14 +425,14 @@
     color: #303030;
     font-size: var(--gallery-title-size);
     line-height: 1.1;
-    font-weight: 900;
+    font-weight: 950;
 }
 
 .gallery-info p {
     margin: 0;
     color: #333333;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .gallery-arrow {
@@ -348,11 +444,12 @@
     height: 34px;
     border: none;
     border-radius: 50%;
-    background: rgba(0,0,0,.34);
+    background: rgba(0, 0, 0, .34);
     color: #ffffff;
     font-size: 22px;
     display: grid;
     place-items: center;
+    cursor: pointer;
 }
 
 .gallery-arrow.left {
@@ -378,4 +475,231 @@
 
 .preview-dots span.active {
     background: #111111;
+}
+
+
+/* =========================================================
+   8. ANIMATION
+========================================================= */
+
+.story-hero-full .home-story-copy > *,
+.home-story-section .home-story-copy > * {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: previewTextUp .65s ease forwards;
+}
+
+.story-hero-full .home-story-copy > *:nth-child(1),
+.home-story-section .home-story-copy > *:nth-child(1) {
+    animation-delay: .12s;
+}
+
+.story-hero-full .home-story-copy > *:nth-child(2),
+.home-story-section .home-story-copy > *:nth-child(2) {
+    animation-delay: .22s;
+}
+
+.story-hero-full .home-story-copy > *:nth-child(3),
+.home-story-section .home-story-copy > *:nth-child(3) {
+    animation-delay: .32s;
+}
+
+.story-hero-full .home-story-copy a,
+.home-story-section .home-story-copy a,
+.story-hero-full .home-story-copy button,
+.home-story-section .home-story-copy button {
+    animation-delay: .42s;
+}
+
+@keyframes previewTextUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.story-hero-full .home-story-image img,
+.home-story-section .home-story-image img,
+.gallery-main-image img,
+.gallery-side-images img {
+    transform: scale(1.03);
+    transition: transform 1.1s ease;
+}
+
+.story-hero-full:hover .home-story-image img,
+.home-story-section:hover .home-story-image img,
+.gallery-main-image:hover img,
+.gallery-side-images a:hover img {
+    transform: scale(1.07);
+}
+
+
+/* =========================================================
+   9. RESPONSIVE
+========================================================= */
+
+@media (max-width: 1024px) {
+    .modern-product-grid,
+    .product-grid.modern-product-grid,
+    .home-products-grid,
+    .category-products-grid,
+    .product-display-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .home-category-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .home-gallery-card {
+        grid-template-columns: 1fr;
+    }
+
+    .gallery-side-images {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: none;
+    }
+
+    .gallery-side-images a {
+        height: var(--gallery-side-height);
+    }
+
+    .gallery-arrow.right {
+        right: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .home-category-strip,
+    .home-category-products-section,
+    .home-gallery-product-section,
+    .home-story-wrapper,
+    .home-gallery-section {
+        padding-inline: var(--shop-x);
+    }
+
+    .home-category-strip-head,
+    .home-display-head,
+    .products-preview-head {
+        align-items: start;
+        flex-direction: column;
+    }
+
+    .modern-product-grid,
+    .product-grid.modern-product-grid,
+    .home-products-grid,
+    .category-products-grid,
+    .product-display-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--mobile-grid-gap);
+    }
+
+    .home-category-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .home-story-section {
+        height: auto;
+        min-height: var(--story-normal-height);
+        grid-template-columns: 1fr;
+    }
+
+    .home-story-section.image-left .home-story-image,
+    .home-story-section.image-right .home-story-image {
+        order: 1;
+    }
+
+    .home-story-section.image-left .home-story-copy,
+    .home-story-section.image-right .home-story-copy {
+        order: 2;
+    }
+
+    .home-story-image {
+        min-height: 220px;
+    }
+
+    .story-hero-full {
+        height: auto;
+        min-height: var(--story-full-height);
+    }
+
+    .story-hero-full .home-story-copy {
+        min-height: var(--story-full-height);
+    }
+
+    .gallery-main-image {
+        height: calc(var(--gallery-main-height) * .78);
+    }
+}
+
+@media (max-width: 520px) {
+    .modern-product-grid,
+    .product-grid.modern-product-grid,
+    .home-products-grid,
+    .category-products-grid,
+    .product-display-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .home-category-list {
+        grid-template-columns: 1fr;
+    }
+
+    .home-story-copy h2 {
+        font-size: calc(var(--story-title-size) * .78);
+    }
+
+    .gallery-info {
+        grid-template-columns: 1fr;
+    }
+
+    .gallery-side-images {
+        grid-template-columns: 1fr;
+    }
+}
+/* =========================================================
+   FORCE HOME SECTION GAP - SESUAI STRUKTUR BLADE
+========================================================= */
+
+.home-page {
+    display: grid;
+    gap: var(--home-section-gap);
+    background: var(--shop-bg);
+}
+
+/* hilangkan margin dobel kalau sebelumnya ada */
+.home-category-strip,
+.home-category-products-section,
+.home-story-section,
+.story-hero-full,
+.home-gallery-product-section {
+    margin: 0;
+}
+
+/* gap khusus antar display produk */
+.home-category-products-section {
+    padding-block: var(--product-display-section-y);
+}
+
+/* gap khusus preview story dan gallery */
+.home-story-section,
+.story-hero-full,
+.home-gallery-product-section {
+    margin-block: var(--home-preview-gap);
+}
+
+/* =========================================================
+   FORCE PRODUCT DISPLAY GAP
+========================================================= */
+
+.product-grid.modern-product-grid,
+.modern-product-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--product-display-columns), minmax(0, 1fr));
+    gap: var(--product-display-gap) !important;
 }

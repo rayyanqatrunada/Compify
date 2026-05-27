@@ -165,3 +165,42 @@
     height: 20px;
     fill: #222222;
 }
+
+/* =========================================================
+   HEADER CONTROL FROM settings.css
+========================================================= */
+
+.top-header,
+.compact-shop-header {
+    min-height: var(--header-height);
+    padding-inline: var(--header-padding-x);
+    background: var(--header-bg);
+}
+
+.brand-logo,
+.compact-brand-logo {
+    width: var(--logo-width);
+    height: var(--logo-height);
+}
+
+.brand-logo img,
+.compact-brand-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.search-box,
+.compact-search-box {
+    width: var(--search-width);
+    height: var(--search-height);
+}
+
+.header-link,
+.compact-header-link {
+    font-size: var(--header-link-size);
+}
+
+.compact-header-actions {
+    gap: var(--header-action-gap);
+}

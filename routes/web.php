@@ -4,6 +4,9 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Laravel\Socialite\Facades\Socialite;
 
 /*
 |--------------------------------------------------------------------------
@@ -154,3 +157,37 @@ Route::middleware(['auth:admin', 'admin'])
             Route::livewire('/shop', 'pages::admin.settings.shop.index')->name('shop');
         });
     });
+
+Route::get('/auth/google/redirect', function () {
+    return Socialite::driver('google')->redirect();
+})->middleware('guest:customer')->name('customer.google.redirect');
+
+Route::get('/auth/google/callback', function () {
+    $googleUser = Socialite::driver('google')->user();
+
+    $user = User::updateOrCreate(
+        [
+            'email' => $googleUser->getEmail(),
+        ],
+        [
+            'name' => $googleUser->getName() ?: $googleUser->getNickname() ?: 'Customer',
+            'google_id' => $googleUser->getId(),
+            'provider' => 'google',
+            'avatar' => $googleUser->getAvatar(),
+            'password' => Hash::make(str()->random(32)),
+            'role' => 'customer',
+        ]
+    );
+
+    if ($user->role === 'admin') {
+        return redirect()
+            ->route('customer.login')
+            ->withErrors(['email' => 'Akun admin tidak digunakan untuk login customer.']);
+    }
+
+    Auth::guard('customer')->login($user, true);
+
+    request()->session()->regenerate();
+
+    return redirect()->route('home');
+})->middleware('guest:customer')->name('customer.google.callback');

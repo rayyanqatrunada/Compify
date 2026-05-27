@@ -1,10 +1,14 @@
 /* =========================================================
    SHOP SETTINGS
-   Edit this file first when you want the shop larger/smaller.
+   Semua ukuran utama shop diatur dari sini.
+   Kalau ingin website lebih compact / besar, edit file ini dulu.
 ========================================================= */
 
 :root {
-    /* Core theme */
+    /* =====================================================
+       1. CORE THEME
+    ===================================================== */
+
     --shop-bg: #f5f6f7;
     --shop-white: #ffffff;
     --shop-black: #050505;
@@ -15,99 +19,298 @@
     --shop-soft: #fafafa;
     --shop-accent: #111111;
 
-    /* Compact size controls */
-    --shop-page-max: 1160px;
+    --shop-font: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+
+    /* =====================================================
+       2. GLOBAL LAYOUT
+       Mengatur lebar halaman, padding, dan jarak umum.
+    ===================================================== */
+
+    --shop-page-max: 1260px;
     --shop-x: clamp(18px, 2.2vw, 28px);
     --shop-page-padding-y: 24px;
-    --shop-section-y: 22px;
-    --shop-section-gap: 12px;
-    --shop-grid-gap: 12px;
-    --shop-control-height: 36px;
-    --shop-control-radius: 8px;
-    --shop-card-radius: 8px;
-    --shop-card-padding: 12px;
+
+    /* jarak antar section utama */
+    --shop-section-gap: 34px;
+
+    /* padding atas-bawah section */
+    --shop-section-y: 24px;
+
+    /* jarak antar grid/card */
+    --shop-grid-gap: 14px;
+
+    /* shadow global */
     --shop-surface-shadow: 0 14px 34px rgba(0, 0, 0, .055);
 
-    /* Type sizes */
+    /* =====================================================
+       3. RADIUS
+       Mengatur lengkungan semua elemen.
+    ===================================================== */
+
+    --radius-small: 6px;
+    --radius-medium: 8px;
+    --radius-large: 10px;
+    --radius-xl: 12px;
+
+    --shop-control-radius: 8px;
+    --shop-card-radius: 10px;
+    --shop-preview-radius: 10px;
+    --shop-banner-radius: 0px;
+
+    /* =====================================================
+       4. FORM / BUTTON / CONTROL
+    ===================================================== */
+
+    --shop-control-height: 36px;
+    --shop-control-padding-x: 14px;
+    --shop-button-height: 38px;
+    --shop-button-radius: 999px;
+
+    /* =====================================================
+       5. TYPOGRAPHY
+    ===================================================== */
+
     --shop-heading-size: 32px;
     --shop-heading-large-size: 38px;
+    --shop-subheading-size: 20px;
+    --shop-body-size: 14px;
+    --shop-small-size: 12px;
     --shop-kicker-size: 11px;
 
-    /* Product card / grid */
+    /* =====================================================
+       6. HEADER
+       Mengatur bagian logo, search, cart, wishlist, akun.
+    ===================================================== */
+
+    --header-height: 58px;
+    --header-padding-x: var(--shop-x);
+    --header-bg: #ffffff;
+
+    --logo-width: 174px;
+    --logo-height: 48px;
+
+    --search-width: 250px;
+    --search-height: 34px;
+
+    --header-link-size: 13px;
+    --header-icon-size: 22px;
+    --header-action-gap: 10px;
+
+    /* =====================================================
+       7. NAVBAR
+       Mengatur navbar hitam: Beranda, Kategori, Merk, dll.
+    ===================================================== */
+
+    --nav-height: 50px;
+    --nav-padding-x: var(--shop-x);
+    --nav-bg: #000000;
+    --nav-gap: 24px;
+    --nav-link-size: 12px;
+    --nav-link-weight: 900;
+
+    --mega-menu-padding-y: 26px;
+    --mega-menu-padding-x: var(--shop-x);
+    --mega-column-gap: 42px;
+
+    /* =====================================================
+       8. HERO / BANNER UTAMA
+    ===================================================== */
+
+    --hero-height: 430px;
+    --hero-radius: 0px;
+
+    --hero-content-width: 520px;
+    --hero-content-left: clamp(34px, 8vw, 150px);
+
+    --hero-title-size: 56px;
+    --hero-support-size: 18px;
+    --hero-desc-size: 15px;
+
+    --hero-button-height: 46px;
+    --hero-button-width: 220px;
+
+    --hero-arrow-size: 46px;
+    --hero-arrow-offset-x: 28px;
+
+    /* =====================================================
+       9. HOME SECTION SPACING
+       Bagian ini untuk jarak antar kategori, produk, preview.
+    ===================================================== */
+
+    /* jarak antar section besar */
+    --home-section-gap: 34px;
+
+    /* jarak antar display produk */
+    --home-product-section-gap: 38px;
+
+    /* jarak antar preview/story/banner kecil */
+    --home-preview-gap: 26px;
+
+    /* padding kiri-kanan khusus home */
+    --home-x: var(--shop-x);
+
+    /* padding atas-bawah section home */
+    --home-section-y: 24px;
+
+    /* =====================================================
+       10. CATEGORY DISPLAY DI HOME
+    ===================================================== */
+
+    --category-grid-columns: 4;
+    --category-grid-gap: 12px;
+
+    --category-card-height: 66px;
+    --category-card-radius: 10px;
+    --category-card-padding: 14px;
+
+    --category-title-size: 13px;
+    --category-subtitle-size: 11px;
+
+    /* =====================================================
+       11. PRODUCT DISPLAY / DISPLAY BARANG
+       Ini untuk section produk 4 card yang muncul di home.
+    ===================================================== */
+
+    --product-display-columns: 4;
+    --product-display-gap: 14px;
+
+    --product-display-section-y: 22px;
+    --product-display-title-size: 28px;
+    --product-display-view-size: 13px;
+
+    /* panjang/tinggi display card di home */
+    --product-display-card-min-height: 330px;
+    --product-display-card-radius: 10px;
+    --product-display-card-padding: 12px;
+
+    --product-display-image-height: 230px;
+    --product-display-image-padding: 12px;
+
+    /* =====================================================
+       12. PRODUCT CARD GLOBAL
+       Dipakai di products page, category page, dan beberapa list.
+    ===================================================== */
+
     --shop-product-grid-columns: 4;
     --shop-product-card-padding: 11px;
     --shop-product-card-gap: 8px;
+
+    --shop-product-card-min-height: 430px;
+    --shop-product-card-radius: 10px;
+
     --shop-product-image-height: 168px;
     --shop-product-image-padding: 12px;
+
     --shop-product-brand-size: 10px;
     --shop-product-title-size: 14px;
     --shop-product-title-min-height: 36px;
     --shop-product-price-size: 14px;
     --shop-product-meta-size: 11px;
+
     --shop-product-button-height: 34px;
     --shop-product-icon-size: 32px;
+
+    /* list mode */
     --shop-product-list-image-width: 138px;
+    --shop-product-list-image-height: 138px;
+
+    /* =====================================================
+       13. PRODUCT DETAIL PAGE
+    ===================================================== */
+
+    --shop-product-detail-gap: 22px;
     --shop-product-detail-media-height: 400px;
     --shop-product-detail-padding: 22px;
     --shop-product-detail-title-size: 36px;
+    --shop-product-detail-radius: 14px;
 
-    /* Category page */
+    /* =====================================================
+       14. CATEGORY PAGE
+       Sidebar filter, grid produk kategori, range price.
+    ===================================================== */
+
     --shop-category-sidebar-width: 226px;
+    --shop-category-layout-gap: 24px;
+
     --shop-category-grid-columns: 4;
+    --shop-category-grid-gap: 18px;
 
-    /* Radius aliases used by existing files */
-    --radius-small: 6px;
-    --radius-medium: 8px;
-    --radius-large: 8px;
-    --radius-xl: 10px;
+    --shop-category-filter-radius: 10px;
+    --shop-category-filter-padding: 14px;
 
-    /* Header */
-    --header-height: 58px;
-    --logo-width: 174px;
-    --search-width: 250px;
-    --search-height: 34px;
-    --header-link-size: 13px;
-    --header-action-gap: 10px;
+    --shop-price-slider-height: 4px;
 
-    /* Navbar */
-    --nav-height: 40px;
-    --nav-gap: 24px;
-    --nav-link-size: 12px;
+    /* =====================================================
+       15. STORY / PREVIEW SECTION
+       Preview kanan-kiri dan preview full image.
+    ===================================================== */
 
-    /* Hero */
-    --hero-height: 430px;
-    --hero-title-size: 56px;
-    --hero-support-size: 18px;
-    --hero-button-height: 46px;
+    /* preview kanan-kiri */
+    --story-normal-height: 310px;
 
-    /* Categories */
-    --category-card-height: 66px;
-    --category-grid-columns: 4;
-    --category-title-size: 13px;
-    --category-subtitle-size: 11px;
+    /* preview full image */
+    --story-full-height: 350px;
 
-    /* Product display */
-    --product-display-gap: var(--shop-grid-gap);
-    --product-display-columns: 4;
-
-    /* Story sections */
-    --story-normal-height: 340px;
-    --story-full-height: 390px;
+    /* alias agar file lama tetap jalan */
     --story-height: var(--story-normal-height);
+    --story-hero-height: var(--story-full-height);
+
+    /* --story-radius: 10px; */
+    --story-gap: 14px;
+
     --story-padding-y: 18px;
     --story-padding-x: 24px;
+
     --story-title-size: 28px;
     --story-desc-size: 13px;
-    --story-hero-height: var(--story-full-height);
+    --story-button-height: 38px;
+    --story-button-width: 150px;
+
     --story-hero-padding-y: 34px;
     --story-hero-padding-x: 38px;
 
-    /* Gallery */
-    --gallery-main-height: 360px;
-    --gallery-side-height: calc((var(--gallery-main-height) - var(--gallery-gap)) / 2);
+    /* =====================================================
+       16. GALLERY 3 FOTO
+       1 foto besar + 2 foto kecil.
+    ===================================================== */
+
+    --gallery-main-height: 340px;
     --gallery-gap: 8px;
-    --gallery-radius: 8px;
+    --gallery-side-height: calc((var(--gallery-main-height) - var(--gallery-gap)) / 2);
+
+    --gallery-radius: 10px;
+    --gallery-padding: 10px;
+
     --gallery-left-size: 1.65fr;
     --gallery-right-size: .95fr;
+
     --gallery-title-size: 19px;
+    --gallery-info-height: 58px;
+
+    /* =====================================================
+       17. FOOTER
+    ===================================================== */
+
+    /* footer lengkap di home */
+    --footer-padding-y: 0px;
+    --footer-padding-x: var(--shop-x);
+    --footer-column-gap: 42px;
+    --footer-logo-width: 190px;
+    --footer-title-size: 22px;
+    --footer-text-size: 15px;
+
+    /* footer minimal di halaman selain home */
+    --footer-minimal-height: 58px;
+    --footer-minimal-padding-x: 40px;
+    --footer-minimal-font-size: 16px;
+
+    /* =====================================================
+       18. RESPONSIVE
+    ===================================================== */
+
+    --mobile-section-gap: 24px;
+    --mobile-grid-gap: 12px;
+    --mobile-header-height: 56px;
+    --mobile-nav-height: 42px;
+    --mobile-hero-height: 360px;
 }

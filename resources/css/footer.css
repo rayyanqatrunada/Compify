@@ -148,3 +148,34 @@
         font-size: 14px;
     }
 }
+
+/* =========================================================
+   FOOTER CONTROL FROM settings.css
+========================================================= */
+
+.shop-footer {
+    padding: var(--footer-padding-y) var(--footer-padding-x);
+}
+
+.footer-main {
+    gap: var(--footer-column-gap);
+}
+
+.footer-logo img {
+    width: var(--footer-logo-width);
+}
+
+.shop-footer h3 {
+    font-size: var(--footer-title-size);
+}
+
+.shop-footer p,
+.shop-footer a {
+    font-size: var(--footer-text-size);
+}
+
+.shop-footer-minimal {
+    min-height: var(--footer-minimal-height);
+    padding-inline: var(--footer-minimal-padding-x);
+    font-size: var(--footer-minimal-font-size);
+}
