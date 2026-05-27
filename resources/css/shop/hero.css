@@ -1,19 +1,25 @@
 /* =========================================================
    HERO SLIDER
+   Controlled by resources/css/shop/settings.css
 ========================================================= */
 
 .hero-slider {
+    position: relative;
+    height: var(--hero-height);
     background: #050505;
+    overflow: hidden;
 }
 
 .hero-slide {
+    position: relative;
+    height: 100%;
     min-height: var(--hero-height);
     display: flex;
     align-items: center;
-    position: relative;
     background: linear-gradient(90deg, #050505, #161616);
     background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
     overflow: hidden;
 }
 
@@ -21,410 +27,100 @@
     content: "";
     position: absolute;
     inset: 0;
+    z-index: 1;
     background:
-        radial-gradient(circle at 72% 35%, rgba(255,255,255,.12), transparent 28%),
-        linear-gradient(to bottom, transparent, rgba(0,0,0,.18));
+        radial-gradient(circle at 72% 35%, rgba(255, 255, 255, .12), transparent 28%),
+        linear-gradient(to bottom, transparent, rgba(0, 0, 0, .18));
     pointer-events: none;
 }
 
+
+/* =========================================================
+   HERO TEXT
+========================================================= */
+
 .hero-copy {
     position: relative;
-    z-index: 2;
-    width: min(720px, 92%);
-    margin-left: 7%;
+    z-index: 5;
+    width: min(var(--hero-content-width), 92%);
+    margin-left: var(--hero-content-left);
     color: #ffffff;
 }
 
 .hero-eyebrow {
     margin: 0 0 16px;
+    color: rgba(255, 255, 255, .78);
     font-size: 14px;
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 2.8px;
-    color: rgba(255,255,255,.78);
 }
 
 .hero-copy h1 {
     margin: 0;
+    color: #ffffff;
     font-size: var(--hero-title-size);
     line-height: .95;
     font-weight: 950;
-    letter-spacing: 0;
 }
 
 .hero-support {
     max-width: 620px;
     margin: 22px 0 34px;
+    color: rgba(255, 255, 255, .9);
     font-size: var(--hero-support-size);
     line-height: 1.25;
-    color: rgba(255,255,255,.9);
 }
 
 .hero-button {
-    min-width: 220px;
-    height: var(--hero-button-height);
+    min-width: var(--hero-button-width);
+    min-height: var(--hero-button-height);
+    padding: 0 22px;
+    border-radius: var(--shop-control-radius);
+    background: #ffffff;
+    color: #000000;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #ffffff;
-    color: #000000;
     font-size: 14px;
     font-weight: 950;
     text-transform: uppercase;
-    letter-spacing: 0;
-    border-radius: var(--shop-control-radius);
-}
-
-.hero-controls {
-    position: absolute;
-    z-index: 3;
-    left: 7%;
-    bottom: 34px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.hero-controls > button {
-    width: 42px;
-    height: 42px;
-    border: 1px solid rgba(255,255,255,.35);
-    border-radius: 50%;
-    background: rgba(255,255,255,.1);
-    color: #ffffff;
-    font-size: 28px;
-    line-height: 1;
-}
-
-.hero-dots {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-}
-
-.hero-dots button {
-    width: 9px;
-    height: 9px;
-    padding: 0;
-    border: none;
-    border-radius: 50%;
-    background: rgba(255,255,255,.42);
-}
-
-.hero-dots button.active {
-    width: 28px;
-    border-radius: 999px;
-    background: #ffffff;
-}
-
-/* =========================================================
-   HERO SLIDER ARROWS
-========================================================= */
-
-.hero-slider,
-.hero-section,
-.home-hero {
-    position: relative;
-    height: var(--hero-height);
-    overflow: hidden;
-}
-
-.hero-slide,
-.hero-banner,
-.hero-item {
-    position: relative;
-    height: 100%;
-    overflow: hidden;
-}
-
-.hero-slide img,
-.hero-banner img,
-.hero-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-}
-
-/* tombol kanan kiri */
-.hero-arrow,
-.hero-slider-button,
-.hero-nav-button {
-    position: absolute;
-    top: 50%;
-    z-index: 20;
-    width: 46px;
-    height: 46px;
-    border: none;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, .78);
-    color: #111111;
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(-50%) scale(.92);
-    transition: opacity .25s ease, transform .25s ease, background .25s ease;
-    backdrop-filter: blur(10px);
-}
-
-.hero-arrow:hover,
-.hero-slider-button:hover,
-.hero-nav-button:hover {
-    background: #ffffff;
-    transform: translateY(-50%) scale(1);
-}
-
-.hero-arrow.prev,
-.hero-slider-button.prev,
-.hero-nav-button.prev {
-    left: 28px;
-}
-
-.hero-arrow.next,
-.hero-slider-button.next,
-.hero-nav-button.next {
-    right: 28px;
-}
-
-/* tombol hanya muncul saat hover hero */
-.hero-slider:hover .hero-arrow,
-.hero-slider:hover .hero-slider-button,
-.hero-slider:hover .hero-nav-button,
-.hero-section:hover .hero-arrow,
-.hero-section:hover .hero-slider-button,
-.hero-section:hover .hero-nav-button,
-.home-hero:hover .hero-arrow,
-.home-hero:hover .hero-slider-button,
-.home-hero:hover .hero-nav-button {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(-50%) scale(1);
-}
-
-/* =========================================================
-   HERO TEXT ANIMATION
-========================================================= */
-
-.hero-content,
-.hero-banner-content,
-.hero-text {
-    position: relative;
-    z-index: 5;
-}
-
-.hero-content > *,
-.hero-banner-content > *,
-.hero-text > * {
-    opacity: 0;
-    transform: translateY(18px);
-    animation: heroTextUp .7s ease forwards;
-}
-
-.hero-content > *:nth-child(1),
-.hero-banner-content > *:nth-child(1),
-.hero-text > *:nth-child(1) {
-    animation-delay: .12s;
-}
-
-.hero-content > *:nth-child(2),
-.hero-banner-content > *:nth-child(2),
-.hero-text > *:nth-child(2) {
-    animation-delay: .22s;
-}
-
-.hero-content > *:nth-child(3),
-.hero-banner-content > *:nth-child(3),
-.hero-text > *:nth-child(3) {
-    animation-delay: .32s;
-}
-
-.hero-content .hero-button,
-.hero-banner-content .hero-button,
-.hero-text .hero-button,
-.hero-content a,
-.hero-banner-content a,
-.hero-text a {
-    animation-delay: .42s;
-}
-
-@keyframes heroTextUp {
-    from {
-        opacity: 0;
-        transform: translateY(18px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* =========================================================
-   HERO CONTROL FROM settings.css
-========================================================= */
-
-.hero-slider,
-.hero-section,
-.home-hero {
-    position: relative;
-    height: var(--hero-height);
-    border-radius: var(--hero-radius);
-    overflow: hidden;
-}
-
-.hero-slide,
-.hero-banner,
-.hero-item {
-    height: 100%;
-}
-
-.hero-slide img,
-.hero-banner img,
-.hero-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.hero-content,
-.hero-banner-content,
-.hero-text {
-    max-width: var(--hero-content-width);
-    margin-left: var(--hero-content-left);
-}
-
-.hero-content h1,
-.hero-banner-content h1,
-.hero-text h1 {
-    font-size: var(--hero-title-size);
-}
-
-.hero-content p,
-.hero-banner-content p,
-.hero-text p {
-    font-size: var(--hero-support-size);
-}
-
-.hero-button,
-.hero-content a,
-.hero-banner-content a {
-    min-width: var(--hero-button-width);
-    min-height: var(--hero-button-height);
-}
-
-/* Hero arrows */
-.hero-arrow,
-.hero-slider-button,
-.hero-nav-button {
-    width: var(--hero-arrow-size);
-    height: var(--hero-arrow-size);
-}
-
-.hero-arrow.prev,
-.hero-slider-button.prev,
-.hero-nav-button.prev {
-    left: var(--hero-arrow-offset-x);
-}
-
-.hero-arrow.next,
-.hero-slider-button.next,
-.hero-nav-button.next {
-    right: var(--hero-arrow-offset-x);
-}
-
-/* =========================================================
-   HERO SLIDER ARROW - SHOW ON HOVER
-========================================================= */
-
-.hero-slider {
-    position: relative;
-    overflow: hidden;
-}
-
-.hero-slide {
-    position: relative;
-    overflow: hidden;
-}
-
-/* tombol default disembunyikan */
-.hero-arrow {
-    position: absolute;
-    top: 50%;
-    z-index: 30;
-
-    width: 64px;
-    height: 64px;
-    border: none;
-    border-radius: 999px;
-
-    background: rgba(0, 0, 0, .62);
-    color: #ffffff;
-
-    display: grid;
-    place-items: center;
-
-    font-size: 58px;
-    font-weight: 300;
-    line-height: 1;
-
-    cursor: pointer;
-
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(-50%) scale(.9);
-
     transition:
-        opacity .22s ease,
-        transform .22s ease,
-        background .22s ease;
+        transform .25s ease,
+        box-shadow .25s ease,
+        background .25s ease;
 }
 
-.hero-arrow.prev {
-    left: 24px;
+.hero-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, .22);
 }
 
-.hero-arrow.next {
-    right: 24px;
-}
-
-/* muncul saat hover area hero */
-.hero-slider:hover .hero-arrow {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(-50%) scale(1);
-}
-
-.hero-arrow:hover {
-    background: rgba(0, 0, 0, .86);
-    transform: translateY(-50%) scale(1.06);
-}
 
 /* =========================================================
-   HERO ARROW - TEXT ONLY + FADE
+   HERO ARROWS
+   Panah tanpa background, muncul saat hover.
 ========================================================= */
-
-.hero-slider,
-.hero-slide {
-    position: relative;
-    overflow: hidden;
-}
 
 .hero-arrow {
     position: absolute;
     top: 50%;
     z-index: 30;
 
-    width: var(--slider-arrow-size);
-    height: var(--slider-arrow-size);
+    width: var(--slider-arrow-size, 54px);
+    height: var(--slider-arrow-size, 54px);
 
+    padding: 0;
     border: none !important;
     border-radius: 0 !important;
+    outline: none;
+
     background: transparent !important;
     box-shadow: none !important;
+    backdrop-filter: none !important;
 
-    color: rgba(255, 255, 255, .92);
+    color: rgba(255, 255, 255, .88);
+
     display: grid;
     place-items: center;
 
@@ -436,8 +132,7 @@
 
     opacity: 0;
     pointer-events: none;
-    transform: translateY(-50%) translateX(0);
-    text-shadow: 0 8px 22px rgba(0, 0, 0, .35);
+    text-shadow: 0 8px 22px rgba(0, 0, 0, .38);
 
     transition:
         opacity .35s ease,
@@ -447,12 +142,12 @@
 }
 
 .hero-arrow.prev {
-    left: var(--slider-arrow-offset-x);
+    left: var(--slider-arrow-offset-x, 28px);
     transform: translateY(-50%) translateX(-14px);
 }
 
 .hero-arrow.next {
-    right: var(--slider-arrow-offset-x);
+    right: var(--slider-arrow-offset-x, 28px);
     transform: translateY(-50%) translateX(14px);
 }
 
@@ -462,19 +157,23 @@
     transform: translateY(-50%) translateX(0);
 }
 
-/* .hero-arrow:hover {
-    /* color: #ffffff; */
-    /* text-shadow: 0 12px 28px rgba(0, 0, 0, .55); */
-/* } */
+.hero-arrow:hover {
+    color: #ffffff;
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: 0 12px 28px rgba(0, 0, 0, .55);
+}
+
 
 /* =========================================================
-   HERO DOTS - LEFT BOTTOM + ANIMATION
+   HERO DOTS
+   Penanda slide di kiri bawah.
 ========================================================= */
 
 .hero-dots {
     position: absolute;
-    left: var(--slider-dots-left);
-    bottom: var(--slider-dots-bottom);
+    left: var(--slider-dots-left, 34px);
+    bottom: var(--slider-dots-bottom, 24px);
     z-index: 35;
 
     display: flex;
@@ -521,28 +220,17 @@
     background: rgba(255, 255, 255, .85);
 }
 
+
 /* =========================================================
-   HERO SLIDE ANIMATION
+   HERO ANIMATION
    Gambar geser, teks fade.
 ========================================================= */
 
-.hero-slider {
-    overflow: hidden;
-}
-
-.hero-slide {
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-/* gambar/banner masuk seperti geser */
 .hero-slide-animated {
     animation: heroImageSlideIn .62s cubic-bezier(.22, .9, .24, 1) both;
     will-change: transform, opacity;
 }
 
-/* teks cukup fade, tidak naik/turun berlebihan */
 .hero-copy-fade > * {
     opacity: 0;
     animation: heroTextFade .48s ease forwards;
@@ -583,5 +271,49 @@
 
     to {
         opacity: 1;
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 768px) {
+    .hero-slider,
+    .hero-slide {
+        height: var(--mobile-hero-height, 360px);
+        min-height: var(--mobile-hero-height, 360px);
+    }
+
+    .hero-copy {
+        width: min(92%, 520px);
+        margin-left: 24px;
+        margin-right: 24px;
+    }
+
+    .hero-copy h1 {
+        font-size: calc(var(--hero-title-size) * .68);
+    }
+
+    .hero-support {
+        font-size: calc(var(--hero-support-size) * .9);
+    }
+
+    .hero-arrow {
+        font-size: 58px;
+    }
+
+    .hero-arrow.prev {
+        left: 14px;
+    }
+
+    .hero-arrow.next {
+        right: 14px;
+    }
+
+    .hero-dots {
+        left: 24px;
+        bottom: 18px;
     }
 }

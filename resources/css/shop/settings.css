@@ -132,6 +132,11 @@
     --hero-arrow-size: 46px;
     --hero-arrow-offset-x: 28px;
 
+    --slider-arrow-size: 54px;
+    --slider-arrow-offset-x: 28px;
+    --slider-dots-left: 34px;
+    --slider-dots-bottom: 24px;
+
     /* =====================================================
        9. HOME SECTION SPACING
        Bagian ini untuk jarak antar kategori, produk, preview.
