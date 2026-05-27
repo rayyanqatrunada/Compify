@@ -25,11 +25,18 @@ class extends Component {
     public string $description = '';
     public string $button_text = '';
     public string $button_url = '';
+    public string $image_position = 'right';
+
     public bool $is_active = true;
     public int $sort_order = 0;
 
     public $imageFile = null;
     public ?string $currentImage = null;
+
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
+    }
 
     #[Computed]
     public function sections()
@@ -50,6 +57,7 @@ class extends Component {
             'description' => ['nullable', 'string'],
             'button_text' => ['nullable', 'string', 'max:100'],
             'button_url' => ['nullable', 'string', 'max:255'],
+            'image_position' => ['required', 'in:left,right'],
             'is_active' => ['boolean'],
             'sort_order' => ['nullable', 'integer'],
             'imageFile' => ['nullable', 'image', 'max:4096'],
@@ -85,7 +93,7 @@ class extends Component {
             HomeSection::create($payload);
         }
 
-        session()->flash('success', 'Full banner berhasil disimpan.');
+        session()->flash('success', 'Split banner berhasil disimpan.');
         $this->resetForm();
     }
 
@@ -99,6 +107,7 @@ class extends Component {
         $this->description = $section->description ?? '';
         $this->button_text = $section->button_text ?? '';
         $this->button_url = $section->button_url ?? '';
+        $this->image_position = $section->image_position ?? 'right';
         $this->is_active = (bool) $section->is_active;
         $this->sort_order = $section->sort_order ?? 0;
         $this->currentImage = $section->image;
@@ -115,22 +124,27 @@ class extends Component {
 
         $section->delete();
 
-        session()->flash('success', 'Full banner berhasil dihapus.');
+        session()->flash('success', 'Split banner berhasil dihapus.');
         $this->resetForm();
     }
 
     public function resetForm(): void
     {
         $this->editingId = null;
+
         $this->title = '';
         $this->subtitle = '';
         $this->description = '';
         $this->button_text = '';
         $this->button_url = '';
+        $this->image_position = 'right';
+
         $this->is_active = true;
         $this->sort_order = 0;
+
         $this->imageFile = null;
         $this->currentImage = null;
+
         $this->resetValidation();
     }
 };
@@ -138,8 +152,8 @@ class extends Component {
 
 <div class="admin-page-v2">
     <div class="admin-section-title-v2">
-        <h2>Full Banners</h2>
-        <p>Mengatur preview full image/banner besar di homepage.</p>
+        <h2>Split Banners</h2>
+        <p>Mengatur preview kanan-kiri di homepage.</p>
     </div>
 
     @if(session('success'))
@@ -147,22 +161,22 @@ class extends Component {
     @endif
 
     <form wire:submit="save" class="admin-panel-v2 admin-form">
-        <h2>{{ $editingId ? 'Edit Full Banner' : 'Tambah Full Banner' }}</h2>
+        <h2>{{ $editingId ? 'Edit Split Banner' : 'Tambah Split Banner' }}</h2>
 
         <div class="admin-grid">
             <label>
                 Judul
-                <input type="text" wire:model="title">
+                <input type="text" wire:model="title" placeholder="Contoh: Upgrade Setup Gaming">
             </label>
 
             <label>
                 Subtitle
-                <input type="text" wire:model="subtitle">
+                <input type="text" wire:model="subtitle" placeholder="Opsional">
             </label>
 
             <label>
                 Button Text
-                <input type="text" wire:model="button_text">
+                <input type="text" wire:model="button_text" placeholder="Contoh: Learn More">
             </label>
 
             <label>
@@ -184,22 +198,24 @@ class extends Component {
             </label>
 
             <label>
-                Gambar Banner
-                <input type="file" wire:model="imageFile" accept="image/*">
-            </label>
-
-            <label>
                 Posisi Gambar
                 <select wire:model="image_position">
                     <option value="right">Gambar Kanan</option>
                     <option value="left">Gambar Kiri</option>
                 </select>
             </label>
+
+            <label>
+                Gambar Banner
+                <input type="file" wire:model="imageFile" accept="image/*">
+            </label>
         </div>
+
+        <br>
 
         <label>
             Deskripsi
-            <textarea wire:model="description" rows="4"></textarea>
+            <textarea wire:model="description" rows="4" placeholder="Deskripsi singkat untuk split banner"></textarea>
         </label>
 
         <div class="home-section-preview-grid">
@@ -217,14 +233,19 @@ class extends Component {
         </div>
 
         <div class="admin-actions">
-            <button class="admin-btn" type="submit">{{ $editingId ? 'Update' : 'Simpan' }}</button>
-            <button class="admin-btn secondary" type="button" wire:click="resetForm">Reset</button>
+            <button class="admin-btn" type="submit">
+                {{ $editingId ? 'Update Split Banner' : 'Simpan Split Banner' }}
+            </button>
+
+            <button class="admin-btn secondary" type="button" wire:click="resetForm">
+                Reset
+            </button>
         </div>
     </form>
 
     <div class="admin-panel-v2">
         <div class="admin-table-head">
-            <h2>Data Full Banners</h2>
+            <h2>Data Split Banners</h2>
 
             <select wire:model.live="perPage">
                 <option value="10">10 data</option>
@@ -239,6 +260,7 @@ class extends Component {
                     <th>Urutan</th>
                     <th>Gambar</th>
                     <th>Judul</th>
+                    <th>Posisi</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
@@ -248,23 +270,41 @@ class extends Component {
                 @forelse($this->sections as $section)
                     <tr>
                         <td>{{ $section->sort_order }}</td>
+
                         <td>
                             @if($section->image)
-                                <img src="{{ Storage::url($section->image) }}" class="admin-table-thumb" alt="Banner">
+                                <img src="{{ Storage::url($section->image) }}" class="admin-table-thumb" alt="Split Banner">
                             @else
                                 -
                             @endif
                         </td>
+
                         <td>{{ $section->title ?? '-' }}</td>
-                        <td>{{ $section->is_active ? 'Aktif' : 'Nonaktif' }}</td>
+
                         <td>
-                            <button class="admin-btn" type="button" wire:click="edit({{ $section->id }})">Edit</button>
-                            <button class="admin-btn danger" type="button" wire:click="delete({{ $section->id }})" wire:confirm="Yakin hapus?">Hapus</button>
+                            {{ $section->image_position === 'left' ? 'Gambar Kiri' : 'Gambar Kanan' }}
+                        </td>
+
+                        <td>{{ $section->is_active ? 'Aktif' : 'Nonaktif' }}</td>
+
+                        <td>
+                            <button class="admin-btn" type="button" wire:click="edit({{ $section->id }})">
+                                Edit
+                            </button>
+
+                            <button
+                                class="admin-btn danger"
+                                type="button"
+                                wire:click="delete({{ $section->id }})"
+                                wire:confirm="Yakin hapus split banner ini?"
+                            >
+                                Hapus
+                            </button>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5">Belum ada data.</td>
+                        <td colspan="6">Belum ada split banner.</td>
                     </tr>
                 @endforelse
             </tbody>

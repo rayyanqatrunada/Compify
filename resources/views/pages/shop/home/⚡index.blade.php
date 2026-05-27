@@ -17,7 +17,7 @@ class extends Component {
     public int $bannerIndex = 0;
 
     public array $sectionIndexes = [];
-    public array $galleryIndexes = [];
+    public int $activeGalleryIndex = 0;
 
     #[Computed]
     public function banners()
@@ -154,62 +154,49 @@ class extends Component {
         $this->sectionIndexes[$sectionId] = $current <= 0 ? $maxIndex : $current - 1;
     }
 
+    public function gallerySections()
+    {
+        return $this->homeSections
+            ->where('section_type', 'gallery')
+            ->values();
+    }
+
+    public function activeGallerySection(): ?HomeSection
+    {
+        $galleries = $this->gallerySections();
+
+        return $galleries->get($this->activeGalleryIndex) ?? $galleries->first();
+    }
+
     public function galleryImages(HomeSection $section): array
     {
-        $images = collect([
+        return collect([
             $section->image,
             $section->image_2,
             $section->image_3,
         ])->filter()->values()->all();
-
-        if (count($images) <= 1) {
-            return $images;
-        }
-
-        $index = $this->galleryIndexes[$section->id] ?? 0;
-
-        return array_values(array_merge(
-            array_slice($images, $index),
-            array_slice($images, 0, $index)
-        ));
     }
 
-    public function nextGallery(int $sectionId): void
+    public function nextGalleryProduct(): void
     {
-        $section = HomeSection::find($sectionId);
-
-        if (! $section) {
-            return;
-        }
-
-        $count = count($this->galleryImages($section));
+        $count = $this->gallerySections()->count();
 
         if ($count <= 1) {
             return;
         }
 
-        $current = $this->galleryIndexes[$sectionId] ?? 0;
-
-        $this->galleryIndexes[$sectionId] = ($current + 1) % $count;
+        $this->activeGalleryIndex = ($this->activeGalleryIndex + 1) % $count;
     }
 
-    public function prevGallery(int $sectionId): void
+    public function prevGalleryProduct(): void
     {
-        $section = HomeSection::find($sectionId);
-
-        if (! $section) {
-            return;
-        }
-
-        $count = count($this->galleryImages($section));
+        $count = $this->gallerySections()->count();
 
         if ($count <= 1) {
             return;
         }
 
-        $current = $this->galleryIndexes[$sectionId] ?? 0;
-
-        $this->galleryIndexes[$sectionId] = ($current - 1 + $count) % $count;
+        $this->activeGalleryIndex = ($this->activeGalleryIndex - 1 + $count) % $count;
     }
 };
 ?>
@@ -290,8 +277,7 @@ class extends Component {
             ->filter(fn ($item) => $item->id !== $fullBannerSection?->id && $item->display_style !== 'full_banner')
             ->values();
 
-        $gallerySection = $this->homeSections
-            ->first(fn ($item) => $item->section_type === 'gallery');
+        $gallerySection = $this->activeGallerySection();
 
         $homeLayoutSlots = [
             ['type' => 'products', 'index' => 0],
@@ -412,7 +398,7 @@ class extends Component {
             <section
                 class="home-gallery-product-section"
                 @if($section->auto_slide)
-                    wire:poll.6000ms="nextGallery({{ $section->id }})"
+                    wire:poll.6000ms="nextGalleryProduct"
                 @endif
             >
                 <div class="products-preview-head">
@@ -425,11 +411,11 @@ class extends Component {
 
                 <div
                     class="home-gallery-card gallery-slide-animated"
-                    wire:key="gallery-card-{{ $section->id }}-{{ $galleryIndexes[$section->id] ?? 0 }}"
+                    wire:key="gallery-product-{{ $section->id }}-{{ $activeGalleryIndex }}"
                 >
                     @if(count($images) > 1)
-                        <button type="button" class="gallery-arrow left" wire:click="prevGallery({{ $section->id }})">‹</button>
-                        <button type="button" class="gallery-arrow right" wire:click="nextGallery({{ $section->id }})">›</button>
+                        <button type="button" class="gallery-arrow left" wire:click="prevGalleryProduct">‹</button>
+                        <button type="button" class="gallery-arrow right" wire:click="nextGalleryProduct">›</button>
                     @endif
 
                     <a href="{{ $galleryUrl }}" class="gallery-main-image" wire:navigate>
@@ -474,8 +460,13 @@ class extends Component {
                         </div>
 
                         <div class="preview-dots">
-                            @foreach($images as $index => $image)
-                                <span @class(['active' => ($galleryIndexes[$section->id] ?? 0) === $index])></span>
+                            @foreach($this->gallerySections() as $index => $galleryItem)
+                                <button
+                                    type="button"
+                                    wire:click="$set('activeGalleryIndex', {{ $index }})"
+                                    @class(['active' => $activeGalleryIndex === $index])
+                                    aria-label="Gallery {{ $index + 1 }}"
+                                ></button>
                             @endforeach
                         </div>
 
