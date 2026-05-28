@@ -1,11 +1,12 @@
 <?php
 
+use App\Models\Order;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
-use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
 use Laravel\Socialite\Facades\Socialite;
 
 /*
@@ -30,6 +31,7 @@ Route::livewire('/returns-policy', 'pages::shop.help.returns')->name('returns');
 Route::livewire('/privacy-policy', 'pages::shop.help.privacy')->name('privacy');
 Route::livewire('/terms-and-conditions', 'pages::shop.help.terms')->name('terms');
 
+
 /*
 |--------------------------------------------------------------------------
 | CUSTOMER AUTH
@@ -51,10 +53,55 @@ Route::livewire('/account', 'pages::shop.account.index')
 Route::post('/customer/logout', function (Request $request) {
     Auth::guard('customer')->logout();
 
+    // Jangan invalidate session agar guard admin tidak ikut terganggu.
     $request->session()->regenerateToken();
 
     return redirect()->route('home');
 })->name('customer.logout');
+
+
+/*
+|--------------------------------------------------------------------------
+| CUSTOMER GOOGLE LOGIN
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/auth/google/redirect', function () {
+    return Socialite::driver('google')->redirect();
+})->middleware('guest:customer')->name('customer.google.redirect');
+
+Route::get('/auth/google/callback', function () {
+    $googleUser = Socialite::driver('google')->user();
+
+    $user = User::updateOrCreate(
+        [
+            'email' => $googleUser->getEmail(),
+        ],
+        [
+            'name' => $googleUser->getName() ?: $googleUser->getNickname() ?: 'Customer',
+            'google_id' => $googleUser->getId(),
+            'provider' => 'google',
+            'avatar' => $googleUser->getAvatar(),
+            'password' => Hash::make(str()->random(32)),
+            'role' => 'customer',
+        ]
+    );
+
+    if ($user->role === 'admin') {
+        return redirect()
+            ->route('customer.login')
+            ->withErrors([
+                'email' => 'Akun admin tidak digunakan untuk login customer.',
+            ]);
+    }
+
+    Auth::guard('customer')->login($user, true);
+
+    request()->session()->regenerate();
+
+    return redirect()->route('home');
+})->middleware('guest:customer')->name('customer.google.callback');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -97,11 +144,31 @@ Route::post('/cart/{product}/add', function (Request $request, Product $product)
     session()->put('cart', $cart);
 
     if ($request->boolean('redirect_to_cart')) {
-        return redirect()->route('cart.index')->with('success', 'Produk masuk ke keranjang.');
+        return redirect()
+            ->route('cart.index')
+            ->with('success', 'Produk masuk ke keranjang.');
     }
 
     return back()->with('success', 'Produk berhasil ditambahkan ke keranjang.');
 })->name('cart.add');
+
+
+/*
+|--------------------------------------------------------------------------
+| CHECKOUT / PAYMENT
+|--------------------------------------------------------------------------
+*/
+
+Route::livewire('/checkout', 'pages::shop.checkout.index')
+    ->middleware('auth:customer')
+    ->name('checkout.index');
+
+Route::get('/checkout/success/{order}', function (Order $order) {
+    abort_if($order->user_id !== Auth::guard('customer')->id(), 403);
+
+    return view('pages.shop.checkout.success', compact('order'));
+})->middleware('auth:customer')->name('checkout.success');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -112,6 +179,7 @@ Route::post('/cart/{product}/add', function (Request $request, Product $product)
 Route::livewire(config('compify.admin_login_path'), 'pages::auth.admin.login')
     ->middleware(['guest:admin', 'throttle:5,1'])
     ->name('login');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -132,6 +200,7 @@ Route::middleware(['auth:admin', 'admin'])
         Route::post('/logout', function (Request $request) {
             Auth::guard('admin')->logout();
 
+            // Jangan invalidate session agar guard customer tidak ikut terganggu.
             $request->session()->regenerateToken();
 
             return redirect()->route('login');
@@ -167,39 +236,8 @@ Route::middleware(['auth:admin', 'admin'])
 
         Route::prefix('settings')->name('settings.')->group(function () {
             Route::livewire('/shop', 'pages::admin.settings.shop.index')->name('shop');
+
+            Route::livewire('/payment-methods', 'pages::admin.settings.payment-methods.index')
+                ->name('payment-methods');
         });
     });
-
-Route::get('/auth/google/redirect', function () {
-    return Socialite::driver('google')->redirect();
-})->middleware('guest:customer')->name('customer.google.redirect');
-
-Route::get('/auth/google/callback', function () {
-    $googleUser = Socialite::driver('google')->user();
-
-    $user = User::updateOrCreate(
-        [
-            'email' => $googleUser->getEmail(),
-        ],
-        [
-            'name' => $googleUser->getName() ?: $googleUser->getNickname() ?: 'Customer',
-            'google_id' => $googleUser->getId(),
-            'provider' => 'google',
-            'avatar' => $googleUser->getAvatar(),
-            'password' => Hash::make(str()->random(32)),
-            'role' => 'customer',
-        ]
-    );
-
-    if ($user->role === 'admin') {
-        return redirect()
-            ->route('customer.login')
-            ->withErrors(['email' => 'Akun admin tidak digunakan untuk login customer.']);
-    }
-
-    Auth::guard('customer')->login($user, true);
-
-    request()->session()->regenerate();
-
-    return redirect()->route('home');
-})->middleware('guest:customer')->name('customer.google.callback');

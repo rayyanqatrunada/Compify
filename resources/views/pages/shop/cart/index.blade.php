@@ -142,8 +142,8 @@ class extends Component {
                 <strong>Rp {{ number_format($this->total, 0, ',', '.') }}</strong>
             </div>
 
-            <a href="{{ route('customer.login') }}" wire:navigate>
-                Lanjut Checkout
+            <a href="{{ route('checkout.index') }}" class="cart-checkout-button" wire:navigate>
+                Lanjut ke Pembayaran
             </a>
         </aside>
     </div>

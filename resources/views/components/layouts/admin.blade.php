@@ -123,6 +123,11 @@
                             Shop Settings
                         </a>
 
+                        <a href="{{ route('admin.settings.payment-methods') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.settings.payment-methods')])>
+                            Payment Methods
+                        </a>
+                        
                         <a href="{{ route('admin.content.pages') }}" wire:navigate
                            @class(['active' => request()->routeIs('admin.content.pages')])>
                             Static Pages
