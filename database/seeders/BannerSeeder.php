@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Banner;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
 
 class BannerSeeder extends Seeder
 {
@@ -53,15 +52,17 @@ class BannerSeeder extends Seeder
                 'sort_order' => $banner['sort_order'],
             ];
 
+            /*
+             * Kalau gambar ditemukan, kolom image akan diisi.
+             * Kalau gambar tidak ditemukan, image lama tidak ditimpa jadi null.
+             */
             if ($imagePath) {
                 $payload['image'] = $imagePath;
             }
 
             Banner::updateOrCreate(
-                ['slug' => Str::slug($banner['title'])],
-                $payload + [
-                    'slug' => Str::slug($banner['title']),
-                ]
+                ['sort_order' => $banner['sort_order']],
+                $payload
             );
         }
     }
