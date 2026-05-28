@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ProductExcelController;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
@@ -53,7 +54,6 @@ Route::livewire('/account', 'pages::shop.account.index')
 Route::post('/customer/logout', function (Request $request) {
     Auth::guard('customer')->logout();
 
-    // Jangan invalidate session agar guard admin tidak ikut terganggu.
     $request->session()->regenerateToken();
 
     return redirect()->route('home');
@@ -200,7 +200,6 @@ Route::middleware(['auth:admin', 'admin'])
         Route::post('/logout', function (Request $request) {
             Auth::guard('admin')->logout();
 
-            // Jangan invalidate session agar guard customer tidak ikut terganggu.
             $request->session()->regenerateToken();
 
             return redirect()->route('login');
@@ -210,6 +209,12 @@ Route::middleware(['auth:admin', 'admin'])
             Route::livewire('/products', 'pages::admin.catalog.products.index')->name('products');
             Route::livewire('/categories', 'pages::admin.catalog.categories.index')->name('categories');
             Route::livewire('/brands', 'pages::admin.catalog.brands.index')->name('brands');
+
+            Route::get('/products/export', [ProductExcelController::class, 'export'])
+                ->name('products.export');
+
+            Route::post('/products/import', [ProductExcelController::class, 'import'])
+                ->name('products.import');
         });
 
         Route::prefix('content')->name('content.')->group(function () {
