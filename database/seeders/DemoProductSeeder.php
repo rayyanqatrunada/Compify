@@ -6,6 +6,7 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
 class DemoProductSeeder extends Seeder
@@ -116,7 +117,7 @@ class DemoProductSeeder extends Seeder
 
         $brands = [];
 
-        foreach ($brandNames as $index => $name) {
+        foreach ($brandNames as $name) {
             $brands[$name] = Brand::updateOrCreate(
                 ['slug' => Str::slug($name)],
                 [
@@ -234,25 +235,62 @@ class DemoProductSeeder extends Seeder
                 $isNew,
             ] = $item;
 
+            $slug = Str::slug($name);
+            $imagePath = $this->seedProductImage($slug);
+
+            $payload = [
+                'category_id' => $categoryModels[$categoryName]->id,
+                'brand_id' => $brands[$brandName]->id,
+                'sku' => strtoupper(Str::slug($brandName, '')) . '-' . str_pad($index + 1, 4, '0', STR_PAD_LEFT),
+                'name' => $name,
+                'description' => $this->makeDescription($name, $categoryName, $brandName),
+                'price' => $price,
+                'sale_price' => $salePrice,
+                'stock' => $stock,
+                'is_featured' => $isFeatured,
+                'is_new' => $isNew,
+                'is_active' => true,
+                'sort_order' => $index + 1,
+            ];
+
+            /*
+             * Kalau gambar ditemukan di public/assets/seed/products,
+             * maka kolom image akan diisi.
+             *
+             * Kalau gambar tidak ditemukan, image lama tidak dihapus.
+             */
+            if ($imagePath) {
+                $payload['image'] = $imagePath;
+            }
+
             Product::updateOrCreate(
-                ['slug' => Str::slug($name)],
-                [
-                    'category_id' => $categoryModels[$categoryName]->id,
-                    'brand_id' => $brands[$brandName]->id,
-                    'sku' => strtoupper(Str::slug($brandName, '')) . '-' . str_pad($index + 1, 4, '0', STR_PAD_LEFT),
-                    'name' => $name,
-                    'description' => $this->makeDescription($name, $categoryName, $brandName),
-                    'price' => $price,
-                    'sale_price' => $salePrice,
-                    'stock' => $stock,
-                    'image' => null,
-                    'is_featured' => $isFeatured,
-                    'is_new' => $isNew,
-                    'is_active' => true,
-                    'sort_order' => $index + 1,
-                ]
+                ['slug' => $slug],
+                $payload
             );
         }
+    }
+
+    private function seedProductImage(string $slug): ?string
+    {
+        $extensions = ['webp', 'jpg', 'jpeg', 'png'];
+
+        foreach ($extensions as $extension) {
+            $sourcePath = public_path("assets/seed/products/{$slug}.{$extension}");
+
+            if (! File::exists($sourcePath)) {
+                continue;
+            }
+
+            $targetRelativePath = "products/{$slug}.{$extension}";
+            $targetFullPath = storage_path("app/public/{$targetRelativePath}");
+
+            File::ensureDirectoryExists(dirname($targetFullPath));
+            File::copy($sourcePath, $targetFullPath);
+
+            return $targetRelativePath;
+        }
+
+        return null;
     }
 
     private function makeDescription(string $name, string $category, string $brand): string
