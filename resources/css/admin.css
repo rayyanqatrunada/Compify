@@ -1312,3 +1312,246 @@
         width: 100%;
     }
 }
+
+/* =========================================================
+   ADMIN THEME GLOBAL
+========================================================= */
+
+.admin-shell-v2 {
+    --admin-bg: #f4f4f6;
+    --admin-panel: #ffffff;
+    --admin-sidebar: #ffffff;
+    --admin-text: #202020;
+    --admin-muted: #777777;
+    --admin-border: #e5e5e5;
+    --admin-border-strong: #d7d7d7;
+    --admin-accent: #111111;
+    --admin-soft: #f3f4f6;
+    --admin-shadow: 0 12px 28px rgba(0, 0, 0, .045);
+}
+
+html[data-admin-theme="dark"] .admin-shell-v2,
+.admin-shell-v2[data-admin-theme="dark"] {
+    --admin-bg: #101010;
+    --admin-panel: #181818;
+    --admin-sidebar: #151515;
+    --admin-text: #f5f5f5;
+    --admin-muted: #a8a8a8;
+    --admin-border: #2b2b2b;
+    --admin-border-strong: #3a3a3a;
+    --admin-accent: #ffffff;
+    --admin-soft: #242424;
+    --admin-shadow: 0 16px 34px rgba(0, 0, 0, .28);
+}
+
+.admin-body-v2,
+.admin-body {
+    background: var(--admin-bg);
+    color: var(--admin-text);
+}
+
+.admin-shell-v2,
+.admin-main-v2,
+.admin-content-v2 {
+    background: var(--admin-bg);
+    color: var(--admin-text);
+}
+
+.admin-panel-v2,
+.admin-panel,
+.admin-card,
+.admin-topbar-v2,
+.admin-sidebar-v2 {
+    background: var(--admin-panel);
+    color: var(--admin-text);
+    border-color: var(--admin-border);
+}
+
+.admin-menu-v2 a,
+.admin-menu-v2 summary,
+.admin-topbar-v2 h1,
+.admin-section-title-v2 h2,
+.admin-panel-v2 h2,
+.admin-panel-v2 h3 {
+    color: var(--admin-text);
+}
+
+.admin-topbar-v2 p,
+.admin-section-title-v2 p,
+.admin-panel-v2 p {
+    color: var(--admin-muted);
+}
+
+/* =========================================================
+   ADMIN TOPBAR ACTIONS
+========================================================= */
+
+.admin-topbar-actions-v2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-theme-toggle {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--admin-border);
+    border-radius: 12px;
+    background: var(--admin-panel);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition:
+        transform .18s ease,
+        background .18s ease,
+        border-color .18s ease;
+}
+
+.admin-theme-toggle:hover {
+    transform: translateY(-1px);
+    background: var(--admin-soft);
+    border-color: var(--admin-border-strong);
+}
+
+.admin-theme-toggle img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.admin-profile-chip {
+    min-height: 42px;
+    padding: 5px 12px 5px 6px;
+    border: 1px solid var(--admin-border);
+    border-radius: 999px;
+    background: var(--admin-panel);
+    color: var(--admin-text);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    transition:
+        transform .18s ease,
+        background .18s ease,
+        border-color .18s ease;
+}
+
+.admin-profile-chip:hover {
+    transform: translateY(-1px);
+    background: var(--admin-soft);
+    border-color: var(--admin-border-strong);
+}
+
+.admin-profile-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--admin-accent);
+    color: var(--admin-panel);
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 950;
+}
+
+html[data-admin-theme="dark"] .admin-profile-avatar {
+    color: #111111;
+}
+
+.admin-profile-chip span:last-child {
+    display: grid;
+    gap: 1px;
+}
+
+.admin-profile-chip strong {
+    color: var(--admin-text);
+    font-size: 12px;
+    font-weight: 950;
+    line-height: 1.1;
+}
+
+.admin-profile-chip small {
+    color: var(--admin-muted);
+    font-size: 10px;
+    font-weight: 800;
+}
+
+/* =========================================================
+   ADMIN PROFILE PAGE
+========================================================= */
+
+.admin-profile-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(320px, .75fr);
+    gap: var(--admin-grid-gap, 14px);
+    align-items: start;
+}
+
+.admin-profile-card {
+    display: grid;
+    gap: 18px;
+}
+
+.admin-profile-preview {
+    padding: 18px;
+    border-radius: 14px;
+    background: var(--admin-soft);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.admin-profile-big-avatar {
+    width: 86px;
+    height: 86px;
+    border-radius: 22px;
+    background: var(--admin-accent);
+    color: var(--admin-panel);
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    flex: 0 0 86px;
+    font-size: 34px;
+    font-weight: 950;
+}
+
+html[data-admin-theme="dark"] .admin-profile-big-avatar {
+    color: #111111;
+}
+
+.admin-profile-big-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.admin-profile-preview h3 {
+    margin: 0 0 4px;
+    color: var(--admin-text);
+    font-size: 20px;
+    font-weight: 950;
+}
+
+.admin-profile-preview p {
+    margin: 0;
+    color: var(--admin-muted);
+    font-size: 13px;
+    font-weight: 750;
+}
+
+@media (max-width: 900px) {
+    .admin-profile-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-profile-preview {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+.admin-profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

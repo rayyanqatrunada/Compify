@@ -1,16 +1,30 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-admin-theme="light">
 <head>
     <meta charset="UTF-8">
     <title>{{ $title ?? 'Admin Compify' }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('compify_admin_theme') || 'light';
+            const theme = savedTheme === 'dark' ? 'dark' : 'light';
+
+            document.documentElement.setAttribute('data-admin-theme', theme);
+        })();
+    </script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
+
 <body class="admin-body-v2">
     @php
         $admin = auth('admin')->user();
+
+        $adminAvatar = $admin?->avatar
+            ? \Illuminate\Support\Facades\Storage::url($admin->avatar)
+            : null;
 
         $isProductOpen =
             request()->routeIs('admin.catalog.*') ||
@@ -25,10 +39,16 @@
             request()->routeIs('admin.content.pages');
     @endphp
 
-    <div class="admin-shell-v2" data-admin-theme="light">
+    <div class="admin-shell-v2" id="adminShell" data-admin-theme="light">
         <aside class="admin-sidebar-v2">
             <a href="{{ route('admin.dashboard') }}" class="admin-logo-v2" wire:navigate>
-                <img src="{{ asset('assets/brand/compify-logo.svg') }}" alt="Compify">
+                <img
+                    id="adminBrandLogo"
+                    src="{{ asset('assets/brand/compify-logo-dark.svg') }}"
+                    data-light-logo="{{ asset('assets/brand/compify-logo-dark.svg') }}"
+                    data-dark-logo="{{ asset('assets/brand/compify-logo-light.svg') }}"
+                    alt="Compify"
+                >
             </a>
 
             <nav class="admin-menu-v2">
@@ -127,7 +147,7 @@
                            @class(['active' => request()->routeIs('admin.settings.payment-methods')])>
                             Payment Methods
                         </a>
-                        
+
                         <a href="{{ route('admin.content.pages') }}" wire:navigate
                            @class(['active' => request()->routeIs('admin.content.pages')])>
                             Static Pages
@@ -138,6 +158,7 @@
 
             <form method="POST" action="{{ route('admin.logout') }}" class="admin-logout-v2">
                 @csrf
+
                 <button type="submit">
                     <span>⇥</span>
                     Logout
@@ -148,21 +169,40 @@
         <section class="admin-main-v2">
             <header class="admin-topbar-v2">
                 <div>
-                    <p>Admin Panel</p>
-                    <h1>{{ $title ?? 'Dashboard' }}</h1>
+                    <p>Compify Admin</p>
+                    <h1>{{ $title ?? 'Admin Panel' }}</h1>
                 </div>
 
                 <div class="admin-topbar-actions-v2">
-                    <button type="button" class="admin-icon-btn-v2" title="Notification">🔔</button>
-                    <button type="button" class="admin-icon-btn-v2" title="Message">💬</button>
-
-                    <button type="button" class="admin-icon-btn-v2" id="adminThemeToggle" title="Dark Mode">
-                        🌙
+                    <button
+                        type="button"
+                        class="admin-theme-toggle"
+                        id="adminThemeToggle"
+                        data-light-icon="{{ asset('assets/admin/icons/moon.svg') }}"
+                        data-dark-icon="{{ asset('assets/admin/icons/sun.svg') }}"
+                        title="Ubah tema"
+                    >
+                        <img
+                            id="adminThemeIcon"
+                            src="{{ asset('assets/admin/icons/sun.svg') }}"
+                            alt="Theme"
+                        >
                     </button>
 
-                    <div class="admin-avatar-v2">
-                        <span>{{ strtoupper(substr($admin?->name ?? 'A', 0, 1)) }}</span>
-                    </div>
+                    <a href="{{ route('admin.profile') }}" class="admin-profile-chip" wire:navigate>
+                        <span class="admin-profile-avatar">
+                            @if($adminAvatar)
+                                <img src="{{ $adminAvatar }}" alt="{{ $admin?->name ?? 'Admin' }}">
+                            @else
+                                {{ strtoupper(substr($admin?->name ?? 'A', 0, 1)) }}
+                            @endif
+                        </span>
+
+                        <span>
+                            <strong>{{ $admin?->name ?? 'Admin' }}</strong>
+                            <small>Administrator</small>
+                        </span>
+                    </a>
                 </div>
             </header>
 
@@ -172,27 +212,60 @@
         </section>
     </div>
 
-    <script>
-        const adminShell = document.querySelector('.admin-shell-v2');
-        const adminThemeToggle = document.getElementById('adminThemeToggle');
-
-        const savedAdminTheme = localStorage.getItem('compify_admin_theme') || 'light';
-        adminShell?.setAttribute('data-admin-theme', savedAdminTheme);
-
-        if (adminThemeToggle) {
-            adminThemeToggle.textContent = savedAdminTheme === 'dark' ? '☀️' : '🌙';
-
-            adminThemeToggle.addEventListener('click', () => {
-                const current = adminShell.getAttribute('data-admin-theme') || 'light';
-                const next = current === 'dark' ? 'light' : 'dark';
-
-                adminShell.setAttribute('data-admin-theme', next);
-                localStorage.setItem('compify_admin_theme', next);
-                adminThemeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
-            });
-        }
-    </script>
-
     @livewireScripts
+
+    <script>
+        function applyAdminTheme(theme) {
+            const finalTheme = theme === 'dark' ? 'dark' : 'light';
+
+            document.documentElement.setAttribute('data-admin-theme', finalTheme);
+            document.body?.setAttribute('data-admin-theme', finalTheme);
+
+            document.querySelectorAll('.admin-shell-v2').forEach((shell) => {
+                shell.setAttribute('data-admin-theme', finalTheme);
+            });
+
+            localStorage.setItem('compify_admin_theme', finalTheme);
+
+            const icon = document.getElementById('adminThemeIcon');
+            const button = document.getElementById('adminThemeToggle');
+
+            if (icon && button) {
+                icon.src = finalTheme === 'dark'
+                    ? button.dataset.darkIcon
+                    : button.dataset.lightIcon;
+
+                icon.alt = finalTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
+            }
+
+            const logo = document.getElementById('adminBrandLogo');
+
+            if (logo) {
+                logo.src = finalTheme === 'dark'
+                    ? logo.dataset.darkLogo
+                    : logo.dataset.lightLogo;
+            }
+        }
+
+        function bootAdminThemeToggle() {
+            const savedTheme = localStorage.getItem('compify_admin_theme') || 'light';
+
+            applyAdminTheme(savedTheme);
+
+            const button = document.getElementById('adminThemeToggle');
+
+            if (!button) return;
+
+            button.onclick = function () {
+                const currentTheme = document.documentElement.getAttribute('data-admin-theme') || 'light';
+                const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+                applyAdminTheme(nextTheme);
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', bootAdminThemeToggle);
+        document.addEventListener('livewire:navigated', bootAdminThemeToggle);
+    </script>
 </body>
 </html>
