@@ -826,7 +826,7 @@
     z-index: 5;
     min-height: 40px;
     padding: 0 18px;
-    border-radius: 999px;
+    border-radius: 9px;
     background: rgba(255,255,255,.55);
     color: #0e0a10;
     display: inline-flex;

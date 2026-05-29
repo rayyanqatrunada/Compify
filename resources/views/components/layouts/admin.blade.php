@@ -149,7 +149,7 @@
                         </a>
 
                         <a href="{{ route('admin.content.pages') }}" wire:navigate
-                           @class(['active' => request()->routeIs('admin.content.pages')])>
+                            @class(['active' => request()->routeIs('admin.content.pages')])>
                             Static Pages
                         </a>
                     </div>

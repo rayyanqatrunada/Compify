@@ -1555,3 +1555,28 @@ html[data-admin-theme="dark"] .admin-profile-big-avatar {
     height: 100%;
     object-fit: cover;
 }
+
+.admin-table-v2 input,
+.admin-table-v2 select {
+    width: 100%;
+    min-height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--admin-border-strong);
+    border-radius: 9px;
+    background: var(--admin-panel);
+    color: var(--admin-text);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    outline: none;
+}
+
+.admin-table-v2 input:focus,
+.admin-table-v2 select:focus {
+    border-color: var(--admin-text);
+}
+
+.admin-section-title-v2 .admin-btn {
+    flex: 0 0 auto;
+}
+
