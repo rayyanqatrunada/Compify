@@ -163,6 +163,10 @@ Route::livewire('/checkout', 'pages::shop.checkout.index')
     ->middleware('auth:customer')
     ->name('checkout.index');
 
+Route::livewire('/checkout/payment/{order}', 'pages::shop.checkout.payment')
+    ->middleware('auth:customer')
+    ->name('checkout.payment');
+
 Route::get('/checkout/success/{order}', function (Order $order) {
     abort_if($order->user_id !== Auth::guard('customer')->id(), 403);
 
@@ -246,5 +250,8 @@ Route::middleware(['auth:admin', 'admin'])
 
             Route::livewire('/payment-methods', 'pages::admin.settings.payment-methods.index')
                 ->name('payment-methods');
+
+            Route::livewire('/shipping-methods', 'pages::admin.settings.shipping-methods.index')
+                ->name('shipping-methods');
         });
     });

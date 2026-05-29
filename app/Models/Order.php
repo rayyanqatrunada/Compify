@@ -8,25 +8,37 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Order extends Model
 {
-    protected $fillable = [
+protected $fillable = [
         'user_id',
+        'shipping_method_id',
         'payment_method_id',
+
         'order_number',
         'status',
         'payment_status',
+
         'payment_type',
         'payment_reference',
         'payment_redirect_url',
+
         'customer_name',
         'customer_email',
         'customer_phone',
+
+        'name',
+        'email',
+        'phone',
+
         'shipping_address',
-        'shipping_city',
         'shipping_province',
+        'shipping_city',
+        'shipping_district',
         'shipping_postal_code',
+
         'subtotal',
         'shipping_cost',
         'total',
+
     ];
 
     protected $casts = [
@@ -44,6 +56,11 @@ class Order extends Model
     public function paymentMethod(): BelongsTo
     {
         return $this->belongsTo(PaymentMethod::class);
+    }
+
+    public function shippingMethod()
+    {
+        return $this->belongsTo(\App\Models\ShippingMethod::class);
     }
 
     public function user(): BelongsTo

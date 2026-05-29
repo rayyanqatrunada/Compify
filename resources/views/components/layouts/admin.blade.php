@@ -148,6 +148,11 @@
                             Payment Methods
                         </a>
 
+                        <a href="{{ route('admin.settings.shipping-methods') }}" wire:navigate
+                            @class(['active' => request()->routeIs('admin.settings.shipping-methods')])>
+                            Shipping Methods
+                        </a>
+
                         <a href="{{ route('admin.content.pages') }}" wire:navigate
                             @class(['active' => request()->routeIs('admin.content.pages')])>
                             Static Pages
