@@ -22,6 +22,8 @@ class Product extends Model
         'is_new',
         'is_active',
         'sort_order',
+        'sale_starts_at',
+        'sale_ends_at',
     ];
 
     protected $casts = [
@@ -32,6 +34,8 @@ class Product extends Model
         'is_new' => 'boolean',
         'is_active' => 'boolean',
         'sort_order' => 'integer',
+        'sale_starts_at' => 'datetime',
+        'sale_ends_at' => 'datetime',
     ];
 
     /**
@@ -85,18 +89,6 @@ class Product extends Model
     }
 
     /**
-     * Harga final produk.
-     * Kalau ada sale_price, pakai sale_price.
-     * Kalau tidak ada, pakai price normal.
-     */
-    public function getFinalPriceAttribute(): float
-    {
-        return $this->sale_price && $this->sale_price > 0
-            ? (float) $this->sale_price
-            : (float) $this->price;
-    }
-
-    /**
      * Cek apakah produk sedang diskon.
      */
     public function getHasDiscountAttribute(): bool
@@ -138,7 +130,46 @@ class Product extends Model
      * Format harga final.
      */
     public function getFormattedFinalPriceAttribute(): string
+        {
+            return 'Rp ' . number_format($this->final_price, 0, ',', '.');
+        }
+
+        public function getIsPromoActiveAttribute(): bool
     {
-        return 'Rp ' . number_format($this->final_price, 0, ',', '.');
+        if (! $this->sale_price || $this->price <= 0) {
+            return false;
+        }
+
+        if ($this->sale_price >= $this->price) {
+            return false;
+        }
+
+        $now = now();
+
+        if ($this->sale_starts_at && $now->lt($this->sale_starts_at)) {
+            return false;
+        }
+
+        if ($this->sale_ends_at && $now->gt($this->sale_ends_at)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function getFinalPriceAttribute(): int
+    {
+        return $this->is_promo_active
+            ? (int) $this->sale_price
+            : (int) $this->price;
+    }
+
+    public function getDiscountPercentAttribute(): ?int
+    {
+        if (! $this->is_promo_active) {
+            return null;
+        }
+
+        return round((($this->price - $this->sale_price) / $this->price) * 100);
     }
 }

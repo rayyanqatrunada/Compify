@@ -3,12 +3,14 @@
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
+use App\Support\CategoryTree;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -28,6 +30,8 @@ class extends Component {
     public string $description = '';
     public string $price = '';
     public string $sale_price = '';
+    public string $sale_starts_at = '';
+    public string $sale_ends_at = '';
 
     public int $stock = 0;
     public bool $is_featured = false;
@@ -39,7 +43,12 @@ class extends Component {
     public ?string $currentImage = null;
 
     public int $perPage = 10;
+
+    #[Url(as: 'q')]
     public string $search = '';
+
+    #[Url(as: 'category')]
+    public string $categoryFilter = '';
 
     public bool $showExportModal = false;
     public bool $showImportModal = false;
@@ -54,17 +63,48 @@ class extends Component {
         $this->resetPage();
     }
 
+    public function updatedCategoryFilter(): void
+    {
+        $this->resetPage();
+    }
+
     #[Computed]
     public function products()
     {
-        return Product::with(['category', 'brand'])
-            ->when($this->search, function ($query) {
-                $query->where(function ($q) {
-                    $q->where('name', 'like', '%' . $this->search . '%')
-                        ->orWhere('sku', 'like', '%' . $this->search . '%')
-                        ->orWhere('slug', 'like', '%' . $this->search . '%');
-                });
-            })
+        $query = Product::with(['category.parent', 'brand']);
+
+        if (filled($this->categoryFilter)) {
+            $category = Category::find((int) $this->categoryFilter);
+            $categoryIds = CategoryTree::ids($category);
+
+            if (! empty($categoryIds)) {
+                $query->whereIn('category_id', $categoryIds);
+            }
+        }
+
+        if (filled($this->search)) {
+            $keyword = '%' . trim($this->search) . '%';
+
+            $query->where(function ($q) use ($keyword) {
+                $q->where('name', 'like', $keyword)
+                    ->orWhere('sku', 'like', $keyword)
+                    ->orWhere('slug', 'like', $keyword)
+                    ->orWhereHas('brand', function ($brand) use ($keyword) {
+                        $brand->where('name', 'like', $keyword)
+                            ->orWhere('slug', 'like', $keyword);
+                    })
+                    ->orWhereHas('category', function ($category) use ($keyword) {
+                        $category->where('name', 'like', $keyword)
+                            ->orWhere('slug', 'like', $keyword)
+                            ->orWhereHas('parent', function ($parent) use ($keyword) {
+                                $parent->where('name', 'like', $keyword)
+                                    ->orWhere('slug', 'like', $keyword);
+                            });
+                    });
+            });
+        }
+
+        return $query
             ->orderBy('sort_order')
             ->latest()
             ->paginate($this->perPage);
@@ -73,7 +113,8 @@ class extends Component {
     #[Computed]
     public function categories()
     {
-        return Category::active()
+        return Category::query()
+            ->where('is_active', true)
             ->orderByRaw('parent_id IS NOT NULL')
             ->orderBy('sort_order')
             ->orderBy('name')
@@ -83,7 +124,8 @@ class extends Component {
     #[Computed]
     public function brands()
     {
-        return Brand::active()
+        return Brand::query()
+            ->where('is_active', true)
             ->orderBy('name')
             ->get();
     }
@@ -103,6 +145,8 @@ class extends Component {
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
             'sale_price' => ['nullable', 'numeric', 'min:0'],
+            'sale_starts_at' => ['nullable', 'date'],
+            'sale_ends_at' => ['nullable', 'date', 'after_or_equal:sale_starts_at'],
             'stock' => ['required', 'integer', 'min:0'],
             'is_featured' => ['boolean'],
             'is_new' => ['boolean'],
@@ -131,6 +175,8 @@ class extends Component {
             'description' => $this->description ?: null,
             'price' => $this->price,
             'sale_price' => $this->sale_price !== '' ? $this->sale_price : null,
+            'sale_starts_at' => $this->sale_starts_at ?: null,
+            'sale_ends_at' => $this->sale_ends_at ?: null,
             'stock' => $this->stock,
             'is_featured' => (bool) $this->is_featured,
             'is_new' => (bool) $this->is_new,
@@ -153,6 +199,7 @@ class extends Component {
         }
 
         session()->flash('success', 'Produk berhasil disimpan.');
+
         $this->resetForm();
     }
 
@@ -168,6 +215,15 @@ class extends Component {
         $this->description = $product->description ?? '';
         $this->price = (string) $product->price;
         $this->sale_price = $product->sale_price ? (string) $product->sale_price : '';
+
+        $this->sale_starts_at = $product->sale_starts_at
+            ? $product->sale_starts_at->format('Y-m-d\TH:i')
+            : '';
+
+        $this->sale_ends_at = $product->sale_ends_at
+            ? $product->sale_ends_at->format('Y-m-d\TH:i')
+            : '';
+
         $this->stock = $product->stock;
         $this->is_featured = (bool) $product->is_featured;
         $this->is_new = (bool) $product->is_new;
@@ -175,6 +231,8 @@ class extends Component {
         $this->sort_order = $product->sort_order ?? 0;
         $this->currentImage = $product->image;
         $this->imageFile = null;
+
+        $this->resetValidation();
     }
 
     public function delete(int $id): void
@@ -188,6 +246,7 @@ class extends Component {
         $product->delete();
 
         session()->flash('success', 'Produk berhasil dihapus.');
+
         $this->resetForm();
     }
 
@@ -202,6 +261,8 @@ class extends Component {
         $this->description = '';
         $this->price = '';
         $this->sale_price = '';
+        $this->sale_starts_at = '';
+        $this->sale_ends_at = '';
 
         $this->stock = 0;
         $this->is_featured = false;
@@ -244,7 +305,9 @@ class extends Component {
     </div>
 
     @if(session('success'))
-        <div class="flash-success">{{ session('success') }}</div>
+        <div class="flash-success">
+            {{ session('success') }}
+        </div>
     @endif
 
     <form wire:submit="save" class="admin-panel-v2 admin-form">
@@ -267,6 +330,7 @@ class extends Component {
                 Kategori
                 <select wire:model="category_id">
                     <option value="">Pilih kategori</option>
+
                     @foreach($this->categories as $category)
                         <option value="{{ $category->id }}">
                             {{ $category->parent_id ? '— ' : '' }}{{ $category->name }}
@@ -280,8 +344,11 @@ class extends Component {
                 Brand
                 <select wire:model="brand_id">
                     <option value="">Tanpa brand</option>
+
                     @foreach($this->brands as $brand)
-                        <option value="{{ $brand->id }}">{{ $brand->name }}</option>
+                        <option value="{{ $brand->id }}">
+                            {{ $brand->name }}
+                        </option>
                     @endforeach
                 </select>
                 @error('brand_id') <span class="error-text">{{ $message }}</span> @enderror
@@ -297,6 +364,18 @@ class extends Component {
                 Harga Diskon
                 <input type="number" wire:model="sale_price" min="0" placeholder="Kosongkan jika tidak diskon">
                 @error('sale_price') <span class="error-text">{{ $message }}</span> @enderror
+            </label>
+
+            <label>
+                Promo Mulai
+                <input type="datetime-local" wire:model="sale_starts_at">
+                @error('sale_starts_at') <span class="error-text">{{ $message }}</span> @enderror
+            </label>
+
+            <label>
+                Promo Selesai
+                <input type="datetime-local" wire:model="sale_ends_at">
+                @error('sale_ends_at') <span class="error-text">{{ $message }}</span> @enderror
             </label>
 
             <label>
@@ -387,11 +466,25 @@ class extends Component {
         <div class="admin-table-head">
             <div>
                 <h2>Data Produk</h2>
-                <p>Default menampilkan 10 data. Bisa diubah dari dropdown.</p>
+                <p>Default menampilkan 10 data. Bisa dicari dan difilter berdasarkan kategori.</p>
             </div>
 
             <div class="admin-table-tools">
-                <input type="text" wire:model.live.debounce.400ms="search" placeholder="Cari produk...">
+                <input
+                    type="text"
+                    wire:model.live.debounce.400ms="search"
+                    placeholder="Cari produk, SKU, brand, kategori..."
+                >
+
+                <select wire:model.live="categoryFilter">
+                    <option value="">Semua kategori</option>
+
+                    @foreach($this->categories as $category)
+                        <option value="{{ $category->id }}">
+                            {{ $category->parent_id ? '— ' : '' }}{{ $category->name }}
+                        </option>
+                    @endforeach
+                </select>
 
                 <select wire:model.live="perPage">
                     <option value="10">10 data</option>
@@ -434,18 +527,41 @@ class extends Component {
                             <small>{{ $product->sku ?? 'Tanpa SKU' }}</small>
                         </td>
 
-                        <td>{{ $product->category?->name ?? '-' }}</td>
+                        <td>
+                            @if($product->category?->parent)
+                                <small>{{ $product->category->parent->name }}</small>
+                                <br>
+                            @endif
+
+                            {{ $product->category?->name ?? '-' }}
+                        </td>
+
                         <td>{{ $product->brand?->name ?? '-' }}</td>
 
                         <td>
-                            @if($product->sale_price)
+                            @if($product->is_promo_active)
                                 <small style="text-decoration: line-through;">
                                     Rp {{ number_format($product->price, 0, ',', '.') }}
                                 </small>
                                 <br>
-                                <strong>Rp {{ number_format($product->sale_price, 0, ',', '.') }}</strong>
+                                <strong>Rp {{ number_format($product->final_price, 0, ',', '.') }}</strong>
+                                <br>
+                                <small>Promo aktif</small>
+                            @elseif($product->sale_price)
+                                <strong>Rp {{ number_format($product->price, 0, ',', '.') }}</strong>
+                                <br>
+                                <small>Promo nonaktif / di luar tanggal</small>
                             @else
                                 <strong>Rp {{ number_format($product->price, 0, ',', '.') }}</strong>
+                            @endif
+
+                            @if($product->sale_starts_at || $product->sale_ends_at)
+                                <br>
+                                <small>
+                                    {{ $product->sale_starts_at?->format('d M Y H:i') ?? 'Sekarang' }}
+                                    -
+                                    {{ $product->sale_ends_at?->format('d M Y H:i') ?? 'Tanpa batas' }}
+                                </small>
                             @endif
                         </td>
 
@@ -495,147 +611,148 @@ class extends Component {
             {{ $this->products->links() }}
         </div>
     </div>
+
     @php
-    $requiredProductFields = [
-        'name' => 'Nama Produk',
-        'slug' => 'Slug',
-        'category_slug' => 'Slug Kategori',
-        'category_name' => 'Nama Kategori',
-        'price' => 'Harga Normal',
-        'stock' => 'Stok',
-        'is_active' => 'Status Aktif',
-        'sort_order' => 'Urutan',
-    ];
+        $requiredProductFields = [
+            'name' => 'Nama Produk',
+            'slug' => 'Slug',
+            'category_slug' => 'Slug Kategori',
+            'category_name' => 'Nama Kategori',
+            'price' => 'Harga Normal',
+            'stock' => 'Stok',
+            'is_active' => 'Status Aktif',
+            'sort_order' => 'Urutan',
+        ];
 
-    $optionalProductFields = [
-        'sku' => 'SKU',
-        'brand_slug' => 'Slug Brand',
-        'brand_name' => 'Nama Brand',
-        'description' => 'Deskripsi',
-        'sale_price' => 'Harga Diskon',
-        'image' => 'Path Gambar',
-        'is_featured' => 'Produk Unggulan',
-        'is_new' => 'Produk Baru',
-        'created_at' => 'Dibuat Pada',
-        'updated_at' => 'Diupdate Pada',
-    ];
-@endphp
+        $optionalProductFields = [
+            'sku' => 'SKU',
+            'brand_slug' => 'Slug Brand',
+            'brand_name' => 'Nama Brand',
+            'description' => 'Deskripsi',
+            'sale_price' => 'Harga Diskon',
+            'sale_starts_at' => 'Promo Mulai',
+            'sale_ends_at' => 'Promo Selesai',
+            'image' => 'Path Gambar',
+            'is_featured' => 'Produk Unggulan',
+            'is_new' => 'Produk Baru',
+            'created_at' => 'Dibuat Pada',
+            'updated_at' => 'Diupdate Pada',
+        ];
+    @endphp
 
-@if($showExportModal)
-    <div class="admin-modal-backdrop">
-        <div class="admin-modal-card">
-            <div class="admin-modal-head">
-                <div>
-                    <h2>Export Produk</h2>
-                    {{-- <p>Pilih kolom yang ingin dimasukkan ke Excel.</p> --}}
+    @if($showExportModal)
+        <div class="admin-modal-backdrop">
+            <div class="admin-modal-card">
+                <div class="admin-modal-head">
+                    <div>
+                        <h2>Export Produk</h2>
+                    </div>
+
+                    <button type="button" wire:click="closeExportModal">×</button>
                 </div>
 
-                <button type="button" wire:click="closeExportModal">×</button>
+                <form method="GET" action="{{ route('admin.catalog.products.export') }}" class="admin-modal-form">
+                    <h3>Kolom Wajib</h3>
+
+                    <div class="admin-field-check-grid">
+                        @foreach($requiredProductFields as $field => $label)
+                            <label class="admin-field-check disabled">
+                                <input type="hidden" name="fields[]" value="{{ $field }}">
+                                <input type="checkbox" checked disabled>
+                                <span>{{ $label }}</span>
+                                <small>Wajib</small>
+                            </label>
+                        @endforeach
+                    </div>
+
+                    <h3>Kolom Optional</h3>
+
+                    <div class="admin-field-check-grid">
+                        @foreach($optionalProductFields as $field => $label)
+                            <label class="admin-field-check">
+                                <input type="checkbox" name="fields[]" value="{{ $field }}" checked>
+                                <span>{{ $label }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+
+                    <div class="admin-modal-actions">
+                        <button type="button" class="admin-modern-btn admin-modern-btn-light" wire:click="closeExportModal">
+                            Batal
+                        </button>
+
+                        <button type="submit" class="admin-modern-btn admin-modern-btn-dark">
+                            Download Excel
+                        </button>
+                    </div>
+                </form>
             </div>
-
-            <form method="GET" action="{{ route('admin.catalog.products.export') }}" class="admin-modal-form">
-                <h3>Kolom Wajib</h3>
-
-                <div class="admin-field-check-grid">
-                    @foreach($requiredProductFields as $field => $label)
-                        <label class="admin-field-check disabled">
-                            <input type="hidden" name="fields[]" value="{{ $field }}">
-                            <input type="checkbox" checked disabled>
-                            <span>{{ $label }}</span>
-                            <small>Wajib</small>
-                        </label>
-                    @endforeach
-                </div>
-
-                <h3>Kolom Optional</h3>
-
-                <div class="admin-field-check-grid">
-                    @foreach($optionalProductFields as $field => $label)
-                        <label class="admin-field-check">
-                            <input type="checkbox" name="fields[]" value="{{ $field }}" checked>
-                            <span>{{ $label }}</span>
-                        </label>
-                    @endforeach
-                </div>
-
-                <div class="admin-modal-actions">
-                    <button type="button" class="admin-modern-btn admin-modern-btn-light" wire:click="closeExportModal">
-                        Batal
-                    </button>
-
-                    <button type="submit" class="admin-modern-btn admin-modern-btn-dark">
-                        Download Excel
-                    </button>
-                </div>
-            </form>
         </div>
-    </div>
-@endif
+    @endif
 
-@if($showImportModal)
-    <div class="admin-modal-backdrop">
-        <div class="admin-modal-card">
-            <div class="admin-modal-head">
-                <div>
-                    <h2>Import Produk</h2>
-                    {{-- <p>Pilih file dan tentukan kolom yang boleh diproses.</p> --}}
+    @if($showImportModal)
+        <div class="admin-modal-backdrop">
+            <div class="admin-modal-card">
+                <div class="admin-modal-head">
+                    <div>
+                        <h2>Import Produk</h2>
+                    </div>
+
+                    <button type="button" wire:click="closeImportModal">×</button>
                 </div>
 
-                <button type="button" wire:click="closeImportModal">×</button>
+                <form method="POST" action="{{ route('admin.catalog.products.import') }}" enctype="multipart/form-data" class="admin-modal-form">
+                    @csrf
+
+                    <label class="admin-modal-file">
+                        File Excel
+                        <input type="file" name="file" accept=".xlsx,.xls,.csv" required>
+                    </label>
+
+                    <label class="admin-modal-file">
+                        Mode Import
+                        <select name="mode" required>
+                            <option value="upsert">Tambah baru & update data lama</option>
+                            <option value="create_only">Hanya tambah produk baru</option>
+                            <option value="update_only">Hanya update produk lama</option>
+                        </select>
+                    </label>
+
+                    <h3>Kolom Wajib</h3>
+
+                    <div class="admin-field-check-grid">
+                        @foreach($requiredProductFields as $field => $label)
+                            <label class="admin-field-check disabled">
+                                <input type="hidden" name="fields[]" value="{{ $field }}">
+                                <input type="checkbox" checked disabled>
+                                <span>{{ $label }}</span>
+                                <small>Wajib</small>
+                            </label>
+                        @endforeach
+                    </div>
+
+                    <h3>Kolom Optional yang Diproses</h3>
+
+                    <div class="admin-field-check-grid">
+                        @foreach($optionalProductFields as $field => $label)
+                            <label class="admin-field-check">
+                                <input type="checkbox" name="fields[]" value="{{ $field }}" checked>
+                                <span>{{ $label }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+
+                    <div class="admin-modal-actions">
+                        <button type="button" class="admin-modern-btn admin-modern-btn-light" wire:click="closeImportModal">
+                            Batal
+                        </button>
+
+                        <button type="submit" class="admin-modern-btn admin-modern-btn-dark">
+                            Import Sekarang
+                        </button>
+                    </div>
+                </form>
             </div>
-
-            <form method="POST" action="{{ route('admin.catalog.products.import') }}" enctype="multipart/form-data" class="admin-modal-form">
-                @csrf
-
-                <label class="admin-modal-file">
-                    File Excel
-                    <input type="file" name="file" accept=".xlsx,.xls,.csv" required>
-                </label>
-
-                <label class="admin-modal-file">
-                    Mode Import
-                    <select name="mode" required>
-                        <option value="upsert">Tambah baru & update data lama</option>
-                        <option value="create_only">Hanya tambah produk baru</option>
-                        <option value="update_only">Hanya update produk lama</option>
-                    </select>
-                </label>
-
-                <h3>Kolom Wajib</h3>
-
-                <div class="admin-field-check-grid">
-                    @foreach($requiredProductFields as $field => $label)
-                        <label class="admin-field-check disabled">
-                            <input type="hidden" name="fields[]" value="{{ $field }}">
-                            <input type="checkbox" checked disabled>
-                            <span>{{ $label }}</span>
-                            <small>Wajib</small>
-                        </label>
-                    @endforeach
-                </div>
-
-                <h3>Kolom Optional yang Diproses</h3>
-
-                <div class="admin-field-check-grid">
-                    @foreach($optionalProductFields as $field => $label)
-                        <label class="admin-field-check">
-                            <input type="checkbox" name="fields[]" value="{{ $field }}" checked>
-                            <span>{{ $label }}</span>
-                        </label>
-                    @endforeach
-                </div>
-
-                <div class="admin-modal-actions">
-                    <button type="button" class="admin-modern-btn admin-modern-btn-light" wire:click="closeImportModal">
-                        Batal
-                    </button>
-
-                    <button type="submit" class="admin-modern-btn admin-modern-btn-dark">
-                        Import Sekarang
-                    </button>
-                </div>
-            </form>
         </div>
-    </div>
-@endif
+    @endif
 </div>

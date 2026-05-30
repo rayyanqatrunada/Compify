@@ -5,11 +5,9 @@
         ? \Illuminate\Support\Facades\Storage::url($product->image)
         : null;
 
-    $discount = null;
-
-    if ($product->sale_price && $product->price > 0) {
-        $discount = round((($product->price - $product->sale_price) / $product->price) * 100);
-    }
+    $isPromoActive = (bool) ($product->is_promo_active ?? false);
+    $discount = $product->discount_percent ?? null;
+    $finalPrice = $product->final_price ?? $product->price;
 
     $isWishlisted = in_array($product->id, session('wishlist', []));
 @endphp
@@ -31,6 +29,7 @@
 
     <form method="POST" action="{{ route('wishlist.toggle', $product) }}" class="wishlist-form">
         @csrf
+
         <button type="submit" class="wishlist-button {{ $isWishlisted ? 'active' : '' }}" title="Wishlist">
             {{ $isWishlisted ? '♥' : '♡' }}
         </button>
@@ -56,17 +55,27 @@
         </a>
 
         <div class="price-row">
-            @if($product->sale_price)
-                <span class="old-price">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                <span class="sale-price">Rp {{ number_format($product->sale_price, 0, ',', '.') }}</span>
+            @if($isPromoActive)
+                <span class="old-price">
+                    Rp {{ number_format($product->price, 0, ',', '.') }}
+                </span>
+
+                <span class="sale-price">
+                    Rp {{ number_format($finalPrice, 0, ',', '.') }}
+                </span>
             @else
-                <span>Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                <span>
+                    Rp {{ number_format($product->price, 0, ',', '.') }}
+                </span>
             @endif
         </div>
 
         <div class="product-meta">
             <span>{{ $product->stock > 0 ? 'Stok tersedia' : 'Stok habis' }}</span>
-            <a href="{{ route('products.show', $product) }}" wire:navigate>Detail ></a>
+
+            <a href="{{ route('products.show', $product) }}" wire:navigate>
+                Detail >
+            </a>
         </div>
     </div>
 </article>
