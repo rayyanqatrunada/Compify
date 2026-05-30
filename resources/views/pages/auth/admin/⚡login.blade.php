@@ -1,220 +1,130 @@
 <?php
 
-use App\Models\ShopSetting;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
 new
-#[Layout('layouts.auth')]
-#[Title('Admin Login - Compify')]
+#[Layout('components.layouts.guest')]
+#[Title('Admin Sign In - Compify')]
 class extends Component {
     public string $email = '';
     public string $password = '';
-    public bool $remember = false;
-
-    public string $site_name = 'Compify';
-    public ?string $support_email = null;
-    public ?string $support_phone = null;
-    public string $login_heading = 'Admin Sign In';
-    public string $login_subheading = 'Masuk ke dashboard Compify';
-    public string $login_showcase_title = 'Manage your store beautifully';
-    public string $login_showcase_text = 'Kelola produk, banner, kategori, dan seluruh tampilan toko dari satu dashboard.';
-    public ?string $login_image = null;
-
-    public function mount(): void
-    {
-        $setting = ShopSetting::first();
-
-        if ($setting) {
-            $this->site_name = $setting->site_name ?: 'Compify';
-            $this->support_email = $setting->support_email;
-            $this->support_phone = $setting->support_phone;
-            $this->login_heading = $setting->login_heading ?: 'Admin Sign In';
-            $this->login_subheading = $setting->login_subheading ?: 'Masuk ke dashboard Compify';
-            $this->login_showcase_title = $setting->login_showcase_title ?: 'Manage your store beautifully';
-            $this->login_showcase_text = $setting->login_showcase_text ?: 'Kelola produk, banner, kategori, dan seluruh tampilan toko dari satu dashboard.';
-            $this->login_image = $setting->login_image;
-        }
-    }
+    public bool $showPassword = false;
 
     public function login(): void
     {
-        $credentials = $this->validate([
+        $this->validate([
             'email' => ['required', 'email'],
-            'password' => ['required', 'min:6'],
+            'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::guard('admin')->attempt($credentials, false)) {
-            $this->addError('email', 'Email atau password salah.');
+        if (! Auth::guard('admin')->attempt([
+            'email' => $this->email,
+            'password' => $this->password,
+        ])) {
+            $this->addError('email', 'Email atau password admin salah.');
             return;
         }
 
-        request()->session()->regenerate();
+        session()->regenerate();
 
-        if (Auth::guard('admin')->user()->role !== 'admin') {
-            Auth::guard('admin')->logout();
+        $this->redirectRoute('admin.dashboard', navigate: true);
+    }
 
-            $this->addError('email', 'Akun ini tidak memiliki akses admin.');
-            return;
-        }
-
-        $this->redirect(route('admin.dashboard'), navigate: true);
+    public function togglePassword(): void
+    {
+        $this->showPassword = ! $this->showPassword;
     }
 };
 ?>
 
-{{-- design theme --}}
-<section class="auth-page-v2">
-    @php
-        $loginImageUrl = $login_image
-            ? asset('storage/' . $login_image)
-            : null;
-    @endphp
+<div class="admin-login-page">
+    <section class="admin-login-illustration">
+        <img
+            src="{{ asset('assets/admin/auth/admin-login-illustration.svg') }}"
+            alt="Admin Login Illustration"
+        >
+    </section>
 
-    <div
-        class="auth-bg-v2"
-        @if($loginImageUrl)
-            style="background-image: linear-gradient(90deg, rgba(17, 19, 34, .96), rgba(17, 19, 34, .82), rgba(17, 19, 34, .45)), url('{{ $loginImageUrl }}')"
-        @endif
-    >
-        <a href="{{ route('home') }}" class="auth-home-btn" wire:navigate>
-            ← Back to website
-        </a>
+    <section class="admin-login-panel">
+        <div class="admin-login-card">
+            <img
+                src="{{ asset('assets/brand/compify-icon.svg') }}"
+                alt="Compify"
+                class="admin-login-logo"
+            >
 
-        <div class="auth-login-box-v2">
-            <p class="auth-start-text">Private admin access</p>
+            <h1>Admin Sign In</h1>
+            <p>Masuk ke dashboard Compify</p>
 
-            <h1>{{ $login_heading }}<span>.</span></h1>
+            <form wire:submit="login" class="admin-login-form">
+                <label class="admin-login-field">
+                    <span class="admin-login-field-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M6 10V8a6 6 0 0 1 12 0v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <rect x="4" y="10" width="16" height="11" rx="2" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </span>
 
-            <p class="auth-login-subtitle">
-                {{ $login_subheading }}
-            </p>
-
-            @if ($errors->any())
-                <div class="auth-alert">
-                    {{ $errors->first() }}
-                </div>
-            @endif
-
-            <form wire:submit="login" class="auth-form-v2">
-                <label class="auth-input-v2">
-                    <span>Email</span>
-                    <input type="email" wire:model.defer="email" placeholder="admin@compify.test">
-                    @error('email') <small class="error-text">{{ $message }}</small> @enderror
+                    <input
+                        type="email"
+                        wire:model="email"
+                        placeholder="Email"
+                        autocomplete="email"
+                    >
                 </label>
 
-                <label class="auth-input-v2">
-                    <span>Password</span>
-                    <input type="password" wire:model.defer="password" placeholder="••••••••">
-                    @error('password') <small class="error-text">{{ $message }}</small> @enderror
+                @error('email')
+                    <small class="admin-login-error">{{ $message }}</small>
+                @enderror
+
+                <label class="admin-login-field">
+                    <span class="admin-login-field-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M4 7.5h16v9H4v-9Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                            <path d="M4.5 8l7.5 5 7.5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+
+                    <input
+                        type="{{ $showPassword ? 'text' : 'password' }}"
+                        wire:model="password"
+                        placeholder="Password"
+                        autocomplete="current-password"
+                    >
+
+                    <button
+                        type="button"
+                        class="admin-login-eye"
+                        wire:click="togglePassword"
+                        aria-label="Tampilkan password"
+                    >
+                        @if($showPassword)
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M3 3l18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M10.7 10.7a2 2 0 0 0 2.6 2.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M7.6 7.8C5.6 8.9 4 10.4 3 12c2 3.2 5.3 5 9 5 1.4 0 2.7-.3 3.8-.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M17.8 14.1c1.3-.8 2.4-1.9 3.2-3.1-2-3.2-5.3-5-9-5-.8 0-1.6.1-2.4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        @else
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M3 12s3.2-6 9-6 9 6 9 6-3.2 6-9 6-9-6-9-6Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                                <circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        @endif
+                    </button>
                 </label>
 
-                <button type="submit" class="auth-primary-v2">
+                @error('password')
+                    <small class="admin-login-error">{{ $message }}</small>
+                @enderror
+
+                <button type="submit" class="admin-login-button">
                     Login
                 </button>
             </form>
         </div>
-
-        <div class="auth-login-caption-v2">
-            <h2>{{ $login_showcase_title }}</h2>
-            <p>{{ $login_showcase_text }}</p>
-        </div>
-
-        <div class="auth-corner-logo">
-            <img src="{{ asset('assets/brand/compify-logo.svg') }}" alt="Compify Logo">
-        </div>
-    </div>
-</section>
-
-{{-- design theme 2 --}}
-{{-- <section class="auth-page">
-    <div class="auth-card">
-        <div class="auth-form-panel">
-            <div class="auth-topbar">
-                <div class="auth-brand">
-                    <div class="auth-brand-mark">C</div>
-                    <div>
-                        <strong>{{ $site_name }}</strong>
-                        <span>Admin Access</span>
-                    </div>
-                </div>
-
-                <a href="{{ route('home') }}" class="auth-back-link" wire:navigate>
-                    Back to website →
-                </a>
-            </div>
-
-            <div class="auth-form-wrap">
-                <p class="auth-eyebrow">Private admin portal</p>
-                <h1>{{ $login_heading }}</h1>
-                <p class="auth-subtitle">{{ $login_subheading }}</p>
-
-                @if ($errors->any())
-                    <div class="auth-alert">
-                        {{ $errors->first() }}
-                    </div>
-                @endif
-
-                <form wire:submit="login" class="auth-form">
-                    <div class="auth-field">
-                        <label>Email</label>
-                        <input type="email" wire:model.defer="email" placeholder="Masukkan email admin">
-                        @error('email') <small class="error-text">{{ $message }}</small> @enderror
-                    </div>
-
-                    <div class="auth-field">
-                        <label>Password</label>
-                        <input type="password" wire:model.defer="password" placeholder="Masukkan password">
-                        @error('password') <small class="error-text">{{ $message }}</small> @enderror
-                    </div>
-
-                    <div class="auth-row">
-                        <label class="auth-check">
-                            <input type="checkbox" wire:model="remember">
-                            <span>Remember me</span>
-                        </label>
-                    </div>
-
-                    <button type="submit" class="auth-submit">
-                        Login to dashboard
-                    </button>
-                </form>
-
-                <div class="auth-help">
-                    @if($support_email)
-                        <p>Email: {{ $support_email }}</p>
-                    @endif
-
-                    @if($support_phone)
-                        <p>Phone: {{ $support_phone }}</p>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        <div class="auth-showcase-panel">
-            <div class="auth-showcase-overlay"></div>
-
-            @if($login_image)
-                <div class="auth-showcase-image">
-                    <img src="{{ asset('storage/' . $login_image) }}" alt="Login artwork">
-                </div>
-            @else
-                <div class="auth-showcase-placeholder">
-                    <div>
-                        <strong>Custom Anime Artwork</strong>
-                        <span>Upload dari Admin Settings untuk menampilkan artwork login.</span>
-                    </div>
-                </div>
-            @endif
-
-            <div class="auth-showcase-content">
-                <p class="auth-showcase-badge">Compify Dashboard</p>
-                <h2>{{ $login_showcase_title }}</h2>
-                <p>{{ $login_showcase_text }}</p>
-            </div>
-        </div>
-    </div>
-</section> --}}
+    </section>
+</div>
