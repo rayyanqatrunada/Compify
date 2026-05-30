@@ -38,7 +38,9 @@ class extends Component {
 
         request()->session()->regenerate();
 
-        $this->redirectRoute('home', navigate: true);
+        $intended = session()->pull('url.intended', route('home'));
+
+        $this->redirect($intended, navigate: true);
     }
 };
 ?>

@@ -5,7 +5,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 new
-#[Layout('layouts.admin')]
+#[Layout('components.layouts.admin')]
 #[Title('Shop Settings - Admin Compify')]
 class extends Component {
 };

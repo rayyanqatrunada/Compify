@@ -215,9 +215,10 @@ class extends Component {
                 'shipping_method_id' => $this->shipping_method_id,
                 'payment_method_id' => $this->payment_method_id,
 
-                'name' => trim($this->first_name . ' ' . $this->last_name),
-                'email' => $this->email,
-                'phone' => $this->phone,
+                'order_number' => Order::generateOrderNumber(),
+                'customer_name' => trim($this->first_name . ' ' . $this->last_name),
+                'customer_email' => $this->email,
+                'customer_phone' => $this->phone,
 
                 'shipping_address' => $this->address,
                 'shipping_province' => $this->province,
@@ -227,9 +228,10 @@ class extends Component {
 
                 'subtotal' => $this->subtotal,
                 'shipping_cost' => $this->shippingCost ?? 0,
-                'total' => $this->total,
+                'discount_amount' => 0,
+                'total_amount' => $this->total,
 
-                'status' => 'pending',
+                'order_status' => 'pending',
                 'payment_status' => 'pending',
             ]);
 
@@ -237,6 +239,7 @@ class extends Component {
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item['product']->id,
+                    'product_name' => $item['product']->name,
                     'quantity' => $item['quantity'],
                     'price' => $item['price'],
                     'total' => $item['line_total'],

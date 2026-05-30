@@ -7,7 +7,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 new
-#[Layout('layouts.shop')]
+#[Layout('components.layouts.shop')]
 #[Title('Wishlist - Compify')]
 class extends Component {
     #[Computed]

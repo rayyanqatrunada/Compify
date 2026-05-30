@@ -11,7 +11,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 
 new
-#[Layout('layouts.shop')]
+#[Layout('components.layouts.shop')]
 #[Title('Produk - Compify')]
 class extends Component {
     use WithPagination;
@@ -63,16 +63,37 @@ class extends Component {
     #[Computed]
     public function products()
     {
-        return Product::with(['category', 'brand'])
+        $search = trim($this->search);
+        $searchCategoryIds = Category::searchIdsWithActiveDescendants($search);
+
+        $selectedCategory = $this->category
+            ? Category::query()->active()->where('slug', $this->category)->first()
+            : null;
+
+        return Product::with(['category.parent', 'brand'])
             ->active()
-            ->when($this->search, function ($query) {
-                $query->where(function ($q) {
-                    $q->where('name', 'like', '%' . $this->search . '%')
-                        ->orWhere('sku', 'like', '%' . $this->search . '%');
+            ->when($search !== '', function ($query) use ($search, $searchCategoryIds) {
+                $like = '%' . $search . '%';
+
+                $query->where(function ($q) use ($like, $searchCategoryIds) {
+                    $q->where('name', 'like', $like)
+                        ->orWhere('sku', 'like', $like)
+                        ->orWhereHas('category', function ($categoryQuery) use ($like) {
+                            $categoryQuery->where('name', 'like', $like)
+                                ->orWhere('slug', 'like', $like);
+                        })
+                        ->orWhereHas('category.parent', function ($parentQuery) use ($like) {
+                            $parentQuery->where('name', 'like', $like)
+                                ->orWhere('slug', 'like', $like);
+                        });
+
+                    if ($searchCategoryIds !== []) {
+                        $q->orWhereIn('category_id', $searchCategoryIds);
+                    }
                 });
             })
-            ->when($this->category, function ($query) {
-                $query->whereHas('category', fn ($q) => $q->where('slug', $this->category));
+            ->when($selectedCategory, function ($query) use ($selectedCategory) {
+                $query->whereIn('category_id', $selectedCategory->selfAndActiveDescendantIds());
             })
             ->when($this->brand, function ($query) {
                 $query->whereHas('brand', fn ($q) => $q->where('slug', $this->brand));
@@ -91,7 +112,7 @@ class extends Component {
     </div>
 
     <div class="filter-bar">
-        <input type="text" wire:model.live.debounce.400ms="search" placeholder="Cari motherboard, PSU, RAM...">
+        <input type="text" wire:model.live.debounce.400ms="search" placeholder="Cari produk, SKU, kategori, atau subkategori...">
 
         <select wire:model.live="category">
             <option value="">Semua Kategori</option>

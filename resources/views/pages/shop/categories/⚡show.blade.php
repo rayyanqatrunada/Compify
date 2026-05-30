@@ -30,12 +30,22 @@ class extends Component {
     public int $priceFrom = 0;
     public int $priceTo = 10000000;
 
+    private function categoryIds(): array
+    {
+        return $this->category->selfAndActiveDescendantIds();
+    }
+
+    public function getNavigationCategoriesProperty()
+    {
+        return $this->category->navigationGroup();
+    }
+
     public function mount(Category $category): void
     {
         $this->category = $category;
 
         $priceQuery = Product::query()
-            ->where('category_id', $category->id)
+            ->whereIn('category_id', $this->categoryIds())
             ->where('is_active', true);
 
         $this->minPrice = (int) ($priceQuery->min('price') ?? 0);
@@ -113,11 +123,11 @@ class extends Component {
     {
         return Brand::query()
             ->whereHas('products', function ($query) {
-                $query->where('category_id', $this->category->id)
+                $query->whereIn('category_id', $this->categoryIds())
                     ->where('is_active', true);
             })
             ->withCount(['products' => function ($query) {
-                $query->where('category_id', $this->category->id)
+                $query->whereIn('category_id', $this->categoryIds())
                     ->where('is_active', true);
             }])
             ->orderBy('name')
@@ -128,7 +138,7 @@ class extends Component {
     {
         return Product::query()
             ->with(['brand', 'category'])
-            ->where('category_id', $this->category->id)
+            ->whereIn('category_id', $this->categoryIds())
             ->where('is_active', true)
             ->when(count($this->selectedBrands), function ($query) {
                 $query->whereIn('brand_id', $this->selectedBrands);
@@ -172,7 +182,7 @@ class extends Component {
                     </div>
 
                     <div class="category-filter__body">
-                        @foreach($category->parent?->children ?? collect([$category]) as $item)
+                        @foreach($this->navigationCategories as $item)
                             <a
                                 href="{{ route('categories.show', $item->slug) }}"
                                 class="category-filter__link {{ $item->id === $category->id ? 'is-active' : '' }}"

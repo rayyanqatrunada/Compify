@@ -48,7 +48,7 @@ Route::livewire('/sign-up', 'pages::auth.customer.register')
     ->name('customer.register');
 
 Route::livewire('/account', 'pages::shop.account.index')
-    ->middleware('auth:customer')
+    ->middleware('customer.auth')
     ->name('account.index');
 
 Route::post('/customer/logout', function (Request $request) {
@@ -99,7 +99,7 @@ Route::get('/auth/google/callback', function () {
 
     request()->session()->regenerate();
 
-    return redirect()->route('home');
+    return redirect()->intended(route('home'));
 })->middleware('guest:customer')->name('customer.google.callback');
 
 
@@ -160,18 +160,18 @@ Route::post('/cart/{product}/add', function (Request $request, Product $product)
 */
 
 Route::livewire('/checkout', 'pages::shop.checkout.index')
-    ->middleware('auth:customer')
+    ->middleware('customer.auth')
     ->name('checkout.index');
 
 Route::livewire('/checkout/payment/{order}', 'pages::shop.checkout.payment')
-    ->middleware('auth:customer')
+    ->middleware('customer.auth')
     ->name('checkout.payment');
 
 Route::get('/checkout/success/{order}', function (Order $order) {
     abort_if($order->user_id !== Auth::guard('customer')->id(), 403);
 
     return view('pages.shop.checkout.success', compact('order'));
-})->middleware('auth:customer')->name('checkout.success');
+})->middleware('customer.auth')->name('checkout.success');
 
 
 /*

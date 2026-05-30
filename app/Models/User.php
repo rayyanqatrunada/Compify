@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 
 #[Fillable([
     'name',
+    'username',
     'email',
     'google_id',
     'provider',
@@ -24,7 +25,6 @@ use Illuminate\Support\Str;
     'city',
     'province',
     'postal_code',
-    'avatar',
     'gender',
     'birth_date',
 ])]

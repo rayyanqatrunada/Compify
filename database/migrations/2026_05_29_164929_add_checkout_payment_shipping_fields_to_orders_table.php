@@ -18,11 +18,11 @@ return new class extends Migration
             }
 
             if (! Schema::hasColumn('orders', 'shipping_cost')) {
-                $table->unsignedBigInteger('shipping_cost')->default(0)->after('total');
+                $table->unsignedBigInteger('shipping_cost')->default(0);
             }
 
             if (! Schema::hasColumn('orders', 'payment_status')) {
-                $table->string('payment_status')->default('pending')->after('status');
+                $table->string('payment_status')->default('pending');
             }
 
             if (! Schema::hasColumn('orders', 'shipping_province')) {

@@ -18,7 +18,7 @@ return new class extends Migration
             }
 
             if (! Schema::hasColumn('orders', 'payment_status')) {
-                $table->string('payment_status')->default('pending')->after('status');
+                $table->string('payment_status')->default('pending');
             }
 
             if (! Schema::hasColumn('orders', 'payment_type')) {

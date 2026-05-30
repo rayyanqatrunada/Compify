@@ -30,12 +30,12 @@ class extends Component {
             <div class="payment-order-box">
                 <div>
                     <span>Nomor Order</span>
-                    <strong>#{{ $order->id }}</strong>
+                    <strong>{{ $order->order_number ?? ('#' . $order->id) }}</strong>
                 </div>
 
                 <div>
                     <span>Total Pembayaran</span>
-                    <strong>Rp {{ number_format($order->total, 0, ',', '.') }}</strong>
+                    <strong>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</strong>
                 </div>
 
                 <div>
@@ -112,7 +112,7 @@ class extends Component {
 
             @foreach($order->items as $item)
                 <div class="payment-summary-item">
-                    <span>{{ $item->quantity }}x {{ $item->product?->name }}</span>
+                    <span>{{ $item->quantity }}x {{ $item->product_name ?? $item->product?->name }}</span>
                     <strong>Rp {{ number_format($item->total, 0, ',', '.') }}</strong>
                 </div>
             @endforeach
@@ -131,7 +131,7 @@ class extends Component {
 
             <div class="payment-summary-total">
                 <span>Total</span>
-                <strong>Rp {{ number_format($order->total, 0, ',', '.') }}</strong>
+                <strong>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</strong>
             </div>
         </aside>
     </div>
