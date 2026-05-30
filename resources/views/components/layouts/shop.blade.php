@@ -35,7 +35,7 @@
 
             <div class="compact-header-actions">
                 <form action="{{ route('products.index') }}" method="GET" class="search-box compact-search-box">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari produk/kategori">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari produk">
 
                     <button type="submit" aria-label="Cari">
                         <svg viewBox="0 0 24 24" aria-hidden="true">
