@@ -130,6 +130,7 @@
     color: var(--admin-text);
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .admin-logo-v2 {
@@ -153,8 +154,19 @@
 
 .admin-menu-v2 {
     margin-top: 14px;
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 3px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+    scrollbar-gutter: stable;
+}
+
+.admin-menu-v2 > * {
+    flex-shrink: 0;
 }
 
 .admin-menu-v2 a,
@@ -245,15 +257,33 @@
 }
 
 .admin-logout-v2 {
-    margin-top: auto;
+    margin-top: 14px;
     padding-top: 14px;
     border-top: 1px solid var(--admin-border);
+    flex-shrink: 0;
 }
 
 .admin-logout-v2 button {
     width: 100%;
     background: var(--admin-soft);
     border-color: var(--admin-border);
+}
+
+.admin-menu-v2::-webkit-scrollbar {
+    width: 6px;
+}
+
+.admin-menu-v2::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.admin-menu-v2::-webkit-scrollbar-thumb {
+    background: var(--admin-border);
+    border-radius: 999px;
+}
+
+.admin-menu-v2::-webkit-scrollbar-thumb:hover {
+    background: var(--admin-muted);
 }
 
 

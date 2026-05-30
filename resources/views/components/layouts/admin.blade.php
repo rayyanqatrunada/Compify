@@ -85,15 +85,15 @@
                            @class(['active' => request()->routeIs('admin.catalog.brands')])>
                             Brands
                         </a>
+                        
+                        <a href="{{ route('admin.content.home-category-products') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.content.home-category-products')])>
+                            Category Products
+                        </a>
 
                         <a href="{{ route('admin.content.banners') }}" wire:navigate
                            @class(['active' => request()->routeIs('admin.content.banners')])>
                             Hero Banners
-                        </a>
-
-                        <a href="{{ route('admin.content.home-category-products') }}" wire:navigate
-                           @class(['active' => request()->routeIs('admin.content.home-category-products')])>
-                            Category Products
                         </a>
 
                         <a href="{{ route('admin.content.home-full-banners') }}" wire:navigate
