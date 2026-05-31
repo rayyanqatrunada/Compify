@@ -30,9 +30,9 @@
     --event-red: #ff6565;
 
     /* Radius */
-    --event-radius-sm: 6px;
-    --event-radius: 10px;
-    --event-radius-lg: 14px;
+    --event-radius-sm: 4px;
+    --event-radius: 6px;
+    --event-radius-lg: 10px;
 
     /* Gap & spacing */
     --event-gap-xs: 6px;
@@ -69,7 +69,7 @@
     --event-product-price-size: 19px;
 
     /* Full banner */
-    --event-full-banner-height: 280px;
+    --event-full-banner-height: 370px;
     --event-full-banner-margin: 30px;
 
     /* Combo package card */
@@ -1018,4 +1018,76 @@
         align-items: flex-start;
         flex-direction: column;
     }
+}
+
+/* =========================================================
+   PRODUCT CARD HOVER STYLE
+   Khusus product card di halaman Event / Flash Sale.
+   Ukuran base tetap pakai variable yang sudah ada:
+   - --event-product-card-min-height
+   - --event-product-image-height
+========================================================= */
+
+.event-page .event-product-card {
+    background: #ffffff;
+    border: 1px solid rgba(14, 10, 16, .08);
+    box-shadow: 0 8px 24px rgba(14, 10, 16, .045);
+    transition:
+        transform .22s ease,
+        box-shadow .22s ease,
+        border-color .22s ease;
+}
+
+.event-page .event-product-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(14, 10, 16, .16);
+    box-shadow: 0 18px 42px rgba(14, 10, 16, .11);
+}
+
+.event-page .event-product-card:hover .event-product-image img {
+    transform: scale(1.045);
+}
+
+.event-page .event-product-image {
+    background: #f6f6f6;
+    transition:
+        background-color .22s ease,
+        box-shadow .22s ease;
+}
+
+.event-page .event-product-card:hover .event-product-image {
+    background: #f2f2f2;
+}
+
+.event-page .event-product-image img {
+    transition: transform .24s ease;
+}
+
+.event-page .event-product-content {
+    background: #ffffff;
+}
+
+.event-page .event-product-content h3 {
+    transition: color .2s ease;
+}
+
+.event-page .event-product-card:hover .event-product-content h3 {
+    color: #160885;
+}
+
+.event-page .event-product-footer button {
+    transition:
+        transform .18s ease,
+        background-color .18s ease,
+        box-shadow .18s ease;
+}
+
+.event-page .event-product-footer button:hover {
+    transform: translateY(-1px);
+    background: #160885;
+    box-shadow: 0 8px 18px rgba(22, 8, 133, .22);
+}
+
+.event-page .event-discount-badge {
+    box-shadow: 0 8px 18px rgba(255, 101, 101, .26);
 }

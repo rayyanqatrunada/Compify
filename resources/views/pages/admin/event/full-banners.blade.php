@@ -149,7 +149,7 @@ class extends Component
                 </label>
 
                 <div class="admin-help-v2">
-                    Rekomendasi ukuran banner: lebar penuh, sekitar <strong>1440 × 446 px</strong>.
+                    Rekomendasi ukuran banner: lebar penuh, sekitar <strong>2560 × 740 px</strong>.
                     Redirect link boleh diisi seperti <strong>/products</strong>, <strong>/event</strong>, atau URL halaman lain.
                 </div>
 

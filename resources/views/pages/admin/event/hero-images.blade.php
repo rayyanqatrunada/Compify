@@ -186,7 +186,7 @@ class extends Component
             <div class="admin-hero-card-v2 admin-hero-card-v2--large">
                 <div>
                     <h3>Hero Besar Kiri</h3>
-                    <p>Ukuran rekomendasi: landscape besar, sekitar 900 × 446 px.</p>
+                    <p>Ukuran rekomendasi: landscape besar, sekitar 1688 × 640 px.</p>
                 </div>
 
                 <div class="admin-hero-preview-v2 admin-hero-preview-v2--large">
@@ -219,7 +219,7 @@ class extends Component
             <div class="admin-hero-card-v2">
                 <div>
                     <h3>Hero Kanan Atas</h3>
-                    <p>Ukuran rekomendasi: landscape kecil, sekitar 440 × 206 px.</p>
+                    <p>Ukuran rekomendasi: landscape kecil, sekitar 844 × 306 px.</p>
                 </div>
 
                 <div class="admin-hero-preview-v2">
@@ -252,7 +252,7 @@ class extends Component
             <div class="admin-hero-card-v2">
                 <div>
                     <h3>Hero Kanan Bawah</h3>
-                    <p>Ukuran rekomendasi: landscape kecil, sekitar 440 × 224 px.</p>
+                    <p>Ukuran rekomendasi: landscape kecil, sekitar 844 × 306 px.</p>
                 </div>
 
                 <div class="admin-hero-preview-v2">
