@@ -35,10 +35,16 @@ class extends Component {
     public function flashSaleItems()
     {
         return EventFlashSaleItem::query()
-            ->with(['product.brand', 'product.category'])
-            ->active()
-            ->whereHas('product', fn ($query) => $query->active())
-            ->orderBy('sort_order')
+            ->with(['product.brand', 'product.category', 'group'])
+            ->join('event_flash_sale_groups', 'event_flash_sale_items.event_flash_sale_group_id', '=', 'event_flash_sale_groups.id')
+            ->select('event_flash_sale_items.*')
+            ->where('event_flash_sale_items.is_active', true)
+            ->where('event_flash_sale_groups.is_active', true)
+            ->whereHas('product', function ($query) {
+                $query->where('products.is_active', true);
+            })
+            ->orderBy('event_flash_sale_groups.sort_order')
+            ->orderBy('event_flash_sale_items.sort_order')
             ->limit(6)
             ->get();
     }
@@ -201,18 +207,15 @@ class extends Component {
             </div>
         </section>
 
-        @if($fullBanner)
-            <section class="event-full-banner"
-                @if($this->imageUrl($fullBanner->image)) style="background-image: url('{{ $this->imageUrl($fullBanner->image) }}')" @endif>
-                <div>
-                    @if($fullBanner->subtitle)<p>{{ $fullBanner->subtitle }}</p>@endif
-                    @if($fullBanner->title)<h2>{{ $fullBanner->title }}</h2>@endif
-                    @if($fullBanner->description)<span>{{ $fullBanner->description }}</span>@endif
-                    @if($fullBanner->button_text && $fullBanner->button_url)
-                        <a href="{{ $fullBanner->button_url }}" wire:navigate>{{ $fullBanner->button_text }}</a>
-                    @endif
-                </div>
-            </section>
+        @if($fullBanner?->image)
+            <a
+                href="{{ $fullBanner->button_url ?: route('products.index') }}"
+                class="event-full-banner event-full-banner--image-only"
+                style="background-image: url('{{ $this->imageUrl($fullBanner->image) }}')"
+                wire:navigate
+            >
+                <span class="sr-only">Full Banner Event</span>
+            </a>
         @endif
 
         <section class="event-section event-combo-section">

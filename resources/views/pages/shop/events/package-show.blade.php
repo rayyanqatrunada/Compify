@@ -9,15 +9,19 @@ use Livewire\Component;
 
 new
 #[Layout('components.layouts.shop')]
-#[Title('Detail Paket Kombo - Compify')]
-class extends Component {
+#[Title('Detail Paket Bundling - Compify')]
+class extends Component
+{
     public ComboPackage $comboPackage;
 
     public function mount(ComboPackage $comboPackage): void
     {
         abort_unless($comboPackage->is_active, 404);
 
-        $this->comboPackage = $comboPackage->load(['items.product.brand', 'items.product.category']);
+        $this->comboPackage = $comboPackage->load([
+            'items.product.brand',
+            'items.product.category',
+        ]);
     }
 
     public function getEventProperty(): ?EventSetting
@@ -33,42 +37,71 @@ class extends Component {
 ?>
 
 <div class="event-page">
-    @if(! $this->event)
+    @if (! $this->event)
         <section class="event-empty">
             <div class="event-empty__box">
                 <p>Event</p>
                 <h1>Tidak ada event saat ini</h1>
-                <span>Paket kombo hanya bisa dilihat saat event berjalan.</span>
+                <span>Paket bundling hanya bisa dilihat saat event berjalan.</span>
                 <a href="{{ route('products.index') }}" wire:navigate>Lihat Produk</a>
             </div>
         </section>
     @else
-        <section class="event-package-detail">
-            <div class="event-package-detail__media">
-                @if($this->imageUrl($comboPackage->image))
+        <section class="event-package-detail-v2">
+            <div class="event-package-detail-v2__media">
+                @if ($this->imageUrl($comboPackage->image))
                     <img src="{{ $this->imageUrl($comboPackage->image) }}" alt="{{ $comboPackage->name }}">
                 @else
-                    <div class="event-package-placeholder">{{ strtoupper(substr($comboPackage->name, 0, 2)) }}</div>
+                    <div class="event-package-placeholder-v2">
+                        {{ strtoupper(substr($comboPackage->name, 0, 2)) }}
+                    </div>
                 @endif
             </div>
 
-            <div class="event-package-detail__info">
-                <a href="{{ route('event.index') }}" class="event-back-link" wire:navigate>← Kembali ke Event</a>
-                <h1>{{ $comboPackage->name }}</h1>
-                <p>{{ $comboPackage->subtitle ?: 'Paket kombo pilihan dari Compify.' }}</p>
+            <div class="event-package-detail-v2__info">
+                <a href="{{ route('event.index') }}" class="event-back-link-v2" wire:navigate>
+                    ← Kembali ke Event
+                </a>
 
-                @if($comboPackage->description)
-                    <div class="event-package-desc">{{ $comboPackage->description }}</div>
+                <span class="event-package-label-v2">Paket Bundling</span>
+
+                <h1>{{ $comboPackage->name }}</h1>
+
+                @if ($comboPackage->subtitle)
+                    <p class="event-package-subtitle-v2">{{ $comboPackage->subtitle }}</p>
                 @endif
 
-                <div class="event-package-price-box">
-                    <span>Total Satuan</span>
-                    <del>{{ $comboPackage->formatted_original_total }}</del>
-                    <span>Harga Paket</span>
-                    <strong>{{ $comboPackage->formatted_package_price }}</strong>
-                    @if($comboPackage->savings > 0)
-                        <b>Hemat {{ $comboPackage->formatted_savings }}</b>
-                    @endif
+                @if ($comboPackage->description)
+                    <div class="event-package-desc-v2">
+                        {{ $comboPackage->description }}
+                    </div>
+                @endif
+
+                <div class="event-package-price-box-v2">
+                    <div>
+                        <span>Total Harga Barang</span>
+                        <del>{{ $comboPackage->formatted_original_total }}</del>
+                    </div>
+
+                    <div>
+                        <span>{{ $comboPackage->discount_label }}</span>
+                        <strong>- {{ $comboPackage->formatted_savings }}</strong>
+                    </div>
+
+                    <div class="is-final">
+                        <span>Harga Paket</span>
+                        <strong>{{ $comboPackage->formatted_package_price }}</strong>
+                    </div>
+                </div>
+
+                <div class="event-package-actions-v2">
+                    <button type="button" disabled>
+                        Beli Paket
+                    </button>
+
+                    <small>
+                        Integrasi cart paket akan dibuat di tahap berikutnya.
+                    </small>
                 </div>
             </div>
         </section>
@@ -76,35 +109,47 @@ class extends Component {
         <section class="event-section event-package-items-section">
             <div class="event-section-head">
                 <h2>Produk Dalam Paket</h2>
+                <span>{{ $comboPackage->items->count() }} produk</span>
             </div>
 
-            <div class="event-package-items">
-                @foreach($comboPackage->items as $item)
+            <div class="event-package-items-v2">
+                @foreach ($comboPackage->items as $item)
                     @php
                         $product = $item->product;
                         $image = $this->imageUrl($product?->image);
                     @endphp
 
-                    <article class="event-package-item-card">
-                        <a href="{{ $product ? route('products.show', $product) : '#' }}" class="event-package-item-card__image" wire:navigate>
-                            @if($image)
+                    <article class="event-package-item-card-v2">
+                        <a
+                            href="{{ $product ? route('products.show', $product) : '#' }}"
+                            class="event-package-item-card-v2__image"
+                            wire:navigate
+                        >
+                            @if ($image)
                                 <img src="{{ $image }}" alt="{{ $product?->name }}">
+                            @else
+                                <span>No Image</span>
                             @endif
                         </a>
 
-                        <div>
+                        <div class="event-package-item-card-v2__content">
                             <h3>{{ $product?->name ?? 'Produk tidak ditemukan' }}</h3>
-                            <p>{{ $product?->brand?->name ?? $product?->category?->name }}</p>
-                            <span>Qty: {{ $item->quantity }}</span>
-                            <strong>{{ $product?->formatted_final_price }}</strong>
+
+                            <p>
+                                {{ $product?->brand?->name ?? $product?->category?->name ?? 'Produk Paket' }}
+                            </p>
+
+                            <div>
+                                <span>Qty: {{ $item->quantity }}</span>
+                                <strong>{{ $product?->formatted_final_price }}</strong>
+                            </div>
+
+                            <small>
+                                Subtotal: {{ 'Rp ' . number_format($item->line_total, 0, ',', '.') }}
+                            </small>
                         </div>
                     </article>
                 @endforeach
-            </div>
-
-            <div class="event-package-note">
-                <strong>Catatan:</strong>
-                tombol checkout khusus paket bisa ditambahkan setelah cart/checkout mendukung harga paket. Untuk tahap ini halaman detail sudah menampilkan semua isi paket dan harga paket dari admin.
             </div>
         </section>
     @endif

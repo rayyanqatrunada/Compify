@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class EventFlashSaleItem extends Model
 {
     protected $fillable = [
+        'event_flash_sale_group_id',
         'product_id',
         'discount_type',
         'discount_value',
@@ -22,6 +23,11 @@ class EventFlashSaleItem extends Model
         'is_active' => 'boolean',
         'sort_order' => 'integer',
     ];
+
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(EventFlashSaleGroup::class, 'event_flash_sale_group_id');
+    }
 
     public function product(): BelongsTo
     {
