@@ -22,8 +22,16 @@
             ->get();
 
         $wishlistCount = count(session('wishlist', []));
-        $cartCount = array_sum(session('cart', []));
-        
+        $cartItems = session('cart', []);
+
+        $cartCount = collect($cartItems)->sum(function ($item) {
+            if (is_array($item)) {
+                return (int) ($item['quantity'] ?? 0);
+            }
+
+            return (int) $item;
+        });
+            
         $isHomePage = request()->routeIs('home');
     @endphp
 

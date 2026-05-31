@@ -188,14 +188,16 @@ class extends Component {
 
                         <div class="event-product-content">
                             <h3>{{ $product->name }}</h3>
-                            <div class="event-product-price-old">{{ $product->formatted_final_price }}</div>
+                            <div class="event-product-price-old">{{ $item->formatted_base_price }}</div>
                             <strong>{{ $item->formatted_event_price }}</strong>
 
                             <div class="event-product-footer">
                                 <span>{{ $item->stock_limit ? 'Stok event: ' . $item->stock_limit : 'Stok terbatas' }}</span>
                                 <form method="POST" action="{{ route('cart.add', $product) }}">
                                     @csrf
+
                                     <input type="hidden" name="quantity" value="1">
+
                                     <button type="submit">Beli</button>
                                 </form>
                             </div>
@@ -266,7 +268,9 @@ class extends Component {
                                 <small>Total Satuan: {{ $package->formatted_original_total }}</small>
                                 <span>Harga Paket <strong>{{ $package->formatted_package_price }}</strong></span>
                             </div>
-                            <a href="{{ route('event.packages.show', $package) }}" wire:navigate>Beli Paket</a>
+                            <a href="{{ route('event.packages.show', $package) }}" wire:navigate>
+                                Beli Paket
+                            </a>
                         </div>
                     </article>
                 @empty

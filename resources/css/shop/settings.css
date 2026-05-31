@@ -149,7 +149,7 @@
     --home-product-section-gap: 38px;
 
     /* jarak antar preview/story/banner kecil */
-    --home-preview-gap: 26px;
+    --home-preview-gap: 12px;
 
     /* padding kiri-kanan khusus home */
     --home-x: var(--shop-x);

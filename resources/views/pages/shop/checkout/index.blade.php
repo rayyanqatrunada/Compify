@@ -12,6 +12,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use App\Services\CartService;
 
 new
 #[Layout('components.layouts.shop')]
@@ -54,32 +55,13 @@ class extends Component {
     #[Computed]
     public function cartItems()
     {
-        $cart = session()->get('cart', []);
-
-        if (empty($cart)) {
-            return collect();
-        }
-
-        $products = Product::with(['brand', 'category'])
-            ->whereIn('id', array_keys($cart))
-            ->get();
-
-        return $products->map(function ($product) use ($cart) {
-            $qty = (int) ($cart[$product->id] ?? 1);
-
-            return [
-                'product' => $product,
-                'quantity' => $qty,
-                'price' => (int) $product->final_price,
-                'line_total' => (int) $product->final_price * $qty,
-            ];
-        });
+        return app(CartService::class)->items();
     }
 
     #[Computed]
     public function subtotal(): int
     {
-        return $this->cartItems->sum('line_total');
+        return app(CartService::class)->subtotal();
     }
 
     #[Computed]
@@ -180,6 +162,117 @@ class extends Component {
         return $method->outside_province_cost ?? $method->base_cost;
     }
 
+    private function cartDiscountTotal(): int
+    {
+        return $this->cartItems->sum(function (array $item) {
+            return (int) ($item['discount_amount'] ?? 0) * (int) ($item['quantity'] ?? 1);
+        });
+    }
+
+    private function createOrderItemSnapshot(Order $order, array $item): void
+    {
+        if ($item['type'] === 'product') {
+            $itemType = ($item['is_event_price'] ?? false) ? 'event_flash_sale' : 'product';
+
+            OrderItem::create([
+                'order_id' => $order->id,
+                'item_type' => $itemType,
+                'product_id' => $item['product_id'],
+                'combo_package_id' => null,
+                'event_flash_sale_item_id' => $item['event_flash_sale_item_id'] ?? null,
+
+                'product_name' => $item['name'],
+                'product_slug' => $item['slug'] ?? null,
+                'product_image' => $item['image'] ?? null,
+
+                'price' => $item['unit_price'],
+                'original_price' => $item['original_price'],
+                'discount_amount' => $item['discount_amount'] ?? 0,
+                'price_label' => $item['price_label'] ?? null,
+
+                'quantity' => $item['quantity'],
+                'total' => $item['line_total'],
+
+                'snapshot_data' => [
+                    'type' => $itemType,
+                    'source' => $item['price_source'] ?? null,
+                    'product_id' => $item['product_id'],
+                    'slug' => $item['slug'] ?? null,
+                    'brand_or_category' => $item['brand_or_category'] ?? null,
+                    'is_event_price' => (bool) ($item['is_event_price'] ?? false),
+                    'event_flash_sale_item_id' => $item['event_flash_sale_item_id'] ?? null,
+                    'unit_price' => $item['unit_price'],
+                    'original_price' => $item['original_price'],
+                    'discount_amount' => $item['discount_amount'] ?? 0,
+                    'discount_percent' => $item['discount_percent'] ?? null,
+                ],
+            ]);
+
+            Product::whereKey($item['product_id'])->decrement('stock', $item['quantity']);
+
+            return;
+        }
+
+        if ($item['type'] === 'combo_package') {
+            $children = collect($item['children'])->map(function ($child) use ($item) {
+                return [
+                    'product_id' => $child['product_id'],
+                    'name' => $child['name'],
+                    'image' => $child['image'] ?? null,
+                    'brand_or_category' => $child['brand_or_category'] ?? null,
+                    'quantity_per_package' => (int) $child['quantity'],
+                    'package_quantity' => (int) $item['quantity'],
+                    'total_quantity' => (int) $child['quantity'] * (int) $item['quantity'],
+                    'unit_price' => (int) $child['unit_price'],
+                    'line_total_per_package' => (int) $child['line_total'],
+                    'line_total_all_package' => (int) $child['line_total'] * (int) $item['quantity'],
+                ];
+            })->values()->all();
+
+            OrderItem::create([
+                'order_id' => $order->id,
+                'item_type' => 'combo_package',
+                'product_id' => null,
+                'combo_package_id' => $item['combo_package_id'],
+                'event_flash_sale_item_id' => null,
+
+                'product_name' => $item['name'],
+                'product_slug' => $item['slug'] ?? null,
+                'product_image' => $item['image'] ?? null,
+
+                'price' => $item['unit_price'],
+                'original_price' => $item['original_price'],
+                'discount_amount' => $item['discount_amount'] ?? 0,
+                'price_label' => $item['price_label'] ?? 'Paket Bundling',
+
+                'quantity' => $item['quantity'],
+                'total' => $item['line_total'],
+
+                'snapshot_data' => [
+                    'type' => 'combo_package',
+                    'combo_package_id' => $item['combo_package_id'],
+                    'slug' => $item['slug'] ?? null,
+                    'unit_price' => $item['unit_price'],
+                    'original_price' => $item['original_price'],
+                    'discount_amount' => $item['discount_amount'] ?? 0,
+                    'discount_percent' => $item['discount_percent'] ?? null,
+                    'children' => $children,
+                ],
+            ]);
+
+            foreach ($item['children'] as $child) {
+                if (! $child['product_id']) {
+                    continue;
+                }
+
+                Product::whereKey($child['product_id'])->decrement(
+                    'stock',
+                    (int) $child['quantity'] * (int) $item['quantity']
+                );
+            }
+        }
+    }
+
     public function placeOrder()
     {
         $this->validate([
@@ -204,8 +297,10 @@ class extends Component {
             return;
         }
 
-        if ($this->shippingCost === null) {
-            $this->addError('shipping_method_id', 'Lengkapi alamat dan pilih metode pengiriman.');
+        $invalidItem = $this->cartItems->first(fn (array $item) => ! $item['is_available']);
+
+        if ($invalidItem) {
+            $this->addError('cart', $invalidItem['message'] ?? 'Ada item keranjang yang tidak tersedia.');
             return;
         }
 
@@ -228,7 +323,7 @@ class extends Component {
 
                 'subtotal' => $this->subtotal,
                 'shipping_cost' => $this->shippingCost ?? 0,
-                'discount_amount' => 0,
+                'discount_amount' => $this->cartDiscountTotal(),
                 'total_amount' => $this->total,
 
                 'order_status' => 'pending',
@@ -236,19 +331,14 @@ class extends Component {
             ]);
 
             foreach ($this->cartItems as $item) {
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $item['product']->id,
-                    'product_name' => $item['product']->name,
-                    'quantity' => $item['quantity'],
-                    'price' => $item['price'],
-                    'total' => $item['line_total'],
-                ]);
+                if (! $item['is_available']) {
+                    continue;
+                }
 
-                $item['product']->decrement('stock', $item['quantity']);
+                $this->createOrderItemSnapshot($order, $item);
             }
 
-            session()->forget('cart');
+            app(CartService::class)->clear();
 
             return $order;
         });
@@ -449,24 +539,35 @@ class extends Component {
             <div class="checkout-summary">
                 @foreach($this->cartItems as $item)
                     @php
-                        $product = $item['product'];
-                        $image = $product->image ? Storage::url($product->image) : null;
+                        $image = ($item['image'] ?? null) ? Storage::url($item['image']) : null;
                     @endphp
 
                     <div class="checkout-summary-product">
                         <div class="checkout-product-image">
                             @if($image)
-                                <img src="{{ $image }}" alt="{{ $product->name }}">
+                                <img src="{{ $image }}" alt="{{ $item['name'] }}">
                             @else
-                                <span>{{ substr($product->name, 0, 2) }}</span>
+                                <span>{{ substr($item['name'], 0, 2) }}</span>
                             @endif
 
                             <b>{{ $item['quantity'] }}</b>
                         </div>
 
                         <div>
-                            <strong>{{ $product->name }}</strong>
-                            <small>{{ $product->brand?->name ?? $product->category?->name }}</small>
+                            <strong>{{ $item['name'] }}</strong>
+                            <small>{{ $item['brand_or_category'] ?? ($item['type'] === 'combo_package' ? 'Paket Bundling' : 'Produk') }}</small>
+
+                            @if($item['type'] === 'combo_package' && $item['children']->isNotEmpty())
+                                <div class="checkout-combo-mini">
+                                    @foreach($item['children']->take(3) as $child)
+                                        <span>{{ $child['quantity'] }}x {{ $child['name'] }}</span>
+                                    @endforeach
+
+                                    @if($item['children']->count() > 3)
+                                        <span>+{{ $item['children']->count() - 3 }} produk lain</span>
+                                    @endif
+                                </div>
+                            @endif
                         </div>
 
                         <p>Rp {{ number_format($item['line_total'], 0, ',', '.') }}</p>

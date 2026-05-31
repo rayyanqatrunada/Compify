@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Laravel\Socialite\Facades\Socialite;
+use App\Models\ComboPackage;
+use App\Models\EventSetting;
+use App\Services\CartService;
 
 /*
 |--------------------------------------------------------------------------
@@ -129,22 +132,16 @@ Route::post('/wishlist/{product}/toggle', function (Product $product) {
 Route::livewire('/cart', 'pages::shop.cart.index')
     ->name('cart.index');
 
-Route::post('/cart/{product}/add', function (Request $request, Product $product) {
-    abort_if(! $product->is_active, 404);
-
+Route::post('/cart/{product}/add', function (Request $request, Product $product, CartService $cartService) {
     $data = $request->validate([
         'quantity' => ['required', 'integer', 'min:1'],
         'redirect_to_cart' => ['nullable', 'boolean'],
     ]);
 
-    $quantity = min((int) $data['quantity'], max(1, $product->stock));
-
-    $cart = session()->get('cart', []);
-    $currentQty = $cart[$product->id] ?? 0;
-
-    $cart[$product->id] = min($currentQty + $quantity, max(1, $product->stock));
-
-    session()->put('cart', $cart);
+    $cartService->addProduct(
+        product: $product,
+        quantity: (int) $data['quantity'],
+    );
 
     if ($request->boolean('redirect_to_cart')) {
         return redirect()
@@ -155,6 +152,24 @@ Route::post('/cart/{product}/add', function (Request $request, Product $product)
     return back()->with('success', 'Produk berhasil ditambahkan ke keranjang.');
 })->name('cart.add');
 
+Route::post('/cart/combo-packages/{comboPackage:slug}', function (
+    Request $request,
+    ComboPackage $comboPackage,
+    CartService $cartService
+) {
+    $data = $request->validate([
+        'quantity' => ['nullable', 'integer', 'min:1'],
+    ]);
+
+    $cartService->addComboPackage(
+        comboPackage: $comboPackage,
+        quantity: (int) ($data['quantity'] ?? 1),
+    );
+
+    return redirect()
+        ->route('cart.index')
+        ->with('success', 'Paket bundling berhasil ditambahkan ke keranjang.');
+})->name('cart.add.combo');
 
 /*
 |--------------------------------------------------------------------------
@@ -255,6 +270,7 @@ Route::middleware(['auth:admin', 'admin'])
 
         Route::prefix('sales')->name('sales.')->group(function () {
             Route::livewire('/orders', 'pages::admin.sales.orders.index')->name('orders');
+            Route::livewire('/orders/{order}', 'pages::admin.sales.orders.show')->name('orders.show');
         });
 
         Route::prefix('settings')->name('settings.')->group(function () {

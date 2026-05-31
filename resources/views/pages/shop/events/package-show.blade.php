@@ -95,12 +95,18 @@ class extends Component
                 </div>
 
                 <div class="event-package-actions-v2">
-                    <button type="button" disabled>
-                        Beli Paket
-                    </button>
+                    <form method="POST" action="{{ route('cart.add.combo', $comboPackage) }}">
+                        @csrf
+
+                        <input type="hidden" name="quantity" value="1">
+
+                        <button type="submit">
+                            Beli Paket
+                        </button>
+                    </form>
 
                     <small>
-                        Integrasi cart paket akan dibuat di tahap berikutnya.
+                        Paket akan masuk ke keranjang sebagai satu item, dengan isi produk tetap ditampilkan.
                     </small>
                 </div>
             </div>

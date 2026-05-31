@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\ProductPricingService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -36,29 +37,21 @@ class EventFlashSaleItem extends Model
 
     public function scopeActive($query)
     {
-        return $query->where('is_active', true);
+        return $query->where($this->getTable() . '.is_active', true);
     }
 
     public function getBasePriceAttribute(): int
     {
-        return (int) ($this->product?->final_price ?? 0);
+        return (int) ($this->product?->base_final_price ?? 0);
     }
 
     public function getEventPriceAttribute(): int
     {
-        $base = $this->base_price;
-
-        if ($base <= 0) {
-            return 0;
-        }
-
-        if ($this->discount_type === 'amount') {
-            return max(0, $base - (int) $this->discount_value);
-        }
-
-        $discount = $base * ((float) $this->discount_value / 100);
-
-        return max(0, (int) round($base - $discount));
+        return app(ProductPricingService::class)->discountedPrice(
+            basePrice: $this->base_price,
+            discountType: $this->discount_type,
+            discountValue: $this->discount_value,
+        );
     }
 
     public function getDiscountPercentAttribute(): int
@@ -68,6 +61,11 @@ class EventFlashSaleItem extends Model
         }
 
         return (int) round((($this->base_price - $this->event_price) / $this->base_price) * 100);
+    }
+
+    public function getFormattedBasePriceAttribute(): string
+    {
+        return 'Rp ' . number_format($this->base_price, 0, ',', '.');
     }
 
     public function getFormattedEventPriceAttribute(): string

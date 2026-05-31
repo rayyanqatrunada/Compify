@@ -5,9 +5,9 @@
         ? \Illuminate\Support\Facades\Storage::url($product->image)
         : null;
 
-    $isPromoActive = (bool) ($product->is_promo_active ?? false);
-    $discount = $product->discount_percent ?? null;
-    $finalPrice = $product->final_price ?? $product->price;
+    $hasDiscount = (bool) $product->has_discount;
+    $discount = $product->discount_percent;
+    $isEventPrice = (bool) $product->is_event_price;
 
     $isWishlisted = in_array($product->id, session('wishlist', []));
 @endphp
@@ -20,6 +20,10 @@
 
         @if($product->is_featured)
             <span class="badge badge-soft">Featured</span>
+        @endif
+
+        @if($isEventPrice)
+            <span class="badge badge-sale">Flash Sale</span>
         @endif
 
         @if($discount)
@@ -55,17 +59,17 @@
         </a>
 
         <div class="price-row">
-            @if($isPromoActive)
+            @if($hasDiscount)
                 <span class="old-price">
-                    Rp {{ number_format($product->price, 0, ',', '.') }}
+                    {{ $product->formatted_original_price }}
                 </span>
 
                 <span class="sale-price">
-                    Rp {{ number_format($finalPrice, 0, ',', '.') }}
+                    {{ $product->formatted_final_price }}
                 </span>
             @else
                 <span>
-                    Rp {{ number_format($product->price, 0, ',', '.') }}
+                    {{ $product->formatted_final_price }}
                 </span>
             @endif
         </div>

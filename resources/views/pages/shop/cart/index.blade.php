@@ -1,6 +1,7 @@
 <?php
 
-use App\Models\Product;
+use App\Services\CartService;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -13,49 +14,38 @@ class extends Component {
     #[Computed]
     public function items()
     {
-        $cart = session('cart', []);
-
-        return Product::with(['category', 'brand'])
-            ->whereIn('id', array_keys($cart))
-            ->get()
-            ->map(function ($product) use ($cart) {
-                $product->cart_qty = $cart[$product->id] ?? 1;
-                $product->cart_total = ($product->sale_price ?: $product->price) * $product->cart_qty;
-
-                return $product;
-            });
+        return app(CartService::class)->items();
     }
 
     #[Computed]
-    public function total()
+    public function total(): int
     {
-        return $this->items->sum('cart_total');
+        return app(CartService::class)->subtotal();
     }
 
-    public function updateQty(int $productId, int $qty): void
+    public function updateQty(string $cartKey, int $qty): void
     {
-        $cart = session('cart', []);
-
-        if ($qty <= 0) {
-            unset($cart[$productId]);
-        } else {
-            $cart[$productId] = $qty;
-        }
-
-        session()->put('cart', $cart);
+        app(CartService::class)->updateQuantity($cartKey, $qty);
     }
 
-    public function remove(int $productId): void
+    public function remove(string $cartKey): void
     {
-        $cart = session('cart', []);
-        unset($cart[$productId]);
-
-        session()->put('cart', $cart);
+        app(CartService::class)->remove($cartKey);
     }
 
     public function clearCart(): void
     {
-        session()->forget('cart');
+        app(CartService::class)->clear();
+    }
+
+    public function imageUrl(?string $path): ?string
+    {
+        return $path ? Storage::url($path) : null;
+    }
+
+    public function formatRupiah(int|float|null $value): string
+    {
+        return 'Rp ' . number_format((float) $value, 0, ',', '.');
     }
 };
 ?>
@@ -80,34 +70,83 @@ class extends Component {
         <div class="flash-success">{{ session('success') }}</div>
     @endif
 
+    @if($errors->has('cart'))
+        <div class="flash-success" style="background: rgba(220, 38, 38, .1); color: #b91c1c;">
+            {{ $errors->first('cart') }}
+        </div>
+    @endif
+
     <div class="cart-layout">
         <div class="cart-list">
-            @forelse($this->items as $product)
-                <div class="cart-item">
-                    <div class="cart-item-image">
-                        @if($product->image)
-                            <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}">
+            @forelse($this->items as $item)
+                @php
+                    $image = $this->imageUrl($item['image'] ?? null);
+                    $isCombo = $item['type'] === 'combo_package';
+                    $detailUrl = $isCombo
+                        ? route('event.packages.show', $item['slug'])
+                        : route('products.show', $item['product']);
+                @endphp
+
+                <div class="cart-item {{ $isCombo ? 'cart-item--combo' : '' }}">
+                    <a href="{{ $detailUrl }}" class="cart-item-image" wire:navigate>
+                        @if($image)
+                            <img src="{{ $image }}" alt="{{ $item['name'] }}">
                         @else
-                            <span>{{ strtoupper(substr($product->name, 0, 2)) }}</span>
+                            <span>{{ strtoupper(substr($item['name'], 0, 2)) }}</span>
                         @endif
-                    </div>
+                    </a>
 
                     <div class="cart-item-info">
-                        <strong>{{ $product->name }}</strong>
-                        <span>{{ $product->brand?->name ?? $product->category?->name }}</span>
-                        <p>Rp {{ number_format($product->sale_price ?: $product->price, 0, ',', '.') }}</p>
+                        <strong>{{ $item['name'] }}</strong>
+
+                        <span>
+                            {{ $item['brand_or_category'] ?? ($isCombo ? 'Paket Bundling' : 'Produk') }}
+                        </span>
+
+                        @if(! $item['is_available'])
+                            <p style="color: #b91c1c; font-weight: 800;">
+                                {{ $item['message'] }}
+                            </p>
+                        @else
+                            @if(($item['discount_amount'] ?? 0) > 0)
+                                <small class="cart-old-price">
+                                    {{ $this->formatRupiah($item['original_price']) }}
+                                </small>
+                            @endif
+
+                            <p>
+                                {{ $this->formatRupiah($item['unit_price']) }}
+
+                                @if($item['is_event_price'] ?? false)
+                                    <em>{{ $item['price_label'] }}</em>
+                                @endif
+                            </p>
+                        @endif
+
+                        @if($isCombo && $item['children']->isNotEmpty())
+                            <div class="cart-combo-children">
+                                @foreach($item['children'] as $child)
+                                    <div>
+                                        <span>{{ $child['quantity'] }}x {{ $child['name'] }}</span>
+                                        <small>{{ $this->formatRupiah($child['line_total']) }}</small>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
 
                     <input
                         type="number"
                         min="1"
-                        value="{{ $product->cart_qty }}"
-                        wire:change="updateQty({{ $product->id }}, $event.target.value)"
+                        max="{{ max(1, (int) ($item['max_quantity'] ?? 1)) }}"
+                        value="{{ $item['quantity'] }}"
+                        wire:change="updateQty('{{ $item['key'] }}', $event.target.value)"
+                        @disabled(! $item['is_available'])
                     >
 
-                    <b>Rp {{ number_format($product->cart_total, 0, ',', '.') }}</b>
+                    <b>{{ $this->formatRupiah($item['line_total']) }}</b>
 
-                    <button type="button" wire:click="remove({{ $product->id }})">
+                    <button type="button" wire:click="remove('{{ $item['key'] }}')">
                         Hapus
                     </button>
                 </div>
@@ -127,7 +166,7 @@ class extends Component {
 
             <div>
                 <span>Subtotal</span>
-                <strong>Rp {{ number_format($this->total, 0, ',', '.') }}</strong>
+                <strong>{{ $this->formatRupiah($this->total) }}</strong>
             </div>
 
             <div>
@@ -139,7 +178,7 @@ class extends Component {
 
             <div>
                 <span>Total</span>
-                <strong>Rp {{ number_format($this->total, 0, ',', '.') }}</strong>
+                <strong>{{ $this->formatRupiah($this->total) }}</strong>
             </div>
 
             <a href="{{ route('checkout.index') }}" class="cart-checkout-button" wire:navigate>

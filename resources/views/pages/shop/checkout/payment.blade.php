@@ -9,14 +9,26 @@ use Livewire\Component;
 new
 #[Layout('components.layouts.shop')]
 #[Title('Detail Pembayaran - Compify')]
-class extends Component {
+class extends Component
+{
     public Order $order;
 
     public function mount(Order $order): void
     {
         abort_if($order->user_id !== auth('customer')->id(), 403);
 
-        $this->order = $order->load(['items.product', 'paymentMethod', 'shippingMethod']);
+        $this->order = $order->load([
+            'items.product',
+            'items.comboPackage',
+            'items.flashSaleItem',
+            'paymentMethod',
+            'shippingMethod',
+        ]);
+    }
+
+    public function formatRupiah(int|float|null $value): string
+    {
+        return 'Rp ' . number_format((float) $value, 0, ',', '.');
     }
 };
 ?>
@@ -35,7 +47,7 @@ class extends Component {
 
                 <div>
                     <span>Total Pembayaran</span>
-                    <strong>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</strong>
+                    <strong>{{ $this->formatRupiah($order->total_amount) }}</strong>
                 </div>
 
                 <div>
@@ -46,7 +58,6 @@ class extends Component {
 
             @php
                 $method = $order->paymentMethod;
-                $type = data_get($method, 'type') ?? data_get($method, 'method_type') ?? 'manual';
                 $logo = data_get($method, 'logo');
                 $qrImage = data_get($method, 'qr_image') ?? data_get($method, 'image');
                 $paymentUrl = data_get($method, 'payment_url') ?? data_get($method, 'url');
@@ -111,9 +122,38 @@ class extends Component {
             <h2>Ringkasan Order</h2>
 
             @foreach($order->items as $item)
-                <div class="payment-summary-item">
-                    <span>{{ $item->quantity }}x {{ $item->product_name ?? $item->product?->name }}</span>
-                    <strong>Rp {{ number_format($item->total, 0, ',', '.') }}</strong>
+                @php
+                    $snapshot = $item->snapshot_data ?? [];
+                    $children = collect($snapshot['children'] ?? []);
+                @endphp
+
+                <div class="payment-summary-item payment-summary-item--rich">
+                    <div>
+                        <span>{{ $item->quantity }}x {{ $item->product_name ?? $item->product?->name }}</span>
+
+                        @if($item->price_label)
+                            <small class="payment-item-label">{{ $item->price_label }}</small>
+                        @endif
+
+                        @if((float) $item->discount_amount > 0)
+                            <small class="payment-item-discount">
+                                Hemat {{ $this->formatRupiah($item->discount_amount * $item->quantity) }}
+                            </small>
+                        @endif
+
+                        @if($children->isNotEmpty())
+                            <div class="payment-combo-children">
+                                @foreach($children as $child)
+                                    <small>
+                                        {{ $child['total_quantity'] ?? $child['quantity_per_package'] ?? 1 }}x
+                                        {{ $child['name'] ?? 'Produk paket' }}
+                                    </small>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+
+                    <strong>{{ $this->formatRupiah($item->total) }}</strong>
                 </div>
             @endforeach
 
@@ -121,17 +161,24 @@ class extends Component {
 
             <div class="payment-summary-item">
                 <span>Subtotal</span>
-                <strong>Rp {{ number_format($order->subtotal, 0, ',', '.') }}</strong>
+                <strong>{{ $this->formatRupiah($order->subtotal) }}</strong>
             </div>
+
+            @if((float) $order->discount_amount > 0)
+                <div class="payment-summary-item">
+                    <span>Total Diskon</span>
+                    <strong>- {{ $this->formatRupiah($order->discount_amount) }}</strong>
+                </div>
+            @endif
 
             <div class="payment-summary-item">
                 <span>Pengiriman</span>
-                <strong>Rp {{ number_format($order->shipping_cost, 0, ',', '.') }}</strong>
+                <strong>{{ $this->formatRupiah($order->shipping_cost) }}</strong>
             </div>
 
             <div class="payment-summary-total">
                 <span>Total</span>
-                <strong>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</strong>
+                <strong>{{ $this->formatRupiah($order->total_amount) }}</strong>
             </div>
         </aside>
     </div>

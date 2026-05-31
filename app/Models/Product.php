@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\ProductPricingService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -38,138 +39,130 @@ class Product extends Model
         'sale_ends_at' => 'datetime',
     ];
 
-    /**
-     * Route model binding pakai slug.
-     * Jadi /product/nama-produk akan otomatis mencari dari kolom slug.
-     */
     public function getRouteKeyName(): string
     {
         return 'slug';
     }
 
-    /**
-     * Relasi product ke category.
-     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
-    /**
-     * Relasi product ke brand.
-     */
     public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class);
     }
 
-    /**
-     * Scope untuk mengambil produk aktif saja.
-     * Contoh: Product::active()->get()
-     */
     public function scopeActive($query)
     {
-        return $query->where('is_active', true);
+        return $query->where($this->getTable() . '.is_active', true);
     }
 
-    /**
-     * Scope produk featured / unggulan.
-     */
     public function scopeFeatured($query)
     {
         return $query->where('is_featured', true);
     }
 
-    /**
-     * Scope produk baru.
-     */
     public function scopeNewProduct($query)
     {
         return $query->where('is_new', true);
     }
 
-    /**
-     * Cek apakah produk sedang diskon.
-     */
-    public function getHasDiscountAttribute(): bool
-    {
-        return $this->sale_price
-            && $this->sale_price > 0
-            && $this->sale_price < $this->price;
-    }
-
-    /**
-     * Persentase diskon.
-     */
-    public function getDiscountPercentageAttribute(): int
-    {
-        if (! $this->has_discount || $this->price <= 0) {
-            return 0;
-        }
-
-        return (int) round((($this->price - $this->sale_price) / $this->price) * 100);
-    }
-
-    /**
-     * Cek stok tersedia.
-     */
     public function getInStockAttribute(): bool
     {
         return $this->stock > 0;
     }
 
-    /**
-     * Format harga normal.
-     */
+    public function getPricingAttribute(): array
+    {
+        return app(ProductPricingService::class)->forProduct($this);
+    }
+
+    public function getBaseFinalPriceAttribute(): int
+    {
+        return app(ProductPricingService::class)->regularPricing($this)['unit_price'];
+    }
+
+    public function getFinalPriceAttribute(): int
+    {
+        return (int) $this->pricing['unit_price'];
+    }
+
+    public function getOriginalPriceAttribute(): int
+    {
+        return (int) $this->pricing['original_price'];
+    }
+
+    public function getDiscountAmountAttribute(): int
+    {
+        return (int) $this->pricing['discount_amount'];
+    }
+
+    public function getHasDiscountAttribute(): bool
+    {
+        return (bool) $this->pricing['is_discounted'];
+    }
+
+    public function getIsPromoActiveAttribute(): bool
+    {
+        return $this->has_discount;
+    }
+
+    public function getIsEventPriceAttribute(): bool
+    {
+        return (bool) $this->pricing['is_event_price'];
+    }
+
+    public function getPriceSourceAttribute(): string
+    {
+        return (string) $this->pricing['source'];
+    }
+
+    public function getPriceSourceLabelAttribute(): string
+    {
+        return (string) $this->pricing['label'];
+    }
+
+    public function getEventFlashSaleItemIdAttribute(): ?int
+    {
+        return $this->pricing['event_flash_sale_item_id'];
+    }
+
+    public function getDiscountPercentageAttribute(): ?int
+    {
+        return $this->discount_percent;
+    }
+
+    public function getDiscountPercentAttribute(): ?int
+    {
+        $percent = (int) $this->pricing['discount_percent'];
+
+        return $percent > 0 ? $percent : null;
+    }
+
     public function getFormattedPriceAttribute(): string
     {
         return 'Rp ' . number_format((float) $this->price, 0, ',', '.');
     }
 
-    /**
-     * Format harga final.
-     */
+    public function getFormattedOriginalPriceAttribute(): string
+    {
+        return 'Rp ' . number_format($this->original_price, 0, ',', '.');
+    }
+
+    public function getFormattedBaseFinalPriceAttribute(): string
+    {
+        return 'Rp ' . number_format($this->base_final_price, 0, ',', '.');
+    }
+
     public function getFormattedFinalPriceAttribute(): string
-        {
-            return 'Rp ' . number_format($this->final_price, 0, ',', '.');
-        }
-
-        public function getIsPromoActiveAttribute(): bool
     {
-        if (! $this->sale_price || $this->price <= 0) {
-            return false;
-        }
-
-        if ($this->sale_price >= $this->price) {
-            return false;
-        }
-
-        $now = now();
-
-        if ($this->sale_starts_at && $now->lt($this->sale_starts_at)) {
-            return false;
-        }
-
-        if ($this->sale_ends_at && $now->gt($this->sale_ends_at)) {
-            return false;
-        }
-
-        return true;
+        return 'Rp ' . number_format($this->final_price, 0, ',', '.');
     }
 
-    public function getFinalPriceAttribute(): int
+    public function getActiveEventFlashSaleItemAttribute(): ?EventFlashSaleItem
     {
-        return $this->is_promo_active
-            ? (int) $this->sale_price
-            : (int) $this->price;
-    }
-
-    public function getDiscountPercentAttribute(): ?int
-    {
-        if (! $this->is_promo_active) {
-            return null;
-        }
-
-        return round((($this->price - $this->sale_price) / $this->price) * 100);
+        return app(ProductPricingService::class)->activeFlashSaleItemForProduct($this);
     }
 }

@@ -1,21 +1,17 @@
 @props(['product'])
 
 @php
-    $finalPrice = $product->sale_price && $product->sale_price > 0
-        ? $product->sale_price
-        : $product->price;
-
-    $hasDiscount = $product->sale_price && $product->sale_price < $product->price;
-
-    $discountPercent = $hasDiscount
-        ? round((($product->price - $product->sale_price) / $product->price) * 100)
-        : 0;
+    $hasDiscount = (bool) $product->has_discount;
+    $discountPercent = $product->discount_percent;
+    $isEventPrice = (bool) $product->is_event_price;
 @endphp
 
 <div class="shop-product-card">
-    <a href="{{ route('products.show', $product->slug) }}" class="shop-product-card__image-wrap" wire:navigate>
-        @if ($hasDiscount)
-            <span class="shop-product-card__badge">-{{ $discountPercent }}%</span>
+    <a href="{{ route('products.show', $product) }}" class="shop-product-card__image-wrap" wire:navigate>
+        @if ($discountPercent)
+            <span class="shop-product-card__badge">
+                {{ $isEventPrice ? 'Flash Sale ' : '' }}-{{ $discountPercent }}%
+            </span>
         @endif
 
         <img
@@ -30,21 +26,22 @@
             {{ $product->brand->name ?? 'Brand' }}
         </div>
 
-        <a href="{{ route('products.show', $product->slug) }}" class="shop-product-card__title" wire:navigate>
+        <a href="{{ route('products.show', $product) }}" class="shop-product-card__title" wire:navigate>
             {{ $product->name }}
         </a>
 
         <div class="shop-product-card__price">
             @if ($hasDiscount)
                 <span class="shop-product-card__price-old">
-                    Rp {{ number_format($product->price, 0, ',', '.') }}
+                    {{ $product->formatted_original_price }}
                 </span>
+
                 <span class="shop-product-card__price-new">
-                    Rp {{ number_format($product->sale_price, 0, ',', '.') }}
+                    {{ $product->formatted_final_price }}
                 </span>
             @else
                 <span class="shop-product-card__price-new">
-                    Rp {{ number_format($finalPrice, 0, ',', '.') }}
+                    {{ $product->formatted_final_price }}
                 </span>
             @endif
         </div>

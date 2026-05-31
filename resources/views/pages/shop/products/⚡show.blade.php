@@ -30,11 +30,9 @@ class extends Component {
     @php
         $image = $product->image ? Storage::url($product->image) : null;
 
-        $finalPrice = $product->sale_price ?: $product->price;
-
-        $discount = $product->sale_price && $product->price > 0
-            ? round((($product->price - $product->sale_price) / $product->price) * 100)
-            : null;
+        $hasDiscount = (bool) $product->has_discount;
+        $discount = $product->discount_percent;
+        $isEventPrice = (bool) $product->is_event_price;
 
         $isWishlisted = in_array($product->id, session('wishlist', []));
     @endphp
@@ -55,7 +53,9 @@ class extends Component {
         <div class="product-detail-main">
             <div class="product-detail-media-card">
                 @if($discount)
-                    <span class="product-detail-discount">-{{ $discount }}%</span>
+                    <span class="product-detail-discount">
+                        {{ $isEventPrice ? 'Flash Sale ' : '' }}-{{ $discount }}%
+                    </span>
                 @endif
 
                 @if($image)
@@ -81,11 +81,17 @@ class extends Component {
                 </div>
 
                 <div class="product-detail-price">
-                    @if($product->sale_price)
-                        <small>Rp {{ number_format($product->price, 0, ',', '.') }}</small>
+                    @if($hasDiscount)
+                        <small>{{ $product->formatted_original_price }}</small>
                     @endif
 
-                    <strong>Rp {{ number_format($finalPrice, 0, ',', '.') }}</strong>
+                    <strong>{{ $product->formatted_final_price }}</strong>
+
+                    @if($isEventPrice)
+                        <span class="product-detail-price-source">
+                            Flash Sale aktif
+                        </span>
+                    @endif
                 </div>
 
                 <p class="product-detail-short-desc">
