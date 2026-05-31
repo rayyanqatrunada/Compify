@@ -120,6 +120,12 @@ class extends Component {
                                 @if($item['is_event_price'] ?? false)
                                     <em>{{ $item['price_label'] }}</em>
                                 @endif
+                                
+                                @if(($item['has_event_stock_limit'] ?? false) && ($item['event_stock_remaining'] ?? null) !== null)
+                                    <small class="cart-event-stock-note">
+                                        Sisa stok flash sale: {{ $item['event_stock_remaining'] }}
+                                    </small>
+                                @endif
                             </p>
                         @endif
 

@@ -57,8 +57,8 @@
             <form method="POST" action="{{ route('cart.add', $product) }}" class="shop-product-card__cart-form">
                 @csrf
                 <input type="hidden" name="quantity" value="1">
-                <button type="submit" class="shop-product-card__cart-btn">
-                    Tambah ke Keranjang
+                <button type="submit" @disabled($this->maxPurchasableStock() < 1)>
+                    {{ $this->maxPurchasableStock() < 1 ? 'Stok Habis' : 'Tambah ke Keranjang' }}
                 </button>
             </form>
         </div>

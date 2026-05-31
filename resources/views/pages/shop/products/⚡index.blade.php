@@ -9,6 +9,7 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Services\ProductPricingService;
 
 new
 #[Layout('components.layouts.shop')]
@@ -64,13 +65,16 @@ class extends Component {
     public function products()
     {
         $search = trim($this->search);
-        $searchCategoryIds = Category::searchIdsWithActiveDescendants($search);
+
+        $searchCategoryIds = $search !== ''
+            ? Category::searchIdsWithActiveDescendants($search)
+            : [];
 
         $selectedCategory = $this->category
             ? Category::query()->active()->where('slug', $this->category)->first()
             : null;
 
-        return Product::with(['category.parent', 'brand'])
+        $products = Product::with(['category.parent', 'brand'])
             ->active()
             ->when($search !== '', function ($query) use ($search, $searchCategoryIds) {
                 $like = '%' . $search . '%';
@@ -102,6 +106,10 @@ class extends Component {
             ->when($this->sort === 'price_high', fn ($query) => $query->orderByDesc('price'))
             ->when($this->sort === 'latest', fn ($query) => $query->latest())
             ->paginate(12);
+
+        app(ProductPricingService::class)->preload($products);
+
+        return $products;
     }
 };
 ?>

@@ -5,10 +5,16 @@ namespace App\Services;
 use App\Models\EventFlashSaleItem;
 use App\Models\EventSetting;
 use App\Models\Product;
+use Illuminate\Pagination\AbstractPaginator;
+use Illuminate\Support\Collection;
 
 class ProductPricingService
 {
-    protected array $cache = [];
+    protected static bool $activeEventResolved = false;
+    protected static ?EventSetting $activeEvent = null;
+
+    protected static array $pricingCache = [];
+    protected static array $flashSaleItemCache = [];
 
     public function forProduct(Product $product): array
     {
@@ -16,22 +22,26 @@ class ProductPricingService
             return $this->regularPricing($product);
         }
 
-        $cacheKey = 'product:' . $product->id;
+        $cacheKey = $this->productCacheKey($product);
 
-        if (isset($this->cache[$cacheKey])) {
-            return $this->cache[$cacheKey];
+        if (isset(static::$pricingCache[$cacheKey])) {
+            return static::$pricingCache[$cacheKey];
         }
 
         $regular = $this->regularPricing($product);
 
-        if (! EventSetting::activeNow()) {
-            return $this->cache[$cacheKey] = $regular;
+        if (! $this->activeEvent()) {
+            return static::$pricingCache[$cacheKey] = $regular;
         }
 
         $flashSaleItem = $this->activeFlashSaleItemForProduct($product);
 
         if (! $flashSaleItem) {
-            return $this->cache[$cacheKey] = $regular;
+            return static::$pricingCache[$cacheKey] = $regular;
+        }
+
+        if (! app(EventFlashSaleStockService::class)->availableForItem($flashSaleItem)) {
+            return static::$pricingCache[$cacheKey] = $regular;
         }
 
         $eventPrice = $this->discountedPrice(
@@ -41,15 +51,16 @@ class ProductPricingService
         );
 
         if ($eventPrice >= $regular['unit_price']) {
-            return $this->cache[$cacheKey] = $regular;
+            return static::$pricingCache[$cacheKey] = $regular;
         }
 
         $discountAmount = max(0, $regular['unit_price'] - $eventPrice);
+
         $discountPercent = $regular['unit_price'] > 0
             ? (int) round(($discountAmount / $regular['unit_price']) * 100)
             : 0;
 
-        return $this->cache[$cacheKey] = [
+        return static::$pricingCache[$cacheKey] = [
             'source' => 'event_flash_sale',
             'label' => 'Flash Sale',
             'unit_price' => $eventPrice,
@@ -65,6 +76,7 @@ class ProductPricingService
     public function regularPricing(Product $product): array
     {
         $price = (int) round((float) $product->price);
+
         $salePrice = $product->sale_price !== null
             ? (int) round((float) $product->sale_price)
             : null;
@@ -82,6 +94,7 @@ class ProductPricingService
 
         $unitPrice = $isSaleActive ? $salePrice : $price;
         $discountAmount = max(0, $price - $unitPrice);
+
         $discountPercent = $price > 0 && $discountAmount > 0
             ? (int) round(($discountAmount / $price) * 100)
             : 0;
@@ -105,8 +118,18 @@ class ProductPricingService
             return null;
         }
 
-        return EventFlashSaleItem::query()
-            ->where('product_id', $product->id)
+        $productId = (int) $product->id;
+
+        if (array_key_exists($productId, static::$flashSaleItemCache)) {
+            return static::$flashSaleItemCache[$productId];
+        }
+
+        if (! $this->activeEvent()) {
+            return static::$flashSaleItemCache[$productId] = null;
+        }
+
+        return static::$flashSaleItemCache[$productId] = EventFlashSaleItem::query()
+            ->where('product_id', $productId)
             ->where('event_flash_sale_items.is_active', true)
             ->whereHas('group', function ($query) {
                 $query->where('event_flash_sale_groups.is_active', true);
@@ -114,6 +137,75 @@ class ProductPricingService
             ->orderBy('event_flash_sale_items.sort_order')
             ->orderBy('event_flash_sale_items.id')
             ->first();
+    }
+
+    public function preload($products): void
+    {
+        $products = $this->normalizeProducts($products);
+
+        if ($products->isEmpty()) {
+            return;
+        }
+
+        $ids = $products
+            ->filter(fn ($product) => $product instanceof Product && $product->exists)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        if ($ids->isEmpty()) {
+            return;
+        }
+
+        if (! $this->activeEvent()) {
+            foreach ($products as $product) {
+                if ($product instanceof Product && $product->exists) {
+                    static::$pricingCache[$this->productCacheKey($product)] = $this->regularPricing($product);
+                    static::$flashSaleItemCache[(int) $product->id] = null;
+                }
+            }
+
+            return;
+        }
+
+        $missingIds = $ids
+            ->filter(fn ($id) => ! array_key_exists((int) $id, static::$flashSaleItemCache))
+            ->values();
+
+        if ($missingIds->isNotEmpty()) {
+            $flashSaleItems = EventFlashSaleItem::query()
+                ->whereIn('product_id', $missingIds)
+                ->where('event_flash_sale_items.is_active', true)
+                ->whereHas('group', function ($query) {
+                    $query->where('event_flash_sale_groups.is_active', true);
+                })
+                ->orderBy('event_flash_sale_items.sort_order')
+                ->orderBy('event_flash_sale_items.id')
+                ->get()
+                ->unique('product_id')
+                ->keyBy('product_id');
+
+            foreach ($missingIds as $id) {
+                static::$flashSaleItemCache[(int) $id] = $flashSaleItems->get((int) $id);
+            }
+        }
+
+        foreach ($products as $product) {
+            if ($product instanceof Product && $product->exists) {
+                $this->forProduct($product);
+            }
+        }
+    }
+
+    public function activeEvent(): ?EventSetting
+    {
+        if (! static::$activeEventResolved) {
+            static::$activeEvent = EventSetting::activeNow();
+            static::$activeEventResolved = true;
+        }
+
+        return static::$activeEvent;
     }
 
     public function discountedPrice(int $basePrice, string $discountType, int|float|string|null $discountValue): int
@@ -137,5 +229,43 @@ class ProductPricingService
     public function formatRupiah(int|float|null $value): string
     {
         return 'Rp ' . number_format((float) $value, 0, ',', '.');
+    }
+
+    public function clearCache(): void
+    {
+        static::$activeEventResolved = false;
+        static::$activeEvent = null;
+        static::$pricingCache = [];
+        static::$flashSaleItemCache = [];
+    }
+
+    protected function productCacheKey(Product $product): string
+    {
+        return 'product:' . $product->id;
+    }
+
+    protected function normalizeProducts($products): Collection
+    {
+        if ($products instanceof AbstractPaginator) {
+            return $products->getCollection();
+        }
+
+        if ($products instanceof Collection) {
+            return $products;
+        }
+
+        if ($products instanceof Product) {
+            return collect([$products]);
+        }
+
+        if (is_array($products)) {
+            return collect($products);
+        }
+
+        if ($products instanceof \Traversable) {
+            return collect(iterator_to_array($products));
+        }
+
+        return collect();
     }
 }

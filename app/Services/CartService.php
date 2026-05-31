@@ -7,6 +7,7 @@ use App\Models\EventSetting;
 use App\Models\Product;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
+use App\Services\ProductPricingService;
 
 class CartService
 {
@@ -29,9 +30,14 @@ class CartService
             ]);
         }
 
-        if ($product->stock < 1) {
+        $maxPurchasable = app(EventFlashSaleStockService::class)
+            ->maxPurchasableForProduct($product);
+
+        if ($maxPurchasable < 1) {
             throw ValidationException::withMessages([
-                'cart' => 'Stok produk habis.',
+                'cart' => $product->is_event_price
+                    ? 'Stok flash sale untuk produk ini sudah habis.'
+                    : 'Stok produk habis.',
             ]);
         }
 
@@ -44,7 +50,7 @@ class CartService
         $cart[$key] = [
             'type' => 'product',
             'product_id' => $product->id,
-            'quantity' => min($currentQty + $quantity, (int) $product->stock),
+            'quantity' => min($currentQty + $quantity, $maxPurchasable),
         ];
 
         session()->put(self::SESSION_KEY, $cart);
@@ -120,7 +126,16 @@ class CartService
                 return;
             }
 
-            $cart[$key]['quantity'] = min($quantity, max(1, (int) $product->stock));
+            $maxPurchasable = app(EventFlashSaleStockService::class)
+                ->maxPurchasableForProduct($product);
+
+            if ($maxPurchasable < 1) {
+                unset($cart[$key]);
+                session()->put(self::SESSION_KEY, $cart);
+                return;
+            }
+
+            $cart[$key]['quantity'] = min($quantity, $maxPurchasable);
         }
 
         if (($cart[$key]['type'] ?? null) === 'combo_package') {
@@ -159,7 +174,11 @@ class CartService
 
     public function items(): Collection
     {
-        return collect($this->cart())
+        $cart = $this->cart();
+
+        $this->preloadPricingForCart($cart);
+
+        return collect($cart)
             ->map(function (array $item, string $key) {
                 return match ($item['type'] ?? null) {
                     'product' => $this->buildProductItem($key, $item),
@@ -169,6 +188,51 @@ class CartService
             })
             ->filter()
             ->values();
+    }
+
+    private function preloadPricingForCart(array $cart): void
+    {
+        $productIds = collect($cart)
+            ->filter(fn ($item) => ($item['type'] ?? null) === 'product')
+            ->pluck('product_id')
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        $comboPackageIds = collect($cart)
+            ->filter(fn ($item) => ($item['type'] ?? null) === 'combo_package')
+            ->pluck('combo_package_id')
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        $products = collect();
+
+        if ($productIds->isNotEmpty()) {
+            $products = $products->merge(
+                Product::query()
+                    ->whereIn('id', $productIds)
+                    ->get()
+            );
+        }
+
+        if ($comboPackageIds->isNotEmpty()) {
+            $comboProducts = ComboPackage::query()
+                ->with(['items.product'])
+                ->whereIn('id', $comboPackageIds)
+                ->get()
+                ->flatMap(function (ComboPackage $comboPackage) {
+                    return $comboPackage->items
+                        ->pluck('product')
+                        ->filter();
+                });
+
+            $products = $products->merge($comboProducts);
+        }
+
+        app(ProductPricingService::class)->preload($products);
     }
 
     public function availableItems(): Collection
@@ -221,8 +285,14 @@ class CartService
             ];
         }
 
-        $isAvailable = $product->is_active && $product->stock > 0;
-        $quantity = min($quantity, max(1, (int) $product->stock));
+        $maxPurchasable = app(EventFlashSaleStockService::class)
+            ->maxPurchasableForProduct($product);
+
+        $isAvailable = $product->is_active && $maxPurchasable > 0;
+        $quantity = min($quantity, max(1, $maxPurchasable));
+
+        $eventStockInfo = app(EventFlashSaleStockService::class)
+            ->infoForProduct($product);
 
         return [
             'key' => $key,
@@ -238,7 +308,7 @@ class CartService
             'brand_or_category' => $product->brand?->name ?? $product->category?->name,
 
             'quantity' => $quantity,
-            'max_quantity' => max(0, (int) $product->stock),
+            'max_quantity' => max(0, $maxPurchasable),
 
             'unit_price' => $isAvailable ? (int) $product->final_price : 0,
             'original_price' => $isAvailable ? (int) $product->original_price : 0,
@@ -248,6 +318,11 @@ class CartService
             'event_flash_sale_item_id' => $isAvailable ? $product->event_flash_sale_item_id : null,
             'price_source' => $isAvailable ? $product->price_source : null,
             'price_label' => $isAvailable ? $product->price_source_label : null,
+
+            'has_event_stock_limit' => $eventStockInfo['has_event_stock_limit'],
+            'event_stock_limit' => $eventStockInfo['event_stock_limit'],
+            'event_stock_reserved' => $eventStockInfo['event_stock_reserved'],
+            'event_stock_remaining' => $eventStockInfo['event_stock_remaining'],
 
             'line_total' => $isAvailable ? (int) $product->final_price * $quantity : 0,
             'children' => collect(),

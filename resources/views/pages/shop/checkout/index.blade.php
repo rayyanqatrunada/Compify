@@ -201,6 +201,12 @@ class extends Component {
                     'brand_or_category' => $item['brand_or_category'] ?? null,
                     'is_event_price' => (bool) ($item['is_event_price'] ?? false),
                     'event_flash_sale_item_id' => $item['event_flash_sale_item_id'] ?? null,
+
+                    'has_event_stock_limit' => $item['has_event_stock_limit'] ?? false,
+                    'event_stock_limit' => $item['event_stock_limit'] ?? null,
+                    'event_stock_reserved_before_order' => $item['event_stock_reserved'] ?? 0,
+                    'event_stock_remaining_before_order' => $item['event_stock_remaining'] ?? null,
+
                     'unit_price' => $item['unit_price'],
                     'original_price' => $item['original_price'],
                     'discount_amount' => $item['discount_amount'] ?? 0,

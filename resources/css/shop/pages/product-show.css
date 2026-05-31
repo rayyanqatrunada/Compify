@@ -681,9 +681,10 @@
 .product-detail-price-source {
     width: fit-content;
     padding: 5px 10px;
-    border-radius: 999px;
+    border-radius: 6px;
     background: rgba(255, 101, 101, .14);
     color: #b91c1c;
     font-size: 12px;
     font-weight: 900;
 }
+

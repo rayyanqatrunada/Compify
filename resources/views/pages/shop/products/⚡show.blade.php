@@ -6,6 +6,7 @@ use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use App\Services\EventFlashSaleStockService;
 
 new
 #[Layout('components.layouts.shop')]
@@ -16,6 +17,25 @@ class extends Component {
     public function mount(Product $product): void
     {
         $this->product = $product->load(['category', 'brand']);
+    }
+
+    public function eventStockInfo(): array
+    {
+        return app(EventFlashSaleStockService::class)->infoForProduct($this->product);
+    }
+
+    public function maxPurchasableStock(): int
+    {
+        return app(EventFlashSaleStockService::class)->maxPurchasableForProduct($this->product);
+    }
+
+    public function stockDisplayLabel(): string
+    {
+        if ($this->product->is_event_price) {
+            return 'Flash';
+        }
+
+        return $this->product->stock > 0 ? 'Stok' : 'Stok Habis';
     }
 };
 ?>
@@ -76,7 +96,15 @@ class extends Component {
 
                 <div class="product-detail-meta">
                     <span>{{ $product->category?->name ?? 'Tanpa kategori' }}</span>
-                    <span>{{ $product->stock > 0 ? 'Stok Tersedia' : 'Stok Habis' }}</span>
+
+                    <span>
+                        @if($isEventPrice)
+                            Flash
+                        @else
+                            {{ $product->stock > 0 ? 'Stok' : 'Stok Habis' }}
+                        @endif
+                    </span>
+
                     <span>SKU: {{ $product->sku ?? '-' }}</span>
                 </div>
 
@@ -89,14 +117,14 @@ class extends Component {
 
                     @if($isEventPrice)
                         <span class="product-detail-price-source">
-                            Flash Sale aktif
+                            Flash Sale
                         </span>
                     @endif
                 </div>
 
-                <p class="product-detail-short-desc">
+                {{-- <p class="product-detail-short-desc">
                     {{ Str::limit($product->description ?: 'Produk pilihan Compify untuk kebutuhan komputer, gaming, kerja, dan upgrade setup.', 150) }}
-                </p>
+                </p> --}}
 
                 <div class="product-detail-actions">
                     <form method="POST" action="{{ route('cart.add', $product) }}" class="product-detail-cart-form">
@@ -109,9 +137,8 @@ class extends Component {
                                 type="number"
                                 name="quantity"
                                 min="1"
-                                max="{{ max(1, $product->stock) }}"
+                                max="{{ max(1, $this->maxPurchasableStock()) }}"
                                 value="1"
-                                {{ $product->stock <= 0 ? 'disabled' : '' }}
                             >
                         </label>
 
@@ -189,8 +216,11 @@ class extends Component {
                     </div>
 
                     <div>
-                        <span>Stok</span>
-                        <strong>{{ $product->stock }}</strong>
+                        <span>{{ $isEventPrice ? 'Flash' : 'Stok' }}</span>
+
+                        <strong>
+                            {{ $isEventPrice ? 'Aktif' : $product->stock }}
+                        </strong>
                     </div>
 
                     <div>

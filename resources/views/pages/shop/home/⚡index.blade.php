@@ -9,6 +9,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use App\Services\ProductPricingService;
 
 new
 #[Layout('components.layouts.shop')]
@@ -96,7 +97,14 @@ class extends Component {
 
         $index = $this->sectionIndexes[$section->id] ?? 0;
 
-        return $query->skip($index)->take(4)->get();
+        $products = $query
+            ->skip($index)
+            ->take(4)
+            ->get();
+
+        app(ProductPricingService::class)->preload($products);
+
+        return $products;
     }
 
     public function productCountForSection(HomeSection $section): int

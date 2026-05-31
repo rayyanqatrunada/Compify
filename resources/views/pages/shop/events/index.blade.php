@@ -10,6 +10,8 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use App\Services\ProductPricingService;
+use App\Services\EventFlashSaleStockService;
 
 new
 #[Layout('components.layouts.shop')]
@@ -22,7 +24,7 @@ class extends Component {
     }
 
     #[Computed]
-        public function heroImages()
+    public function heroImages()
     {
         return EventHeroImage::query()
             ->active()
@@ -34,7 +36,7 @@ class extends Component {
     #[Computed]
     public function flashSaleItems()
     {
-        return EventFlashSaleItem::query()
+        $items = EventFlashSaleItem::query()
             ->with(['product.brand', 'product.category', 'group'])
             ->join('event_flash_sale_groups', 'event_flash_sale_items.event_flash_sale_group_id', '=', 'event_flash_sale_groups.id')
             ->select('event_flash_sale_items.*')
@@ -47,6 +49,18 @@ class extends Component {
             ->orderBy('event_flash_sale_items.sort_order')
             ->limit(6)
             ->get();
+        
+        $stockService = app(EventFlashSaleStockService::class);
+
+        $items = $items
+            ->filter(fn ($item) => $stockService->availableForItem($item))
+            ->values();
+
+        app(ProductPricingService::class)->preload(
+            $items->pluck('product')->filter()
+        );
+
+        return $items;
     }
 
     #[Computed]
@@ -61,13 +75,21 @@ class extends Component {
     #[Computed]
     public function comboPackages()
     {
-        return ComboPackage::query()
+        $packages = ComboPackage::query()
             ->with(['items.product.brand', 'items.product.category'])
             ->active()
             ->whereHas('items')
             ->orderBy('sort_order')
             ->limit(4)
             ->get();
+
+        app(ProductPricingService::class)->preload(
+            $packages
+                ->flatMap(fn ($package) => $package->items->pluck('product'))
+                ->filter()
+        );
+
+        return $packages;
     }
 
     public function countdownParts(): array
@@ -192,7 +214,13 @@ class extends Component {
                             <strong>{{ $item->formatted_event_price }}</strong>
 
                             <div class="event-product-footer">
-                                <span>{{ $item->stock_limit ? 'Stok event: ' . $item->stock_limit : 'Stok terbatas' }}</span>
+                                <span>
+                                    @if($item->stock_limit !== null)
+                                        Sisa stok event: {{ $item->remaining_stock }}
+                                    @else
+                                        Stok terbatas
+                                    @endif
+                                </span>
                                 <form method="POST" action="{{ route('cart.add', $product) }}">
                                     @csrf
 

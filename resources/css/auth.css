@@ -1264,3 +1264,11 @@
 .auth-figma-page .auth-figma-panel {
     overflow-y: auto;
 }
+
+.cart-event-stock-note {
+    display: block;
+    margin-top: 6px;
+    color: #b91c1c;
+    font-size: 12px;
+    font-weight: 900;
+}

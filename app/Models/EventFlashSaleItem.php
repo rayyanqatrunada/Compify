@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Services\ProductPricingService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Services\EventFlashSaleStockService;
 
 class EventFlashSaleItem extends Model
 {
@@ -71,5 +72,29 @@ class EventFlashSaleItem extends Model
     public function getFormattedEventPriceAttribute(): string
     {
         return 'Rp ' . number_format($this->event_price, 0, ',', '.');
+    }
+
+    public function getReservedQuantityAttribute(): int
+    {
+        return app(EventFlashSaleStockService::class)->reservedQuantity($this);
+    }
+
+    public function getRemainingStockAttribute(): ?int
+    {
+        return app(EventFlashSaleStockService::class)->remainingForItem($this);
+    }
+
+    public function getIsEventStockAvailableAttribute(): bool
+    {
+        return app(EventFlashSaleStockService::class)->availableForItem($this);
+    }
+
+    public function getStockLabelAttribute(): string
+    {
+        if ($this->stock_limit === null) {
+            return 'Stok mengikuti produk';
+        }
+
+        return 'Sisa stok event: ' . $this->remaining_stock;
     }
 }
