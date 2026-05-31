@@ -1091,3 +1091,89 @@
 .event-page .event-discount-badge {
     box-shadow: 0 8px 18px rgba(255, 101, 101, .26);
 }
+
+/* =========================================================
+   PAKET BUNDLING CARD HOVER STYLE
+   Biar card paket tidak menyatu dengan container.
+   Ukuran base tetap pakai variable yang sudah ada.
+========================================================= */
+
+.event-page .event-combo-card {
+    background: #ffffff;
+    border: 1px solid rgba(14, 10, 16, .09);
+    box-shadow: 0 8px 24px rgba(14, 10, 16, .045);
+    transition:
+        transform .22s ease,
+        box-shadow .22s ease,
+        border-color .22s ease;
+}
+
+.event-page .event-combo-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(14, 10, 16, .18);
+    box-shadow: 0 18px 42px rgba(14, 10, 16, .11);
+}
+
+.event-page .event-combo-card:hover .event-combo-head h3 {
+    color: #160885;
+}
+
+.event-page .event-combo-head h3 {
+    transition: color .2s ease;
+}
+
+.event-page .event-combo-item {
+    border: 1px solid rgba(14, 10, 16, .10);
+    background: #f8f8f8;
+    transition:
+        border-color .2s ease,
+        background-color .2s ease,
+        transform .2s ease;
+}
+
+.event-page .event-combo-card:hover .event-combo-item {
+    border-color: rgba(14, 10, 16, .16);
+    background: #ffffff;
+}
+
+.event-page .event-combo-card:hover .event-combo-item:hover {
+    transform: translateX(3px);
+}
+
+.event-page .event-combo-thumb {
+    background: #ffffff;
+    border: 1px solid rgba(14, 10, 16, .06);
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease;
+}
+
+.event-page .event-combo-thumb img {
+    transition: transform .24s ease;
+}
+
+.event-page .event-combo-card:hover .event-combo-thumb {
+    border-color: rgba(14, 10, 16, .12);
+    box-shadow: 0 6px 16px rgba(14, 10, 16, .06);
+}
+
+.event-page .event-combo-card:hover .event-combo-thumb img {
+    transform: scale(1.04);
+}
+
+.event-page .event-combo-footer a {
+    transition:
+        transform .18s ease,
+        background-color .18s ease,
+        box-shadow .18s ease;
+}
+
+.event-page .event-combo-footer a:hover {
+    transform: translateY(-1px);
+    background: #160885;
+    box-shadow: 0 8px 18px rgba(22, 8, 133, .22);
+}
+
+.event-page .event-combo-save {
+    box-shadow: 0 8px 18px rgba(255, 101, 101, .22);
+}
