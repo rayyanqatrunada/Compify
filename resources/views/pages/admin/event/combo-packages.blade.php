@@ -327,7 +327,7 @@ class extends Component
 };
 ?>
 
-<div class="admin-page-v2">
+<div class="admin-page-v2 admin-event-page-v2">
     <div class="admin-section-title-v2">
         <div>
             <h2>Paket Bundling</h2>
@@ -342,7 +342,7 @@ class extends Component
     @endif
 
     <form wire:submit="save" class="admin-panel-v2 admin-form-v2">
-        <div class="admin-grid-v2 admin-grid-v2--2">
+        <div class="admin-grid-v2 admin-grid-v2--event-settings">
             <label>
                 <span>Nama Paket</span>
                 <input type="text" wire:model.live="name" placeholder="Contoh: Paket Gaming Hemat">
@@ -406,7 +406,7 @@ class extends Component
 
             @error('items') <small>{{ $message }}</small> @enderror
 
-            <div class="admin-grid-v2 admin-grid-v2--2">
+            <div class="admin-grid-v2 admin-grid-v2--event-settings">
                 <label>
                     <span>Filter Kategori</span>
                     <select wire:model.live="selected_category_id">
@@ -465,7 +465,7 @@ class extends Component
         </div>
 
         <div class="admin-discount-box-v2">
-            <div class="admin-grid-v2 admin-grid-v2--2">
+            <div class="admin-grid-v2 admin-grid-v2--event-settings">
                 <label>
                     <span>Tipe Diskon Paket</span>
                     <select wire:model.live="discount_type">

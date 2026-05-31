@@ -286,7 +286,7 @@ class extends Component
 };
 ?>
 
-<div class="admin-page-v2">
+<div class="admin-page-v2 admin-event-page-v2">
     <div class="admin-section-title-v2">
         <div>
             <h2>Flash Sale</h2>
@@ -382,7 +382,7 @@ class extends Component
             <small>{{ $message }}</small>
         @enderror
 
-        <div class="admin-grid-v2 admin-grid-v2--2">
+        <div class="admin-grid-v2 admin-grid-v2--event-settings">
             <label>
                 <span>Filter Kategori</span>
                 <select wire:model.live="selected_category_id">

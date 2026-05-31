@@ -1,0 +1,173 @@
+/* =========================================================
+   16. MODAL
+========================================================= */
+
+.admin-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    padding: 24px;
+    background: rgba(0, 0, 0, .46);
+    backdrop-filter: blur(8px);
+    display: grid;
+    place-items: center;
+    overflow-y: auto;
+}
+
+.admin-modal-card {
+    width: min(var(--admin-modal-width), calc(100vw - 48px));
+    max-height: min(var(--admin-modal-max-height), 820px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid var(--admin-border);
+    border-radius: 22px;
+    background: var(--admin-panel);
+    color: var(--admin-text);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .24);
+    animation: adminModalIn .22s ease both;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.admin-modal-card::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+}
+
+@keyframes adminModalIn {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.admin-modal-head {
+    padding: 18px var(--admin-modal-padding);
+    border-bottom: 1px solid var(--admin-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.admin-modal-head h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 950;
+}
+
+.admin-modal-head p {
+    display: none;
+}
+
+.admin-modal-head > button {
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: var(--admin-radius);
+    background: transparent;
+    color: inherit;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.admin-modal-head > button:hover {
+    background: var(--admin-soft);
+}
+
+.admin-modal-form {
+    padding: 18px var(--admin-modal-padding) 22px;
+}
+
+.admin-modal-form h3 {
+    margin: 14px 0 10px;
+    font-size: 14px;
+    font-weight: 950;
+}
+
+.admin-modal-file {
+    margin-bottom: 12px;
+    display: grid;
+    gap: 8px;
+    color: var(--admin-text);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.admin-modal-file input,
+.admin-modal-file select {
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius);
+    background: var(--admin-panel);
+    color: var(--admin-text);
+    font-family: inherit;
+    font-weight: 800;
+}
+
+.admin-modal-file input[type="file"] {
+    padding: 8px 12px;
+}
+
+.admin-field-check-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.admin-field-check {
+    min-height: 42px;
+    padding: 9px 11px;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius);
+    background: rgba(127, 127, 127, .05);
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    cursor: pointer;
+}
+
+.admin-field-check input {
+    width: 16px;
+    height: 16px;
+}
+
+.admin-field-check span {
+    font-size: 12px;
+    font-weight: 850;
+}
+
+.admin-field-check small {
+    margin-left: auto;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: var(--admin-accent);
+    color: var(--admin-panel);
+    font-size: 10px;
+    font-weight: 900;
+}
+
+.admin-shell-v2[data-admin-theme="dark"] .admin-field-check small {
+    color: #111111;
+}
+
+.admin-field-check.disabled {
+    cursor: not-allowed;
+    opacity: .78;
+}
+
+.admin-modal-actions {
+    margin-top: 18px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+

@@ -1,0 +1,60 @@
+/* =========================================================
+   7. PANELS / CARDS
+========================================================= */
+
+.admin-panel-v2,
+.admin-panel,
+.admin-card {
+    min-width: 0;
+    padding: var(--admin-panel-padding);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-panel-radius);
+    background: var(--admin-panel);
+    box-shadow: var(--admin-shadow);
+    overflow-x: auto;
+}
+
+.admin-panel-v2 h2,
+.admin-panel-v2 h3,
+.admin-panel h3,
+.admin-card h2 {
+    margin: 0 0 10px;
+    color: var(--admin-text);
+    font-size: var(--admin-card-title-size);
+    font-weight: 950;
+}
+
+.admin-panel-head-v2 {
+    margin-bottom: 16px;
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.admin-panel-head-v2 h2,
+.admin-panel-head-v2 h3 {
+    margin: 0 0 4px;
+    color: var(--admin-text);
+    font-size: var(--admin-card-title-size);
+    font-weight: 950;
+}
+
+.admin-panel-head-v2 a,
+.admin-page-actions a {
+    min-height: 32px;
+    padding: 0 12px;
+    border-radius: var(--admin-radius);
+    background: var(--admin-accent);
+    color: var(--admin-panel);
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.admin-shell-v2[data-admin-theme="dark"] .admin-panel-head-v2 a,
+.admin-shell-v2[data-admin-theme="dark"] .admin-page-actions a {
+    color: #111111;
+}
+

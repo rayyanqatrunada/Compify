@@ -1,0 +1,20 @@
+/* =========================================================
+   15. ALERTS
+========================================================= */
+
+.flash-success {
+    margin-bottom: var(--admin-grid-gap);
+    padding: 11px 12px;
+    border: 1px solid #bfe6cc;
+    border-radius: var(--admin-radius);
+    background: #ecf9f0;
+    color: #1f6f3d;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.error-text {
+    color: var(--admin-danger);
+    font-size: 12px;
+}
+

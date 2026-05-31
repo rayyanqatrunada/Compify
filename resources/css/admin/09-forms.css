@@ -1,0 +1,62 @@
+/* =========================================================
+   10. FORMS
+========================================================= */
+
+.admin-form {
+    display: grid;
+    gap: 14px;
+}
+
+.admin-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--admin-grid-gap);
+}
+
+.admin-form label {
+    display: grid;
+    gap: 6px;
+    color: var(--admin-text);
+    font-size: var(--admin-text-size);
+    font-weight: 850;
+}
+
+.admin-form input,
+.admin-form select,
+.admin-form textarea,
+.admin-table-tools input,
+.admin-table-tools select {
+    width: 100%;
+    min-height: var(--admin-control-height);
+    border: 1px solid var(--admin-border-strong);
+    border-radius: var(--admin-radius);
+    padding: 0 11px;
+    outline: none;
+    background: var(--admin-panel);
+    color: var(--admin-text);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.admin-form textarea {
+    padding-top: 10px;
+    resize: vertical;
+}
+
+.admin-form input:focus,
+.admin-form select:focus,
+.admin-form textarea:focus,
+.admin-table-tools input:focus,
+.admin-table-tools select:focus {
+    border-color: var(--admin-text);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, .06);
+}
+
+.admin-actions {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+

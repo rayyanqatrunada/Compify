@@ -1,0 +1,45 @@
+/* =========================================================
+   1. ADMIN SETTINGS
+========================================================= */
+
+:root {
+    /* Layout */
+    --admin-sidebar-width: 236px;
+    --admin-topbar-height: 64px;
+    --admin-content-x: 26px;
+    --admin-content-y: 22px;
+
+    /* Size */
+    --admin-radius: 10px;
+    --admin-panel-radius: 12px;
+    --admin-panel-padding: 18px;
+    --admin-grid-gap: 12px;
+    --admin-control-height: 38px;
+
+    /* Typography */
+    --admin-title-size: 30px;
+    --admin-page-title-size: 24px;
+    --admin-card-title-size: 19px;
+    --admin-text-size: 13px;
+    --admin-small-size: 12px;
+
+    /* Table */
+    --admin-table-min-width: 760px;
+    --admin-table-cell-y: 12px;
+    --admin-table-cell-x: 12px;
+    --admin-table-thumb-width: 76px;
+    --admin-table-thumb-height: 44px;
+
+    /* Preview */
+    --admin-preview-height: 110px;
+    --admin-product-preview-size: 130px;
+
+    /* Modal */
+    --admin-modal-width: 1120px;
+    --admin-modal-max-height: 86vh;
+    --admin-modal-padding: 22px;
+
+    /* Colors fallback */
+    --admin-danger: #dc2626;
+}
+

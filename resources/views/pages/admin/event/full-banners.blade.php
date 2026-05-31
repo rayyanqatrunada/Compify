@@ -103,7 +103,7 @@ class extends Component
 };
 ?>
 
-<div class="admin-page-v2">
+<div class="admin-page-v2 admin-event-page-v2">
     <div class="admin-section-title-v2">
         <div>
             <h2>Full Banner</h2>

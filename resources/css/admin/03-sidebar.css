@@ -1,0 +1,170 @@
+/* =========================================================
+   4. SIDEBAR
+========================================================= */
+
+.admin-sidebar-v2 {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 18px 10px;
+    background: var(--admin-sidebar);
+    border-right: 1px solid var(--admin-border);
+    color: var(--admin-text);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.admin-logo-v2 {
+    min-height: 48px;
+    padding: 0 12px 14px;
+    border-bottom: 1px solid var(--admin-border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--admin-text);
+    font-size: 18px;
+    font-weight: 950;
+}
+
+.admin-logo-v2 img {
+    width: 150px;
+    height: auto;
+    max-height: 34px;
+    object-fit: contain;
+}
+
+.admin-menu-v2 {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+    scrollbar-gutter: stable;
+}
+
+.admin-menu-v2 > * {
+    flex-shrink: 0;
+}
+
+.admin-menu-v2 a,
+.admin-menu-v2 summary,
+.admin-logout-v2 button {
+    min-height: 40px;
+    padding: 0 12px;
+    border: 1px solid transparent;
+    border-radius: var(--admin-radius);
+    background: transparent;
+    color: var(--admin-text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: var(--admin-text-size);
+    font-weight: 850;
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.admin-menu-v2 a span,
+.admin-menu-v2 summary span,
+.admin-logout-v2 button span {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--admin-soft);
+    color: var(--admin-text);
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    line-height: 1;
+    text-align: center;
+}
+
+.admin-menu-v2 a:hover,
+.admin-menu-v2 summary:hover,
+.admin-menu-v2 details[open] > summary {
+    background: var(--admin-soft);
+    border-color: var(--admin-border);
+}
+
+.admin-menu-v2 a.active {
+    background: var(--admin-accent);
+    color: var(--admin-panel);
+    border-color: var(--admin-accent);
+}
+
+.admin-shell-v2[data-admin-theme="dark"] .admin-menu-v2 a.active {
+    color: #111111;
+}
+
+.admin-menu-v2 a.active span {
+    background: rgba(255, 255, 255, .18);
+    color: inherit;
+}
+
+.admin-menu-v2 details {
+    display: grid;
+}
+
+.admin-menu-v2 summary {
+    list-style: none;
+}
+
+.admin-menu-v2 summary::-webkit-details-marker {
+    display: none;
+}
+
+.admin-submenu-v2 {
+    display: grid;
+    gap: 3px;
+    padding: 5px 0 7px 36px;
+}
+
+.admin-submenu-v2 a {
+    min-height: 32px;
+    padding: 0 12px;
+    border-radius: var(--admin-radius);
+    color: var(--admin-muted);
+    font-size: 12px;
+}
+
+.admin-submenu-v2 a.active,
+.admin-submenu-v2 a:hover {
+    color: var(--admin-text);
+    background: var(--admin-soft);
+}
+
+.admin-logout-v2 {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--admin-border);
+    flex-shrink: 0;
+}
+
+.admin-logout-v2 button {
+    width: 100%;
+    background: var(--admin-soft);
+    border-color: var(--admin-border);
+}
+
+.admin-menu-v2::-webkit-scrollbar {
+    width: 6px;
+}
+
+.admin-menu-v2::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.admin-menu-v2::-webkit-scrollbar-thumb {
+    background: var(--admin-border);
+    border-radius: 999px;
+}
+
+.admin-menu-v2::-webkit-scrollbar-thumb:hover {
+    background: var(--admin-muted);
+}
+

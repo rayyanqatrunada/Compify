@@ -1,0 +1,70 @@
+/* =========================================================
+   9. LISTS
+========================================================= */
+
+.admin-selling-list-v2,
+.admin-order-list-v2,
+.admin-list {
+    display: grid;
+    gap: 10px;
+}
+
+.admin-selling-list-v2 > div:not(.admin-empty-v2) {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.admin-selling-list-v2 span {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--admin-radius);
+    background: var(--admin-soft);
+    color: var(--admin-text);
+    border: 1px solid var(--admin-border);
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 950;
+}
+
+.admin-selling-list-v2 strong,
+.admin-order-list-v2 strong {
+    display: block;
+    color: var(--admin-text);
+    font-size: 13px;
+}
+
+.admin-selling-list-v2 small,
+.admin-order-list-v2 span {
+    color: var(--admin-muted);
+    font-size: 12px;
+}
+
+.admin-selling-list-v2 b,
+.admin-order-list-v2 b {
+    color: var(--admin-text);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.admin-order-list-v2 > div:not(.admin-empty-v2) {
+    min-height: 48px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-empty-v2,
+.admin-empty {
+    padding: 18px;
+    border-radius: var(--admin-radius);
+    background: var(--admin-soft);
+    color: var(--admin-muted);
+    border: 1px solid var(--admin-border);
+    text-align: center;
+}
+

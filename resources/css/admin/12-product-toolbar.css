@@ -1,0 +1,49 @@
+/* =========================================================
+   13. PRODUCT TOOLBAR / EXPORT IMPORT
+========================================================= */
+
+.admin-product-table-toolbar {
+    margin: 12px 0 18px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 14px;
+}
+
+.admin-product-export-import,
+.admin-import-form {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.admin-modern-file {
+    max-width: 260px;
+    height: 40px;
+    padding: 7px 10px;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius);
+    background: var(--admin-panel);
+    color: var(--admin-text);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.admin-modern-file::file-selector-button {
+    height: 26px;
+    margin-right: 10px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 8px;
+    background: var(--admin-soft);
+    color: var(--admin-text);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 900;
+    cursor: pointer;
+}
+

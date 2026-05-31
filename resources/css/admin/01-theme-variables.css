@@ -1,0 +1,30 @@
+/* =========================================================
+   2. THEME VARIABLES
+========================================================= */
+
+.admin-shell-v2 {
+    --admin-bg: var(--shop-bg, #f4f4f6);
+    --admin-panel: var(--shop-white, #ffffff);
+    --admin-sidebar: var(--shop-white, #ffffff);
+    --admin-text: var(--shop-text, #222222);
+    --admin-muted: var(--shop-muted, #777777);
+    --admin-border: var(--shop-border, #e5e5e5);
+    --admin-border-strong: var(--shop-border-strong, #d7d7d7);
+    --admin-accent: var(--shop-accent, #111111);
+    --admin-soft: #f4f5f6;
+    --admin-shadow: 0 12px 28px rgba(0, 0, 0, .045);
+}
+
+.admin-shell-v2[data-admin-theme="dark"] {
+    --admin-bg: #111111;
+    --admin-panel: #1a1a1a;
+    --admin-sidebar: #151515;
+    --admin-text: #f7f7f7;
+    --admin-muted: #a7a7a7;
+    --admin-border: #2b2b2b;
+    --admin-border-strong: #3a3a3a;
+    --admin-accent: #ffffff;
+    --admin-soft: #242424;
+    --admin-shadow: 0 16px 34px rgba(0, 0, 0, .28);
+}
+

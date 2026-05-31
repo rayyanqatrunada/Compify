@@ -1,0 +1,727 @@
+/* =========================================================
+   ADMIN EVENT CSS
+   File/section ini khusus untuk halaman:
+   - Atur Event
+   - Image Hero
+   - Flash Sale
+   - Full Banner
+   - Paket Bundling
+
+   Syarat:
+   Root halaman harus punya class:
+   <div class="admin-page-v2 admin-event-page-v2">
+========================================================= */
+
+
+/* =========================================================
+   0. EVENT ADMIN CONTROL CENTER
+   Ubah ukuran utama dari sini.
+========================================================= */
+
+.admin-event-page-v2 {
+    /* Jarak antar elemen */
+    --event-gap-xs: 6px;
+    --event-gap-sm: 8px;
+    --event-gap: 10px;
+    --event-gap-lg: 14px;
+
+    /* Panel/card */
+    --event-panel-padding: 14px;
+    --event-panel-radius: 12px;
+    --event-card-padding: 12px;
+    --event-card-radius: 12px;
+
+    /* Form */
+    --event-control-height: 34px;
+    --event-control-padding-x: 10px;
+    --event-control-radius: 8px;
+    --event-label-size: 12px;
+    --event-input-size: 12px;
+    --event-help-size: 12px;
+
+    /* Button */
+    --event-button-height: 32px;
+    --event-button-padding-x: 11px;
+    --event-button-radius: 8px;
+    --event-button-size: 12px;
+
+    /* Table */
+    --event-table-cell-y: 9px;
+    --event-table-cell-x: 10px;
+    --event-table-text-size: 12px;
+    --event-table-head-size: 10px;
+
+    /* Preview image */
+    --event-preview-small: 120px;
+    --event-preview-medium: 190px;
+    --event-preview-large: 280px;
+    --event-preview-full-banner: 220px;
+
+    /* Layout khusus */
+    --event-hero-left-width: 1.25fr;
+    --event-hero-right-width: .75fr;
+    --event-full-banner-left-width: 1.35fr;
+    --event-full-banner-right-width: .65fr;
+
+    /* Warna */
+    --event-surface: var(--admin-panel);
+    --event-soft: var(--admin-soft);
+    --event-text: var(--admin-text);
+    --event-muted: var(--admin-muted);
+    --event-border: var(--admin-border);
+    --event-danger: var(--admin-danger, #dc2626);
+    --event-black: #0e0a10;
+    --event-success-bg: rgba(16, 185, 129, .12);
+    --event-success-text: #047857;
+    --event-inactive-bg: rgba(100, 116, 139, .14);
+    --event-inactive-text: #475569;
+}
+
+
+/* =========================================================
+   1. PAGE HEADER
+   Mengatur judul halaman event admin.
+========================================================= */
+
+.admin-event-page-v2 .admin-section-title-v2 {
+    margin-bottom: var(--event-gap);
+}
+
+.admin-event-page-v2 .admin-section-title-v2 h2 {
+    font-size: 24px;
+}
+
+.admin-event-page-v2 .admin-section-title-v2 p {
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   2. PANEL / BOX
+   Mengatur card putih utama tiap form.
+========================================================= */
+
+.admin-event-page-v2 .admin-panel-v2 {
+    padding: var(--event-panel-padding);
+    border-radius: var(--event-panel-radius);
+}
+
+.admin-event-page-v2 .admin-panel-v2 + .admin-panel-v2,
+.admin-event-page-v2 form + .admin-panel-v2 {
+    margin-top: 12px;
+}
+
+
+/* =========================================================
+   3. ALERT
+   Pesan sukses / info.
+========================================================= */
+
+.admin-event-page-v2 .admin-alert-v2 {
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.admin-event-page-v2 .admin-alert-v2--success {
+    background: var(--event-success-bg);
+    color: var(--event-success-text);
+}
+
+
+/* =========================================================
+   4. FORM BASE
+   Semua input/select/textarea halaman event.
+========================================================= */
+
+.admin-event-page-v2 .admin-form-v2 {
+    display: grid;
+    gap: var(--event-gap);
+}
+
+.admin-event-page-v2 .admin-grid-v2 {
+    display: grid;
+    gap: var(--event-gap);
+}
+
+.admin-event-page-v2 .admin-grid-v2--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* Khusus halaman Atur Event, biar 4 field sejajar di desktop */
+.admin-event-page-v2 .admin-grid-v2--event-settings {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin-event-page-v2 .admin-form-v2 label {
+    display: grid;
+    gap: 5px;
+    color: var(--event-text);
+    font-size: var(--event-label-size);
+    font-weight: 850;
+}
+
+.admin-event-page-v2 .admin-form-v2 input,
+.admin-event-page-v2 .admin-form-v2 select,
+.admin-event-page-v2 .admin-form-v2 textarea {
+    width: 100%;
+    min-height: var(--event-control-height);
+    padding: 7px var(--event-control-padding-x);
+    border: 1px solid var(--event-border);
+    border-radius: var(--event-control-radius);
+    background: var(--event-surface);
+    color: var(--event-text);
+    font: inherit;
+    font-size: var(--event-input-size);
+    outline: none;
+}
+
+.admin-event-page-v2 .admin-form-v2 textarea {
+    min-height: 84px;
+    padding-top: 9px;
+    resize: vertical;
+}
+
+.admin-event-page-v2 .admin-form-v2 input:focus,
+.admin-event-page-v2 .admin-form-v2 select:focus,
+.admin-event-page-v2 .admin-form-v2 textarea:focus {
+    border-color: var(--event-text);
+    box-shadow: 0 0 0 3px rgba(14, 10, 16, .06);
+}
+
+.admin-event-page-v2 .admin-form-v2 small {
+    color: var(--event-danger);
+    font-size: 11px;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   5. CHECKBOX
+   Contoh: Aktifkan event, group aktif, produk aktif.
+========================================================= */
+
+.admin-event-page-v2 .admin-check-v2 {
+    width: fit-content;
+    min-height: 30px;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px !important;
+    color: var(--event-text);
+    font-size: 12px;
+    font-weight: 850;
+}
+
+.admin-event-page-v2 .admin-check-v2 input {
+    width: 15px;
+    min-height: 15px;
+}
+
+
+/* =========================================================
+   6. HELP TEXT
+   Box penjelasan kecil di bawah form.
+========================================================= */
+
+.admin-event-page-v2 .admin-help-v2 {
+    padding: 9px 11px;
+    border-radius: 10px;
+    background: rgba(22, 8, 133, .08);
+    color: var(--event-muted);
+    font-size: var(--event-help-size);
+    line-height: 1.45;
+    font-weight: 750;
+}
+
+
+/* =========================================================
+   7. BUTTONS
+   Tombol simpan, edit, hapus, batal.
+========================================================= */
+
+.admin-event-page-v2 .admin-actions-v2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.admin-event-page-v2 .admin-btn-v2 {
+    min-height: var(--event-button-height);
+    padding: 6px var(--event-button-padding-x);
+    border: 1px solid var(--event-border);
+    border-radius: var(--event-button-radius);
+    background: var(--event-surface);
+    color: var(--event-text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: var(--event-button-size);
+    font-weight: 900;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.admin-event-page-v2 .admin-btn-v2--primary {
+    border-color: var(--event-black);
+    background: var(--event-black);
+    color: #ffffff;
+}
+
+.admin-event-page-v2 .admin-btn-v2--danger {
+    border-color: rgba(220, 38, 38, .25);
+    background: rgba(220, 38, 38, .08);
+    color: #b91c1c;
+}
+
+.admin-event-page-v2 .admin-btn-v2--sm {
+    min-height: 28px;
+    padding: 5px 9px;
+    border-radius: 7px;
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   8. TABLE
+   Tabel list flash sale / paket bundling.
+========================================================= */
+
+.admin-event-page-v2 .admin-table-wrap-v2 {
+    margin-top: 12px;
+    overflow-x: auto;
+}
+
+.admin-event-page-v2 .admin-table-v2 {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-event-page-v2 .admin-table-v2 th,
+.admin-event-page-v2 .admin-table-v2 td {
+    padding: var(--event-table-cell-y) var(--event-table-cell-x);
+    border-bottom: 1px solid var(--event-border);
+    color: var(--event-text);
+    text-align: left;
+    vertical-align: middle;
+    font-size: var(--event-table-text-size);
+}
+
+.admin-event-page-v2 .admin-table-v2 th {
+    color: var(--event-muted);
+    font-size: var(--event-table-head-size);
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.admin-event-page-v2 .admin-table-actions-v2 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   9. STATUS PILL
+   Label Aktif / Nonaktif.
+========================================================= */
+
+.admin-event-page-v2 .admin-status-v2 {
+    min-height: 22px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.admin-event-page-v2 .admin-status-v2--active {
+    background: var(--event-success-bg);
+    color: var(--event-success-text);
+}
+
+.admin-event-page-v2 .admin-status-v2--inactive {
+    background: var(--event-inactive-bg);
+    color: var(--event-inactive-text);
+}
+
+
+/* =========================================================
+   10. GENERAL IMAGE PREVIEW
+   Preview kecil, misalnya gambar paket.
+========================================================= */
+
+.admin-event-page-v2 .admin-preview-v2 {
+    display: grid;
+    gap: 6px;
+    color: var(--event-muted);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.admin-event-page-v2 .admin-preview-v2 img {
+    width: min(360px, 100%);
+    max-height: var(--event-preview-small);
+    border-radius: 10px;
+    background: var(--event-soft);
+    object-fit: cover;
+}
+
+
+/* =========================================================
+   11. MUTED TEXT
+   Teks kecil abu-abu.
+========================================================= */
+
+.admin-event-page-v2 .admin-muted-v2 {
+    margin: 4px 0 0;
+    color: var(--event-muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   12. HERO IMAGE ADMIN
+   Halaman: Event > Image Hero
+========================================================= */
+
+/* Layout 3 kartu hero:
+   kiri besar, kanan atas, kanan bawah */
+.admin-event-page-v2 .admin-hero-grid-v2 {
+    display: grid;
+    grid-template-columns: minmax(0, var(--event-hero-left-width)) minmax(260px, var(--event-hero-right-width));
+    gap: var(--event-gap);
+}
+
+/* Card per hero */
+.admin-event-page-v2 .admin-hero-card-v2 {
+    display: grid;
+    gap: 10px;
+    padding: var(--event-card-padding);
+    border: 1px solid var(--event-border);
+    border-radius: var(--event-card-radius);
+    background: rgba(127, 127, 127, .06);
+}
+
+/* Hero besar kiri mengambil 2 baris */
+.admin-event-page-v2 .admin-hero-card-v2--large {
+    grid-row: span 2;
+}
+
+.admin-event-page-v2 .admin-hero-card-v2 h3 {
+    margin: 0;
+    color: var(--event-text);
+    font-size: 15px;
+    font-weight: 900;
+}
+
+.admin-event-page-v2 .admin-hero-card-v2 p {
+    margin: 4px 0 0;
+    color: var(--event-muted);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* Preview hero kanan */
+.admin-event-page-v2 .admin-hero-preview-v2 {
+    min-height: var(--event-preview-medium);
+    border: 1px dashed var(--event-border);
+    border-radius: 10px;
+    background: var(--event-soft);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    color: var(--event-muted);
+    font-weight: 800;
+}
+
+/* Preview hero besar kiri */
+.admin-event-page-v2 .admin-hero-preview-v2--large {
+    min-height: var(--event-preview-large);
+}
+
+.admin-event-page-v2 .admin-hero-preview-v2 img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+/* =========================================================
+   13. FLASH SALE GROUP ADMIN
+   Halaman: Event > Flash Sale
+========================================================= */
+
+/* Form tambah/edit group */
+.admin-event-page-v2 .admin-grid-v2--group {
+    grid-template-columns: minmax(220px, 1fr) 90px auto auto;
+    align-items: end;
+    gap: var(--event-gap);
+}
+
+/* List group flash sale */
+.admin-event-page-v2 .admin-flash-group-list-v2 {
+    display: grid;
+    gap: 8px;
+}
+
+/* Card group */
+.admin-event-page-v2 .admin-flash-group-card-v2 {
+    padding: 10px;
+    border: 1px solid var(--event-border);
+    border-radius: 12px;
+    background: var(--event-surface);
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Group yang sedang dipilih */
+.admin-event-page-v2 .admin-flash-group-card-v2.is-selected {
+    border-color: var(--event-black);
+    box-shadow: 0 0 0 3px rgba(14, 10, 16, .08);
+}
+
+/* Area klik nama group */
+.admin-event-page-v2 .admin-flash-group-card-v2 > button {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    text-align: left;
+    display: grid;
+    gap: 4px;
+    cursor: pointer;
+}
+
+.admin-event-page-v2 .admin-flash-group-card-v2 > button strong {
+    color: var(--event-text);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.admin-event-page-v2 .admin-flash-group-card-v2 > button span {
+    color: var(--event-muted);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* Area tombol group: hidupkan/edit/hapus */
+.admin-event-page-v2 .admin-flash-group-card-v2 > div {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   14. FULL BANNER ADMIN
+   Halaman: Event > Full Banner
+========================================================= */
+
+/* Layout preview kiri, form kanan */
+.admin-event-page-v2 .admin-full-banner-setting-v2 {
+    display: grid;
+    grid-template-columns: minmax(0, var(--event-full-banner-left-width)) minmax(260px, var(--event-full-banner-right-width));
+    gap: var(--event-gap);
+    align-items: start;
+}
+
+/* Preview full banner */
+.admin-event-page-v2 .admin-full-banner-preview-v2 {
+    min-height: var(--event-preview-full-banner);
+    border: 1px dashed var(--event-border);
+    border-radius: 12px;
+    background: var(--event-soft);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    color: var(--event-muted);
+    font-weight: 800;
+}
+
+/* Gambar full banner */
+.admin-event-page-v2 .admin-full-banner-preview-v2 img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Field di kanan preview */
+.admin-event-page-v2 .admin-full-banner-fields-v2 {
+    display: grid;
+    gap: var(--event-gap);
+}
+
+
+/* =========================================================
+   15. PAKET BUNDLING / NESTED FORM
+   Halaman: Event > Paket Kombo
+========================================================= */
+
+/* Box produk dalam paket */
+.admin-event-page-v2 .admin-nested-v2 {
+    display: grid;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid var(--event-border);
+    border-radius: 12px;
+    background: rgba(127, 127, 127, .06);
+}
+
+/* Header box produk dalam paket */
+.admin-event-page-v2 .admin-nested-v2__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.admin-event-page-v2 .admin-nested-v2__head p {
+    margin: 4px 0 0;
+}
+
+/* Row tiap produk paket */
+.admin-event-page-v2 .admin-nested-row-v2 {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) 72px 72px auto;
+    gap: 8px;
+    align-items: end;
+    padding: 10px;
+    border-radius: 10px;
+    background: var(--event-surface);
+}
+
+
+/* =========================================================
+   16. DISCOUNT SUMMARY
+   Ringkasan harga paket:
+   total barang, diskon, harga final.
+========================================================= */
+
+.admin-event-page-v2 .admin-discount-box-v2 {
+    display: grid;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid var(--event-border);
+    border-radius: 12px;
+    background: var(--event-surface);
+}
+
+.admin-event-page-v2 .admin-price-summary-v2 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.admin-event-page-v2 .admin-price-summary-v2 > div {
+    padding: 10px;
+    border-radius: 10px;
+    background: rgba(127, 127, 127, .08);
+    display: grid;
+    gap: 6px;
+}
+
+.admin-event-page-v2 .admin-price-summary-v2 span {
+    color: var(--event-muted);
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.admin-event-page-v2 .admin-price-summary-v2 strong {
+    color: var(--event-text);
+    font-size: 15px;
+    font-weight: 950;
+}
+
+/* Box harga final dibuat gelap */
+.admin-event-page-v2 .admin-price-summary-v2 .is-final {
+    background: var(--event-black);
+}
+
+.admin-event-page-v2 .admin-price-summary-v2 .is-final span,
+.admin-event-page-v2 .admin-price-summary-v2 .is-final strong {
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   17. RESPONSIVE
+   Ukuran tablet dan mobile.
+========================================================= */
+
+/* Tablet besar */
+@media (max-width: 1100px) {
+    .admin-event-page-v2 .admin-grid-v2--event-settings,
+    .admin-event-page-v2 .admin-grid-v2--2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-event-page-v2 .admin-price-summary-v2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Tablet kecil */
+@media (max-width: 900px) {
+    .admin-event-page-v2 .admin-hero-grid-v2,
+    .admin-event-page-v2 .admin-full-banner-setting-v2,
+    .admin-event-page-v2 .admin-flash-group-card-v2,
+    .admin-event-page-v2 .admin-grid-v2--group,
+    .admin-event-page-v2 .admin-nested-row-v2 {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-event-page-v2 .admin-hero-card-v2--large {
+        grid-row: auto;
+    }
+
+    .admin-event-page-v2 .admin-hero-preview-v2--large,
+    .admin-event-page-v2 .admin-full-banner-preview-v2 {
+        min-height: 180px;
+    }
+
+    .admin-event-page-v2 .admin-flash-group-card-v2 > div {
+        justify-content: flex-start;
+    }
+
+    .admin-event-page-v2 .admin-nested-v2__head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+    .admin-event-page-v2 {
+        --event-panel-padding: 12px;
+        --event-gap: 8px;
+        --event-control-height: 32px;
+        --event-preview-medium: 160px;
+        --event-preview-large: 180px;
+        --event-preview-full-banner: 170px;
+    }
+
+    .admin-event-page-v2 .admin-grid-v2--event-settings,
+    .admin-event-page-v2 .admin-grid-v2--2 {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-event-page-v2 .admin-actions-v2 {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .admin-event-page-v2 .admin-actions-v2 .admin-btn-v2 {
+        width: 100%;
+    }
+}

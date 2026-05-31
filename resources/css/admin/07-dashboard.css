@@ -1,0 +1,119 @@
+/* =========================================================
+   8. DASHBOARD COMPONENTS
+========================================================= */
+
+.admin-stat-row-v2 {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--admin-grid-gap);
+}
+
+.admin-stat-card-v2 {
+    min-height: 88px;
+    padding: 14px;
+    border-radius: var(--admin-panel-radius);
+    background: var(--admin-panel);
+    border: 1px solid var(--admin-border);
+    box-shadow: var(--admin-shadow);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.admin-stat-card-v2 strong {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--admin-text);
+    font-size: 22px;
+    line-height: 1.08;
+    font-weight: 950;
+    overflow-wrap: anywhere;
+}
+
+.admin-stat-card-v2 span {
+    color: var(--admin-muted);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.admin-stat-card-v2 i {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    border-radius: var(--admin-radius);
+    background: var(--admin-soft);
+    color: var(--admin-text);
+    border: 1px solid var(--admin-border);
+    display: grid;
+    place-items: center;
+    font-style: normal;
+    font-size: 15px;
+}
+
+.admin-grid-v2,
+.admin-grid-v2.wide {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(280px, .8fr);
+    gap: var(--admin-grid-gap);
+}
+
+.admin-ring-row-v2 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--admin-grid-gap);
+    align-items: center;
+}
+
+.admin-ring-v2 {
+    --size: 112px;
+
+    width: var(--size);
+    height: var(--size);
+    margin: 0 auto;
+    border-radius: 50%;
+    background:
+        radial-gradient(var(--admin-panel) 58%, transparent 59%),
+        conic-gradient(var(--admin-accent) calc(var(--value) * 1%), var(--admin-soft) 0);
+    display: grid;
+    place-items: center;
+}
+
+.admin-ring-v2 strong {
+    display: block;
+    color: var(--admin-text);
+    font-size: 23px;
+    font-weight: 950;
+}
+
+.admin-ring-v2 span {
+    color: var(--admin-muted);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.admin-line-chart-v2 {
+    color: var(--admin-accent);
+}
+
+.admin-line-chart-v2 svg {
+    width: 100%;
+    height: 260px;
+    display: block;
+    border-radius: var(--admin-radius);
+    background:
+        linear-gradient(to bottom, transparent 24%, var(--admin-soft) 25%, transparent 26%),
+        linear-gradient(to bottom, transparent 49%, var(--admin-soft) 50%, transparent 51%),
+        linear-gradient(to bottom, transparent 74%, var(--admin-soft) 75%, transparent 76%);
+}
+
+.admin-chart-labels-v2 {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 6px;
+    color: var(--admin-muted);
+    font-size: 11px;
+    text-align: center;
+}
+

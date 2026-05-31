@@ -1,0 +1,94 @@
+/* =========================================================
+   ADMIN TOPBAR ACTIONS
+========================================================= */
+
+.admin-topbar-actions-v2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-theme-toggle {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--admin-border);
+    border-radius: 12px;
+    background: var(--admin-panel);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition:
+        transform .18s ease,
+        background .18s ease,
+        border-color .18s ease;
+}
+
+.admin-theme-toggle:hover {
+    transform: translateY(-1px);
+    background: var(--admin-soft);
+    border-color: var(--admin-border-strong);
+}
+
+.admin-theme-toggle img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.admin-profile-chip {
+    min-height: 42px;
+    padding: 5px 12px 5px 6px;
+    border: 1px solid var(--admin-border);
+    border-radius: 999px;
+    background: var(--admin-panel);
+    color: var(--admin-text);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    transition:
+        transform .18s ease,
+        background .18s ease,
+        border-color .18s ease;
+}
+
+.admin-profile-chip:hover {
+    transform: translateY(-1px);
+    background: var(--admin-soft);
+    border-color: var(--admin-border-strong);
+}
+
+.admin-profile-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--admin-accent);
+    color: var(--admin-panel);
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 950;
+}
+
+html[data-admin-theme="dark"] .admin-profile-avatar {
+    color: #111111;
+}
+
+.admin-profile-chip span:last-child {
+    display: grid;
+    gap: 1px;
+}
+
+.admin-profile-chip strong {
+    color: var(--admin-text);
+    font-size: 12px;
+    font-weight: 950;
+    line-height: 1.1;
+}
+
+.admin-profile-chip small {
+    color: var(--admin-muted);
+    font-size: 10px;
+    font-weight: 800;
+}
+

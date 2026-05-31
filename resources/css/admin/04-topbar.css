@@ -1,0 +1,69 @@
+/* =========================================================
+   5. TOPBAR
+========================================================= */
+
+.admin-topbar-v2 {
+    min-height: var(--admin-topbar-height);
+    height: var(--admin-topbar-height);
+    padding: 0 var(--admin-content-x);
+    background: var(--admin-panel);
+    border-bottom: 1px solid var(--admin-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.admin-topbar-v2 p {
+    margin: 0 0 3px;
+    color: var(--admin-muted);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.admin-topbar-v2 h1 {
+    margin: 0;
+    color: var(--admin-text);
+    font-size: 21px;
+    line-height: 1.1;
+    font-weight: 950;
+}
+
+.admin-topbar-actions-v2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-icon-btn-v2 {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius);
+    background: var(--admin-panel);
+    color: var(--admin-text);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+}
+
+.admin-icon-btn-v2:hover {
+    background: var(--admin-soft);
+    border-color: var(--admin-border-strong);
+}
+
+.admin-avatar-v2 {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--admin-radius);
+    background: var(--admin-accent);
+    color: var(--admin-panel);
+    display: grid;
+    place-items: center;
+    font-weight: 950;
+}
+
+.admin-shell-v2[data-admin-theme="dark"] .admin-avatar-v2 {
+    color: #111111;
+}
+

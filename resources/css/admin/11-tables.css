@@ -1,0 +1,73 @@
+/* =========================================================
+   12. TABLES
+========================================================= */
+
+.admin-table-head {
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.admin-table-head h2 {
+    margin: 0;
+}
+
+.admin-table-tools {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.admin-table-tools input {
+    min-width: 220px;
+}
+
+.admin-table-tools select {
+    width: auto;
+}
+
+.admin-table,
+.admin-table-v2 {
+    width: 100%;
+    min-width: var(--admin-table-min-width);
+    border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td,
+.admin-table-v2 th,
+.admin-table-v2 td {
+    padding: var(--admin-table-cell-y) var(--admin-table-cell-x);
+    border-bottom: 1px solid var(--admin-border);
+    color: var(--admin-text);
+    text-align: left;
+    vertical-align: middle;
+}
+
+.admin-table th,
+.admin-table-v2 th {
+    color: var(--admin-muted);
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.admin-table td,
+.admin-table-v2 td {
+    font-size: var(--admin-text-size);
+}
+
+.admin-table-thumb {
+    width: var(--admin-table-thumb-width);
+    height: var(--admin-table-thumb-height);
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.admin-pagination {
+    margin-top: 18px;
+}
+

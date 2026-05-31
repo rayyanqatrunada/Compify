@@ -1,0 +1,69 @@
+/* =========================================================
+   ADMIN THEME GLOBAL
+========================================================= */
+
+.admin-shell-v2 {
+    --admin-bg: #f4f4f6;
+    --admin-panel: #ffffff;
+    --admin-sidebar: #ffffff;
+    --admin-text: #202020;
+    --admin-muted: #777777;
+    --admin-border: #e5e5e5;
+    --admin-border-strong: #d7d7d7;
+    --admin-accent: #111111;
+    --admin-soft: #f3f4f6;
+    --admin-shadow: 0 12px 28px rgba(0, 0, 0, .045);
+}
+
+html[data-admin-theme="dark"] .admin-shell-v2,
+.admin-shell-v2[data-admin-theme="dark"] {
+    --admin-bg: #101010;
+    --admin-panel: #181818;
+    --admin-sidebar: #151515;
+    --admin-text: #f5f5f5;
+    --admin-muted: #a8a8a8;
+    --admin-border: #2b2b2b;
+    --admin-border-strong: #3a3a3a;
+    --admin-accent: #ffffff;
+    --admin-soft: #242424;
+    --admin-shadow: 0 16px 34px rgba(0, 0, 0, .28);
+}
+
+.admin-body-v2,
+.admin-body {
+    background: var(--admin-bg);
+    color: var(--admin-text);
+}
+
+.admin-shell-v2,
+.admin-main-v2,
+.admin-content-v2 {
+    background: var(--admin-bg);
+    color: var(--admin-text);
+}
+
+.admin-panel-v2,
+.admin-panel,
+.admin-card,
+.admin-topbar-v2,
+.admin-sidebar-v2 {
+    background: var(--admin-panel);
+    color: var(--admin-text);
+    border-color: var(--admin-border);
+}
+
+.admin-menu-v2 a,
+.admin-menu-v2 summary,
+.admin-topbar-v2 h1,
+.admin-section-title-v2 h2,
+.admin-panel-v2 h2,
+.admin-panel-v2 h3 {
+    color: var(--admin-text);
+}
+
+.admin-topbar-v2 p,
+.admin-section-title-v2 p,
+.admin-panel-v2 p {
+    color: var(--admin-muted);
+}
+

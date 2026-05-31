@@ -1,0 +1,62 @@
+/* =========================================================
+   11. BUTTONS
+========================================================= */
+
+.admin-btn,
+.admin-modern-btn {
+    min-height: var(--admin-control-height);
+    padding: 0 14px;
+    border: 1px solid var(--admin-accent);
+    border-radius: var(--admin-radius);
+    background: var(--admin-accent);
+    color: var(--admin-panel);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 900;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        background .18s ease,
+        color .18s ease,
+        border-color .18s ease;
+}
+
+.admin-btn:hover,
+.admin-modern-btn:hover {
+    transform: translateY(-1px);
+}
+
+.admin-shell-v2[data-admin-theme="dark"] .admin-btn,
+.admin-shell-v2[data-admin-theme="dark"] .admin-modern-btn {
+    color: #111111;
+}
+
+.admin-btn.secondary,
+.admin-modern-btn-light {
+    background: var(--admin-soft);
+    color: var(--admin-text);
+    border-color: var(--admin-border);
+}
+
+.admin-btn.danger {
+    background: var(--admin-danger);
+    color: #ffffff;
+    border-color: var(--admin-danger);
+}
+
+.admin-modern-btn-dark {
+    background: var(--admin-accent);
+    color: var(--admin-panel);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, .12);
+}
+
+.admin-modern-btn-dark:hover {
+    box-shadow: 0 14px 28px rgba(0, 0, 0, .18);
+}
+
