@@ -148,7 +148,7 @@ class extends Component {
                                 name="redirect_to_cart"
                                 value="1"
                                 class="product-detail-buy"
-                                {{ $product->stock <= 0 ? 'disabled' : '' }}
+                                {{ $this->maxPurchasableStock() <= 0 ? 'disabled' : '' }}
                             >
                                 Beli Sekarang
                             </button>
@@ -156,7 +156,7 @@ class extends Component {
                             <button
                                 type="submit"
                                 class="product-detail-cart"
-                                {{ $product->stock <= 0 ? 'disabled' : '' }}
+                                {{ $this->maxPurchasableStock() <= 0 ? 'disabled' : '' }}
                             >
                                 Masukkan Keranjang
                             </button>
@@ -217,10 +217,7 @@ class extends Component {
 
                     <div>
                         <span>{{ $isEventPrice ? 'Flash' : 'Stok' }}</span>
-
-                        <strong>
-                            {{ $isEventPrice ? 'Aktif' : $product->stock }}
-                        </strong>
+                        <strong>{{ $this->maxPurchasableStock() }}</strong>
                     </div>
 
                     <div>
