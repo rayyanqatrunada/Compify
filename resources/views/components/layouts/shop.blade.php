@@ -156,7 +156,7 @@
 
                 <a href="{{ route('products.index') }}" class="nav-link" wire:navigate>Produk</a>
                 <a href="{{ route('products.index', ['sort' => 'latest']) }}" class="nav-link" wire:navigate>Produk Baru</a>
-                <a href="{{ route('products.index') }}" class="nav-link" wire:navigate>Promo</a>
+                <a href="{{ route('event.index') }}" class="nav-link" wire:navigate>Event</a>
                 <a href="{{ route('about') }}" class="nav-link" wire:navigate>About Us</a>
             </div>
         </nav>

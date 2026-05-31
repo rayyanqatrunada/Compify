@@ -22,6 +22,9 @@ Route::livewire('/products', 'pages::shop.products.index')->name('products.index
 Route::livewire('/product/{product:slug}', 'pages::shop.products.show')->name('products.show');
 Route::livewire('/category/{category:slug}', 'pages::shop.categories.show')->name('categories.show');
 
+Route::livewire('/event', 'pages::shop.events.index')->name('event.index');
+Route::livewire('/event/packages/{comboPackage:slug}', 'pages::shop.events.package-show')->name('event.packages.show');
+
 Route::livewire('/wishlist', 'pages::shop.wishlist.index')->name('wishlist.index');
 
 Route::livewire('/about-us', 'pages::shop.company.about')->name('about');
@@ -240,6 +243,15 @@ Route::middleware(['auth:admin', 'admin'])
 
             Route::livewire('/pages', 'pages::admin.content.pages.index')->name('pages');
         });
+
+        Route::prefix('event')->name('event.')->group(function () {
+            Route::livewire('/settings', 'pages::admin.event.settings')->name('settings');
+            Route::livewire('/hero-images', 'pages::admin.event.hero-images')->name('hero-images');
+            Route::livewire('/flash-sale', 'pages::admin.event.flash-sale')->name('flash-sale');
+            Route::livewire('/full-banners', 'pages::admin.event.full-banners')->name('full-banners');
+            Route::livewire('/combo-packages', 'pages::admin.event.combo-packages')->name('combo-packages');
+        });
+
 
         Route::prefix('sales')->name('sales.')->group(function () {
             Route::livewire('/orders', 'pages::admin.sales.orders.index')->name('orders');

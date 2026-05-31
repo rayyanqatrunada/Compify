@@ -37,6 +37,9 @@
         $isConfigureOpen =
             request()->routeIs('admin.settings.*') ||
             request()->routeIs('admin.content.pages');
+
+        $isEventOpen = 
+            request()->routeIs('admin.event.*');
     @endphp
 
     <div class="admin-shell-v2" id="adminShell" data-admin-theme="light">
@@ -109,6 +112,40 @@
                         <a href="{{ route('admin.content.home-galleries') }}" wire:navigate
                            @class(['active' => request()->routeIs('admin.content.home-galleries')])>
                             Gallery 3 Images
+                        </a>
+                    </div>
+                </details>
+
+                <details {{ $isEventOpen ? 'open' : '' }}>
+                    <summary>
+                        <span>✦</span>
+                        Event
+                    </summary>
+
+                    <div class="admin-submenu-v2">
+                        <a href="{{ route('admin.event.settings') }}" wire:navigate
+                        @class(['active' => request()->routeIs('admin.event.settings')])>
+                            Atur Event
+                        </a>
+
+                        <a href="{{ route('admin.event.hero-images') }}" wire:navigate
+                        @class(['active' => request()->routeIs('admin.event.hero-images')])>
+                            Image Hero
+                        </a>
+
+                        <a href="{{ route('admin.event.flash-sale') }}" wire:navigate
+                        @class(['active' => request()->routeIs('admin.event.flash-sale')])>
+                            Flash Sale
+                        </a>
+
+                        <a href="{{ route('admin.event.full-banners') }}" wire:navigate
+                        @class(['active' => request()->routeIs('admin.event.full-banners')])>
+                            Full Banner
+                        </a>
+
+                        <a href="{{ route('admin.event.combo-packages') }}" wire:navigate
+                        @class(['active' => request()->routeIs('admin.event.combo-packages')])>
+                            Paket Kombo
                         </a>
                     </div>
                 </details>
