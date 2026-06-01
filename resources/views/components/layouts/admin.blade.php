@@ -34,6 +34,9 @@
             request()->routeIs('admin.content.home-split-banners') ||
             request()->routeIs('admin.content.home-galleries');
 
+        $isAboutOpen =
+            request()->routeIs('admin.content.about.*');
+
         $isConfigureOpen =
             request()->routeIs('admin.settings.*') ||
             request()->routeIs('admin.content.pages');
@@ -112,6 +115,40 @@
                         <a href="{{ route('admin.content.home-galleries') }}" wire:navigate
                            @class(['active' => request()->routeIs('admin.content.home-galleries')])>
                             Gallery 3 Images
+                        </a>
+                    </div>
+                </details>
+
+                <details {{ $isAboutOpen ? 'open' : '' }}>
+                    <summary>
+                        <span>A</span>
+                        About Page
+                    </summary>
+
+                    <div class="admin-submenu-v2">
+                        <a href="{{ route('admin.content.about.hero') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.content.about.hero')])>
+                            About Hero
+                        </a>
+
+                        <a href="{{ route('admin.content.about.intro') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.content.about.intro')])>
+                            About Intro
+                        </a>
+
+                        <a href="{{ route('admin.content.about.stats') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.content.about.stats')])>
+                            About Stats
+                        </a>
+
+                        <a href="{{ route('admin.content.about.quote') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.content.about.quote')])>
+                            About Quote
+                        </a>
+
+                        <a href="{{ route('admin.content.about.values') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.content.about.values')])>
+                            About Values
                         </a>
                     </div>
                 </details>

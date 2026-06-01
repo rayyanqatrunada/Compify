@@ -40,6 +40,7 @@ class DatabaseSeeder extends Seeder
             BannerSeeder::class,
             HomeSectionSeeder::class,
             ShippingMethodSeeder::class,
+            AboutSectionSeeder::class,
         ]);
     }
 }

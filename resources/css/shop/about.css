@@ -1,0 +1,227 @@
+.about-page {
+    background: #fff;
+    color: #0e0a10;
+    font-family: 'Manrope', sans-serif;
+}
+
+.about-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 90px 80px;
+}
+
+.about-hero {
+    min-height: 355px;
+    background: #d9d9d9;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 24px;
+}
+
+.about-hero h1 {
+    margin: 0;
+    color: #ececec;
+    font-size: 64px;
+    font-weight: 600;
+    line-height: 1;
+    text-align: center;
+    text-shadow: 0 8px 26px rgba(0, 0, 0, .26);
+}
+
+.about-intro {
+    padding-top: 24px;
+}
+
+.about-intro h2 {
+    max-width: 960px;
+    margin: 0 0 24px;
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 40px;
+}
+
+.about-page .shop-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 16px;
+    padding: 12px 24px;
+    border-radius: 5px;
+    background: #0e0a10;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform .3s ease;
+}
+
+.about-page .shop-btn:hover {
+    transform: translateY(-3px);
+}
+
+.about-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-top: 58px;
+}
+
+.about-page .stat-card {
+    width: 214px;
+    min-height: 129px;
+    padding: 18px 24px;
+    border: 1px solid rgba(0, 0, 0, .5);
+    border-radius: 8px;
+    background: rgba(236, 236, 236, .25);
+}
+
+.about-page .stat-card h3 {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    font-size: 40px;
+    font-weight: 500;
+    line-height: 60px;
+}
+
+.about-page .stat-card p {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: .03em;
+    opacity: .85;
+}
+
+.about-quote {
+    position: relative;
+    max-width: 974px;
+    margin: 90px auto 0;
+}
+
+.about-quote h2 {
+    margin: 0;
+    color: rgba(14, 10, 16, .78);
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 40px;
+}
+
+.quote-left,
+.quote-right {
+    position: absolute;
+    color: #0e0a10;
+    font-size: 70px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.quote-left {
+    left: -70px;
+    top: -10px;
+}
+
+.quote-right {
+    right: -70px;
+    bottom: -20px;
+}
+
+.about-values {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px;
+    margin: 90px 0;
+}
+
+.about-page .value-card {
+    min-height: 320px;
+    padding: 34px;
+    border-radius: 8px;
+    background: rgba(236, 236, 236, .4);
+    transition: box-shadow .4s ease, transform .4s ease;
+}
+
+.about-page .value-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, .04);
+}
+
+.about-page .value-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 5px;
+    background: #000;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+    text-align: center;
+}
+
+.about-page .value-card h3 {
+    margin: 90px 0 0;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 40px;
+}
+
+.about-page .value-card p {
+    max-width: 263px;
+    margin: 12px 0 0;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 22px;
+}
+
+@media (max-width: 992px) {
+    .about-container {
+        padding: 72px 24px;
+    }
+
+    .about-values {
+        grid-template-columns: 1fr;
+    }
+
+    .quote-left,
+    .quote-right {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .about-hero {
+        min-height: 260px;
+    }
+
+    .about-hero h1 {
+        font-size: 42px;
+    }
+
+    .about-intro h2 {
+        font-size: 22px;
+        line-height: 34px;
+    }
+
+    .about-stats {
+        flex-direction: column;
+    }
+
+    .about-page .stat-card {
+        width: 100%;
+    }
+
+    .about-quote h2 {
+        font-size: 24px;
+        line-height: 34px;
+    }
+
+    .about-values {
+        margin: 72px 0;
+    }
+}

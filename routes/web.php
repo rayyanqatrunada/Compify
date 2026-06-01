@@ -256,6 +256,14 @@ Route::middleware(['auth:admin', 'admin'])
             Route::livewire('/home-galleries', 'pages::admin.content.home-sections.galleries')
                 ->name('home-galleries');
 
+            Route::prefix('about')->name('about.')->group(function () {
+                Route::livewire('/hero', 'pages::admin.content.about.hero')->name('hero');
+                Route::livewire('/intro', 'pages::admin.content.about.intro')->name('intro');
+                Route::livewire('/stats', 'pages::admin.content.about.stats')->name('stats');
+                Route::livewire('/quote', 'pages::admin.content.about.quote')->name('quote');
+                Route::livewire('/values', 'pages::admin.content.about.values')->name('values');
+            });
+
             Route::livewire('/pages', 'pages::admin.content.pages.index')->name('pages');
         });
 
