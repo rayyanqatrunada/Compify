@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use App\Services\WhatsAppOrderMessageService;
+use App\Models\Product;
+use Illuminate\Support\Facades\DB;
 
 new
 #[Layout('components.layouts.admin')]
@@ -98,6 +101,71 @@ class extends Component
     {
         return 'Rp ' . number_format((float) $value, 0, ',', '.');
     }
+
+    public function customerWhatsappUrl(): ?string
+    {
+        return app(WhatsAppOrderMessageService::class)
+            ->customerUrlForOrder($this->order);
+    }
+
+    public function canDeleteOrder(): bool
+    {
+        return in_array($this->order->payment_status, ['pending', 'failed', 'expired'], true)
+            || in_array($this->order->order_status, ['pending', 'cancelled'], true);
+    }
+
+    public function deleteOrder()
+    {
+        if (! $this->canDeleteOrder()) {
+            session()->flash('error', 'Order yang sudah dibayar/diproses tidak bisa dihapus langsung. Ubah status atau batalkan order terlebih dahulu.');
+            return;
+        }
+
+        DB::transaction(function () {
+            $this->order->loadMissing('items');
+
+            foreach ($this->order->items as $item) {
+                $this->restoreStockFromOrderItem($item);
+            }
+
+            $this->order->delete();
+        });
+
+        session()->flash('success', 'Order berhasil dihapus dan stok dikembalikan.');
+
+        return $this->redirectRoute('admin.sales.orders', navigate: true);
+    }
+
+    private function restoreStockFromOrderItem($item): void
+    {
+        if ($item->item_type === 'product' || $item->item_type === 'event_flash_sale') {
+            if ($item->product_id) {
+                Product::whereKey($item->product_id)->increment('stock', (int) $item->quantity);
+            }
+
+            return;
+        }
+
+        if ($item->item_type === 'combo_package') {
+            $children = collect($item->snapshot_data['children'] ?? []);
+
+            foreach ($children as $child) {
+                $productId = $child['product_id'] ?? null;
+
+                if (! $productId) {
+                    continue;
+                }
+
+                $restoreQty = (int) ($child['total_quantity'] ?? 0);
+
+                if ($restoreQty < 1) {
+                    $restoreQty = (int) ($child['quantity_per_package'] ?? 1) * (int) $item->quantity;
+                }
+
+                Product::whereKey($productId)->increment('stock', $restoreQty);
+            }
+        }
+    }
 };
 ?>
 
@@ -126,6 +194,12 @@ class extends Component
     @if(session('success'))
         <div class="admin-alert-v2 admin-alert-v2--success">
             {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="admin-alert-v2 admin-alert-v2--danger">
+            {{ session('error') }}
         </div>
     @endif
 
@@ -180,6 +254,22 @@ class extends Component
                     <strong>{{ $order->paymentMethod?->name ?? '-' }}</strong>
                 </div>
             </div>
+
+            @if($this->customerWhatsappUrl())
+                <div class="admin-order-wa-actions-v2">
+                    <a
+                        href="{{ $this->customerWhatsappUrl() }}"
+                        target="_blank"
+                        class="admin-btn-v2 admin-btn-v2--whatsapp"
+                    >
+                        Hubungi Customer via WhatsApp
+                    </a>
+
+                    <small>
+                        Membuka WhatsApp dengan pesan status order otomatis.
+                    </small>
+                </div>
+            @endif
         </section>
 
         <section class="admin-panel-v2">
@@ -212,7 +302,19 @@ class extends Component
                     <button type="submit" class="admin-btn-v2 admin-btn-v2--primary">
                         Simpan Status
                     </button>
+
+                    @if($this->canDeleteOrder())
+                        <button
+                            type="button"
+                            class="admin-btn-v2 admin-btn-v2--danger"
+                            wire:click="deleteOrder"
+                            wire:confirm="Yakin hapus order ini? Stok produk akan dikembalikan dan data order akan hilang."
+                        >
+                            Hapus Order
+                        </button>
+                    @endif
                 </div>
+
             </form>
         </section>
     </div>

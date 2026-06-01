@@ -24,6 +24,11 @@ class extends Component {
     public string $name = '';
     public string $type = 'manual';
     public string $payment_url = '';
+
+    public string $whatsapp_number = '';
+    public string $whatsapp_template = '';
+    public string $auto_redirect = '0';
+
     public string $api_provider = '';
     public string $api_endpoint = '';
     public string $instructions = '';
@@ -41,6 +46,13 @@ class extends Component {
         $this->resetPage();
     }
 
+    public function updatedType(): void
+    {
+        if ($this->type === 'whatsapp' && $this->whatsapp_template === '') {
+            $this->whatsapp_template = $this->defaultWhatsappTemplate();
+        }
+    }
+
     #[Computed]
     public function methods()
     {
@@ -54,24 +66,60 @@ class extends Component {
     {
         $this->validate([
             'name' => ['required', 'string', 'max:255'],
-            'type' => ['required', 'in:manual,url,qr,api'],
+            'type' => ['required', 'in:manual,url,qr,api,whatsapp'],
+
             'payment_url' => ['nullable', 'string', 'max:255'],
+
+            'whatsapp_number' => ['nullable', 'string', 'max:30'],
+            'whatsapp_template' => ['nullable', 'string'],
+            'auto_redirect' => ['boolean'],
+
             'api_provider' => ['nullable', 'string', 'max:100'],
             'api_endpoint' => ['nullable', 'string', 'max:255'],
             'instructions' => ['nullable', 'string'],
             'is_active' => ['boolean'],
             'sort_order' => ['nullable', 'integer'],
+
             'logoFile' => ['nullable', 'image', 'max:2048'],
             'qrFile' => ['nullable', 'image', 'max:4096'],
         ]);
 
+        if ($this->type === 'whatsapp' && trim($this->whatsapp_number) === '') {
+            $this->addError('whatsapp_number', 'Nomor WhatsApp wajib diisi untuk tipe WhatsApp.');
+            return;
+        }
+
+        $slug = Str::slug($this->name);
+
         $payload = [
             'name' => $this->name,
-            'slug' => Str::slug($this->name),
+            'slug' => $slug,
             'type' => $this->type,
-            'payment_url' => $this->payment_url ?: null,
-            'api_provider' => $this->api_provider ?: null,
-            'api_endpoint' => $this->api_endpoint ?: null,
+
+            'payment_url' => $this->type === 'url'
+                ? ($this->payment_url ?: null)
+                : null,
+
+            'whatsapp_number' => $this->type === 'whatsapp'
+                ? ($this->whatsapp_number ?: null)
+                : null,
+
+            'whatsapp_template' => $this->type === 'whatsapp'
+                ? ($this->whatsapp_template ?: $this->defaultWhatsappTemplate())
+                : null,
+
+            'auto_redirect' => $this->type === 'whatsapp'
+                ? $this->auto_redirect === '1'
+                : false,
+
+            'api_provider' => $this->type === 'api'
+                ? ($this->api_provider ?: null)
+                : null,
+
+            'api_endpoint' => $this->type === 'api'
+                ? ($this->api_endpoint ?: null)
+                : null,
+
             'instructions' => $this->instructions ?: null,
             'is_active' => $this->is_active,
             'sort_order' => $this->sort_order,
@@ -110,7 +158,13 @@ class extends Component {
         $this->editingId = $method->id;
         $this->name = $method->name;
         $this->type = $method->type;
+
         $this->payment_url = $method->payment_url ?? '';
+
+        $this->whatsapp_number = $method->whatsapp_number ?? '';
+        $this->whatsapp_template = $method->whatsapp_template ?? '';
+        $this->auto_redirect = $method->auto_redirect ? '1' : '0';
+
         $this->api_provider = $method->api_provider ?? '';
         $this->api_endpoint = $method->api_endpoint ?? '';
         $this->instructions = $method->instructions ?? '';
@@ -147,6 +201,11 @@ class extends Component {
         $this->name = '';
         $this->type = 'manual';
         $this->payment_url = '';
+
+        $this->whatsapp_number = '';
+        $this->whatsapp_template = '';
+        $this->auto_redirect = '0';
+
         $this->api_provider = '';
         $this->api_endpoint = '';
         $this->instructions = '';
@@ -161,13 +220,30 @@ class extends Component {
 
         $this->resetValidation();
     }
+
+    public function defaultWhatsappTemplate(): string
+    {
+        return "Halo Admin Compify, saya ingin konfirmasi pesanan.\n\nOrder: {order_number}\nNama: {customer_name}\nNo. HP: {customer_phone}\nTotal: {total_amount}\n\nItem:\n{items}\n\nAlamat:\n{shipping_address}\n\nTerima kasih.";
+    }
+
+    public function typeLabel(?string $type): string
+    {
+        return match ($type) {
+            'manual' => 'MANUAL',
+            'qr' => 'QR',
+            'url' => 'URL',
+            'api' => 'API',
+            'whatsapp' => 'WHATSAPP',
+            default => strtoupper((string) $type),
+        };
+    }
 };
 ?>
 
 <div class="admin-page-v2">
     <div class="admin-section-title-v2">
         <h2>Payment Methods</h2>
-        <p>Atur metode pembayaran seperti QRIS, transfer bank, e-wallet, URL payment, atau API gateway.</p>
+        <p>Atur metode pembayaran seperti QRIS, transfer bank, e-wallet, URL payment, API gateway, atau WhatsApp admin.</p>
     </div>
 
     @if(session('success'))
@@ -180,7 +256,7 @@ class extends Component {
         <div class="admin-grid">
             <label>
                 Nama Metode
-                <input type="text" wire:model="name" placeholder="Contoh: QRIS, BCA, Xendit">
+                <input type="text" wire:model="name" placeholder="Contoh: QRIS, BCA, WhatsApp Admin">
             </label>
 
             <label>
@@ -190,6 +266,7 @@ class extends Component {
                     <option value="qr">QR Image</option>
                     <option value="url">Payment URL</option>
                     <option value="api">API Gateway</option>
+                    <option value="whatsapp">WhatsApp Admin</option>
                 </select>
             </label>
 
@@ -236,7 +313,44 @@ class extends Component {
                     <input type="text" wire:model="api_endpoint" placeholder="Endpoint API pembayaran">
                 </label>
             @endif
+
+            @if($type === 'whatsapp')
+                <label>
+                    Nomor WhatsApp Admin
+                    <input type="text" wire:model="whatsapp_number" placeholder="Contoh: 6281234567890">
+                    @error('whatsapp_number')
+                        <small style="color: #b91c1c;">{{ $message }}</small>
+                    @enderror
+                </label>
+
+                <label>
+                    Auto Redirect
+                    <select wire:model.live="auto_redirect">
+                        <option value="1">Aktif - langsung buka WhatsApp</option>
+                        <option value="0">Nonaktif - tampilkan tombol di payment page</option>
+                    </select>
+                </label>
+            @endif
         </div>
+
+        @if($type === 'whatsapp')
+            <br>
+
+            <label>
+                Template Pesan WhatsApp
+                <textarea
+                    wire:model="whatsapp_template"
+                    rows="8"
+                    placeholder="Template pesan WhatsApp"
+                ></textarea>
+
+                <small class="admin-form-help-v2">
+                    Placeholder yang bisa dipakai:
+                    {order_number}, {customer_name}, {customer_phone}, {customer_email},
+                    {items}, {subtotal}, {shipping_cost}, {total_amount}, {shipping_address}
+                </small>
+            </label>
+        @endif
 
         <br>
 
@@ -299,6 +413,7 @@ class extends Component {
                     <th>Logo</th>
                     <th>Nama</th>
                     <th>Tipe</th>
+                    <th>Detail</th>
                     <th>Status</th>
                     <th>Urutan</th>
                     <th>Aksi</th>
@@ -315,10 +430,30 @@ class extends Component {
                                 -
                             @endif
                         </td>
+
                         <td>{{ $method->name }}</td>
-                        <td>{{ strtoupper($method->type) }}</td>
+
+                        <td>{{ $this->typeLabel($method->type) }}</td>
+
+                        <td>
+                            @if($method->type === 'whatsapp')
+                                <strong>{{ $method->whatsapp_number ?: '-' }}</strong>
+                                <small>
+                                    {{ $method->auto_redirect ? 'Auto redirect aktif' : 'Auto redirect nonaktif' }}
+                                </small>
+                            @elseif($method->type === 'url')
+                                <small>{{ $method->payment_url ?: '-' }}</small>
+                            @elseif($method->type === 'api')
+                                <small>{{ $method->api_provider ?: '-' }}</small>
+                            @else
+                                <small>-</small>
+                            @endif
+                        </td>
+
                         <td>{{ $method->is_active ? 'Aktif' : 'Nonaktif' }}</td>
+
                         <td>{{ $method->sort_order }}</td>
+
                         <td>
                             <button class="admin-btn" type="button" wire:click="edit({{ $method->id }})">
                                 Edit
@@ -336,7 +471,7 @@ class extends Component {
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6">Belum ada metode pembayaran.</td>
+                        <td colspan="7">Belum ada metode pembayaran.</td>
                     </tr>
                 @endforelse
             </tbody>

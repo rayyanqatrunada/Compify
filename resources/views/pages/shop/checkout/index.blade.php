@@ -13,6 +13,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use App\Services\CartService;
+use App\Services\WhatsAppOrderMessageService;
 
 new
 #[Layout('components.layouts.shop')]
@@ -332,6 +333,10 @@ class extends Component {
                 'discount_amount' => $this->cartDiscountTotal(),
                 'total_amount' => $this->total,
 
+                'payment_type' => $this->selectedPaymentMethod?->type,
+                'payment_reference' => null,
+                'payment_redirect_url' => null,
+
                 'order_status' => 'pending',
                 'payment_status' => 'pending',
             ]);
@@ -348,6 +353,30 @@ class extends Component {
 
             return $order;
         });
+
+        $order->load([
+            'items',
+            'paymentMethod',
+            'shippingMethod',
+        ]);
+
+        $paymentMethod = $order->paymentMethod;
+
+        if ($paymentMethod?->type === 'whatsapp') {
+            $whatsappUrl = app(WhatsAppOrderMessageService::class)
+                ->urlForOrder($order, $paymentMethod);
+
+            if ($whatsappUrl) {
+                $order->update([
+                    'payment_type' => 'whatsapp',
+                    'payment_redirect_url' => $whatsappUrl,
+                ]);
+
+                if ($paymentMethod->auto_redirect) {
+                    return redirect()->away($whatsappUrl);
+                }
+            }
+        }
 
         return redirect()->route('checkout.payment', $order);
     }

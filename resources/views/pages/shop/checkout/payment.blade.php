@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use App\Services\WhatsAppOrderMessageService;
 
 new
 #[Layout('components.layouts.shop')]
@@ -29,6 +30,22 @@ class extends Component
     public function formatRupiah(int|float|null $value): string
     {
         return 'Rp ' . number_format((float) $value, 0, ',', '.');
+    }
+
+    public function whatsappUrl(): ?string
+    {
+        $method = $this->order->paymentMethod;
+
+        if (! $method || $method->type !== 'whatsapp') {
+            return null;
+        }
+
+        if ($this->order->payment_redirect_url) {
+            return $this->order->payment_redirect_url;
+        }
+
+        return app(WhatsAppOrderMessageService::class)
+            ->urlForOrder($this->order, $method);
     }
 };
 ?>
@@ -89,6 +106,24 @@ class extends Component
                     <a href="{{ $paymentUrl }}" target="_blank" class="payment-url-button">
                         Buka Link Pembayaran
                     </a>
+                @endif
+
+                @if($this->whatsappUrl())
+                    <div class="payment-whatsapp-box">
+                        <h2>Konfirmasi via WhatsApp</h2>
+
+                        <p>
+                            Detail order sudah disiapkan otomatis. Klik tombol di bawah untuk membuka WhatsApp dan kirim pesan ke admin.
+                        </p>
+
+                        <a href="{{ $this->whatsappUrl() }}" target="_blank" class="payment-url-button payment-whatsapp-button">
+                            Kirim Detail Order ke WhatsApp
+                        </a>
+
+                        <small>
+                            Jika WhatsApp tidak terbuka otomatis, pastikan WhatsApp Web sudah login atau aplikasi WhatsApp tersedia di perangkat Anda.
+                        </small>
+                    </div>
                 @endif
 
                 @if($accountNumber || $accountName)
