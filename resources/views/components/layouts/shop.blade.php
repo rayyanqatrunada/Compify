@@ -59,7 +59,7 @@
                         </svg>
                     </span>
 
-                    <span>Keranjang</span>
+                    <span></span>
                     <b>{{ $cartCount }}</b>
                 </a>
 
@@ -70,7 +70,7 @@
                         </svg>
                     </span>
 
-                    <span>Wishlist</span>
+                    <span></span>
                     <b>{{ $wishlistCount }}</b>
                 </a>
 
@@ -163,7 +163,6 @@
                 </div>
 
                 <a href="{{ route('products.index') }}" class="nav-link" wire:navigate>Produk</a>
-                <a href="{{ route('products.index', ['sort' => 'latest']) }}" class="nav-link" wire:navigate>Produk Baru</a>
                 <a href="{{ route('event.index') }}" class="nav-link" wire:navigate>Event</a>
                 <a href="{{ route('about') }}" class="nav-link" wire:navigate>About Us</a>
             </div>
