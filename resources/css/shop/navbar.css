@@ -1,12 +1,93 @@
+.scroll-top-btn {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+
+    width: 48px;
+    height: 48px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #111111;
+    color: #ffffff;
+
+    font-size: 20px;
+    font-weight: 900;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    box-shadow: 0 10px 24px rgba(0,0,0,.2);
+
+    opacity: 0;
+    visibility: hidden;
+
+    transform: translateY(12px);
+
+    transition:
+        opacity .25s ease,
+        visibility .25s ease,
+        transform .25s ease;
+
+    z-index: 9999;
+}
+
+.scroll-top-btn.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.scroll-top-btn:hover {
+    transform: translateY(-3px);
+}
+
 /* =========================================================
    SHOP NAVBAR + DROPDOWN
 ========================================================= */
+
+/* ==========================================
+   STICKY NAVBAR
+========================================== */
 
 .main-nav {
     height: var(--nav-height);
     background: #000000;
     color: #ffffff;
     overflow: visible;
+
+    transition:
+        transform .3s ease,
+        box-shadow .3s ease,
+        background .3s ease;
+}
+
+.main-nav.is-sticky {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    z-index: 998;
+
+    animation: navbarSlideDown .25s ease;
+    box-shadow: 0 12px 32px rgba(0,0,0,.15);
+}
+
+@keyframes navbarSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .main-nav-inner {
@@ -74,6 +155,7 @@
     transform: translateY(8px);
     pointer-events: none;
     transition: .22s ease;
+    z-index: 99999;
 }
 
 .nav-dropdown:hover .mega-menu,
@@ -155,6 +237,23 @@
 .brand-dropdown-item strong {
     color: #222222;
     font-size: 13px;
+}
+
+.main-nav .search-box {
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.15);
+}
+
+.main-nav .search-box input {
+    color: #fff;
+}
+
+.main-nav .search-box input::placeholder {
+    color: rgba(255,255,255,.6);
+}
+
+.main-nav .search-box button svg {
+    fill: #fff;
 }
 
 /* =========================================================

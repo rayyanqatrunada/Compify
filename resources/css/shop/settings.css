@@ -116,11 +116,13 @@
        8. HERO / BANNER UTAMA
     ===================================================== */
 
-    --hero-height: 430px;
+      --hero-height: calc(
+         100dvh - var(--header-height) - var(--nav-height)
+      );
     --hero-radius: 0px;
 
     --hero-content-width: 520px;
-    --hero-content-left: clamp(34px, 8vw, 150px);
+    --hero-content-left: clamp(24px, 4vw, 80px);
 
     --hero-title-size: 56px;
     --hero-support-size: 18px;

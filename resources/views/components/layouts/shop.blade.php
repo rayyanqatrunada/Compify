@@ -35,6 +35,10 @@
         $isHomePage = request()->routeIs('home');
     @endphp
 
+    <button id="scrollTopBtn" class="scroll-top-btn">
+        ↑
+    </button>
+
     <header class="shop-header">
         <div class="top-header compact-shop-header">
             <a href="{{ route('home') }}" class="brand-logo compact-brand-logo" wire:navigate>
@@ -42,15 +46,6 @@
             </a>
 
             <div class="compact-header-actions">
-                <form action="{{ route('products.index') }}" method="GET" class="search-box compact-search-box">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari produk">
-
-                    <button type="submit" aria-label="Cari">
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M10.8 4a6.8 6.8 0 0 1 5.3 11.1l3.4 3.4-1.4 1.4-3.4-3.4A6.8 6.8 0 1 1 10.8 4Zm0 2a4.8 4.8 0 1 0 0 9.6 4.8 4.8 0 0 0 0-9.6Z"/>
-                        </svg>
-                    </button>
-                </form>
 
                 <a href="{{ route('cart.index') }}" class="header-link compact-header-link" wire:navigate>
                     <span class="header-icon">
@@ -89,9 +84,9 @@
                                 @endif
                             </span>
 
-                            <span>
+                            <!-- <span>
                                 {{ $customer->username ?: $customer->name }}
-                            </span>
+                            </span> -->
                         </a>
                     @else
                         <a href="{{ route('customer.login') }}" class="header-account-link" wire:navigate>
@@ -107,67 +102,79 @@
             </div>
         </div>
 
-        <nav class="main-nav">
-            <div class="main-nav-inner">
-                <a href="{{ route('home') }}" class="nav-link" wire:navigate>Beranda</a>
 
-                <div class="nav-dropdown">
-                    <button type="button" class="nav-link nav-dropdown-trigger">
-                        Kategori
-                    </button>
-
-                    <div class="mega-menu">
-                        <div class="mega-menu-inner">
-                            @forelse($menuCategories as $parent)
-                                <div class="mega-column">
-                                    <a href="{{ route('categories.show', $parent) }}" class="mega-title" wire:navigate>
-                                        {{ $parent->name }}
-                                    </a>
-
-                                    @forelse($parent->children as $child)
-                                        <a href="{{ route('categories.show', $child) }}" class="mega-link" wire:navigate>
-                                            {{ $child->name }}
-                                        </a>
-                                    @empty
-                                        <a href="{{ route('categories.show', $parent) }}" class="mega-link" wire:navigate>
-                                            Lihat Produk
-                                        </a>
-                                    @endforelse
-                                </div>
-                            @empty
-                                <div class="mega-column">
-                                    <span class="mega-title">Belum ada kategori</span>
-                                </div>
-                            @endforelse
-                        </div>
-                    </div>
-                </div>
-
-                <div class="nav-dropdown">
-                    <button type="button" class="nav-link nav-dropdown-trigger">
-                        Merk
-                    </button>
-
-                    <div class="mega-menu mega-menu-small">
-                        <div class="mega-menu-inner brand-menu-inner">
-                            @forelse($navBrands as $brand)
-                                <a href="{{ route('products.index', ['brand' => $brand->slug]) }}" class="brand-dropdown-item" wire:navigate>
-                                    <span>{{ strtoupper(substr($brand->name, 0, 2)) }}</span>
-                                    <strong>{{ $brand->name }}</strong>
-                                </a>
-                            @empty
-                                <p>Belum ada merk.</p>
-                            @endforelse
-                        </div>
-                    </div>
-                </div>
-
-                <a href="{{ route('products.index') }}" class="nav-link" wire:navigate>Produk</a>
-                <a href="{{ route('event.index') }}" class="nav-link" wire:navigate>Event</a>
-                <a href="{{ route('about') }}" class="nav-link" wire:navigate>About Us</a>
-            </div>
-        </nav>
     </header>
+
+    <nav class="main-nav">
+        <div class="main-nav-inner">
+            <a href="{{ route('home') }}" class="nav-link" wire:navigate>Beranda</a>
+
+            <div class="nav-dropdown">
+                <button type="button" class="nav-link nav-dropdown-trigger">
+                    Kategori
+                </button>
+
+                <div class="mega-menu">
+                    <div class="mega-menu-inner">
+                        @forelse($menuCategories as $parent)
+                            <div class="mega-column">
+                                <a href="{{ route('categories.show', $parent) }}" class="mega-title" wire:navigate>
+                                    {{ $parent->name }}
+                                </a>
+
+                                @forelse($parent->children as $child)
+                                    <a href="{{ route('categories.show', $child) }}" class="mega-link" wire:navigate>
+                                        {{ $child->name }}
+                                    </a>
+                                @empty
+                                    <a href="{{ route('categories.show', $parent) }}" class="mega-link" wire:navigate>
+                                        Lihat Produk
+                                    </a>
+                                @endforelse
+                            </div>
+                        @empty
+                            <div class="mega-column">
+                                <span class="mega-title">Belum ada kategori</span>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-dropdown">
+                <button type="button" class="nav-link nav-dropdown-trigger">
+                    Merk
+                </button>
+
+                <div class="mega-menu mega-menu-small">
+                    <div class="mega-menu-inner brand-menu-inner">
+                        @forelse($navBrands as $brand)
+                            <a href="{{ route('products.index', ['brand' => $brand->slug]) }}" class="brand-dropdown-item" wire:navigate>
+                                <span>{{ strtoupper(substr($brand->name, 0, 2)) }}</span>
+                                <strong>{{ $brand->name }}</strong>
+                            </a>
+                        @empty
+                            <p>Belum ada merk.</p>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+
+            <a href="{{ route('products.index') }}" class="nav-link" wire:navigate>Produk</a>
+            <a href="{{ route('event.index') }}" class="nav-link" wire:navigate>Event</a>
+            <a href="{{ route('about') }}" class="nav-link" wire:navigate>About Us</a>
+
+            <form action="{{ route('products.index') }}" method="GET" class="search-box compact-search-box">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari produk">
+
+                <button type="submit" aria-label="Cari">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M10.8 4a6.8 6.8 0 0 1 5.3 11.1l3.4 3.4-1.4 1.4-3.4-3.4A6.8 6.8 0 1 1 10.8 4Zm0 2a4.8 4.8 0 1 0 0 9.6 4.8 4.8 0 0 0 0-9.6Z"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </nav>
 
     <main>
         {{ $slot }}

@@ -28,6 +28,7 @@
         left: 0;
         right: auto;
         width: min(100vw, 900px);
+        z-index: 99999;
     }
 
     .mega-menu-inner {
