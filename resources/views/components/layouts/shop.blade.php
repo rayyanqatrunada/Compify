@@ -201,7 +201,7 @@
                             </svg>
                         </a>
 
-                        <a href="#" aria-label="Instagram">
+                        <a href="https://www.instagram.com/compifyid/" aria-label="Instagram">
                             <svg viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M7.5 2.5h9A5 5 0 0 1 21.5 7.5v9a5 5 0 0 1-5 5h-9A5 5 0 0 1 2.5 16.5v-9a5 5 0 0 1 5-5Zm0 2A3 3 0 0 0 4.5 7.5v9a3 3 0 0 0 3 3h9a3 3 0 0 0 3-3v-9a3 3 0 0 0-3-3h-9ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm5.2-2.5a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4Z"/>
                             </svg>
@@ -254,10 +254,39 @@
                     <h3>Newsletter</h3>
                     <p>Dapatkan info produk baru, promo, dan rekomendasi build PC.</p>
 
-                    <div class="newsletter-box">
-                        <input type="email" placeholder="Masukkan email Anda">
-                        <button>Submit</button>
-                    </div>
+                    <form method="POST" action="{{ route('newsletter.subscribe') }}" class="newsletter-box">
+                        @csrf
+
+                        <input
+                            type="email"
+                            name="newsletter_email"
+                            value="{{ old('newsletter_email') }}"
+                            placeholder="Masukkan email Anda"
+                            required
+                        >
+
+                        <button type="submit">
+                            Submit
+                        </button>
+                    </form>
+
+                    @if(session('newsletter_success'))
+                        <small class="newsletter-message newsletter-message--success">
+                            {{ session('newsletter_success') }}
+                        </small>
+                    @endif
+
+                    @if(session('newsletter_info'))
+                        <small class="newsletter-message newsletter-message--info">
+                            {{ session('newsletter_info') }}
+                        </small>
+                    @endif
+
+                    @error('newsletter_email')
+                        <small class="newsletter-message newsletter-message--error">
+                            {{ $message }}
+                        </small>
+                    @enderror
                 </div>
             </div>
 

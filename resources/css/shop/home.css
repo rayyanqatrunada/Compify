@@ -1008,3 +1008,27 @@
         opacity: 1;
     }
 }
+
+/* =========================================================
+   FOOTER NEWSLETTER MESSAGE
+========================================================= */
+
+.newsletter-message {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.45;
+}
+
+.newsletter-message--success {
+    color: #047857;
+}
+
+.newsletter-message--info {
+    color: #475569;
+}
+
+.newsletter-message--error {
+    color: #b91c1c;
+}

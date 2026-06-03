@@ -12,6 +12,8 @@ use Laravel\Socialite\Facades\Socialite;
 use App\Models\ComboPackage;
 use App\Models\EventSetting;
 use App\Services\CartService;
+use App\Models\NewsletterSubscriber;
+use Illuminate\Support\Facades\Validator;
 
 /*
 |--------------------------------------------------------------------------
@@ -218,8 +220,17 @@ Route::middleware(['auth:admin', 'admin'])
         Route::livewire('/profile', 'pages::admin.profile.index')->name('profile');
 
         Route::livewire('/analytics', 'pages::admin.analytics.index')->name('analytics.index');
-        Route::livewire('/customers', 'pages::admin.customers.index')->name('customers.index');
-        Route::livewire('/reviews', 'pages::admin.reviews.index')->name('reviews.index');
+        
+        Route::prefix('customers')->name('customers.')->group(function () {
+            Route::livewire('/', 'pages::admin.customers.index')
+                ->name('index');
+
+            Route::livewire('/newsletter-subscribers', 'pages::admin.customers.newsletter-subscribers')
+                ->name('newsletter');
+
+            Route::livewire('/reviews', 'pages::admin.customers.reviews')
+                ->name('reviews');
+        });
 
         Route::post('/logout', function (Request $request) {
             Auth::guard('admin')->logout();
@@ -291,3 +302,44 @@ Route::middleware(['auth:admin', 'admin'])
                 ->name('shipping-methods');
         });
     });
+
+/*
+|--------------------------------------------------------------------------
+| SUBMIT EMAIL
+|--------------------------------------------------------------------------
+*/
+
+Route::post('/newsletter/subscribe', function (Request $request) {
+    $validator = Validator::make($request->all(), [
+        'newsletter_email' => ['required', 'email', 'max:255'],
+    ], [
+        'newsletter_email.required' => 'Email wajib diisi.',
+        'newsletter_email.email' => 'Format email tidak valid.',
+        'newsletter_email.max' => 'Email terlalu panjang.',
+    ]);
+
+    if ($validator->fails()) {
+        return back()
+            ->withErrors($validator)
+            ->withInput();
+    }
+
+    $email = strtolower(trim($request->newsletter_email));
+
+    $subscriber = NewsletterSubscriber::firstOrCreate(
+        ['email' => $email],
+        [
+            'customer_id' => auth('customer')->id(),
+            'source' => 'footer',
+            'ip_address' => $request->ip(),
+            'user_agent' => substr((string) $request->userAgent(), 0, 1000),
+            'subscribed_at' => now(),
+        ]
+    );
+
+    if (! $subscriber->wasRecentlyCreated) {
+        return back()->with('newsletter_info', 'Email ini sudah terdaftar di newsletter.');
+    }
+
+    return back()->with('newsletter_success', 'Terima kasih! Email kamu berhasil didaftarkan.');
+})->name('newsletter.subscribe');

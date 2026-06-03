@@ -48,6 +48,9 @@
 
         $isEventOpen = 
             request()->routeIs('admin.event.*');
+
+        $isCustomerOpen =
+    request()->routeIs('admin.customers.*');
     @endphp
 
     <div class="admin-shell-v2" id="adminShell" data-admin-theme="light">
@@ -220,17 +223,29 @@
                     Orders
                 </a>
 
-                <a href="{{ route('admin.customers.index') }}" wire:navigate
-                   @class(['active' => request()->routeIs('admin.customers.*')])>
-                    <span>☻</span>
-                    Customer
-                </a>
+                <details {{ $isCustomerOpen ? 'open' : '' }}>
+                    <summary>
+                        <span>☻</span>
+                        Customer
+                    </summary>
 
-                <a href="{{ route('admin.reviews.index') }}" wire:navigate
-                   @class(['active' => request()->routeIs('admin.reviews.*')])>
-                    <span>✎</span>
-                    Reviews
-                </a>
+                    <div class="admin-submenu-v2">
+                        <a href="{{ route('admin.customers.index') }}" wire:navigate
+                        @class(['active' => request()->routeIs('admin.customers.*')])>
+                            Data Customer
+                        </a>
+
+                        <a href="{{ route('admin.customers.newsletter') }}" wire:navigate
+                        @class(['active' => request()->routeIs('admin.customers.newsletter')])>
+                            Newsletter Subscribers
+                        </a>
+
+                        <a href="{{ route('admin.customers.reviews') }}" wire:navigate
+                        @class(['active' => request()->routeIs('admin.customers.reviews')])>
+                            Reviews
+                        </a>
+                    </div>
+                </details>
 
                 <details {{ $isConfigureOpen ? 'open' : '' }}>
                     <summary>

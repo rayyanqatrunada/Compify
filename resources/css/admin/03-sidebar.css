@@ -185,7 +185,7 @@
     min-height: 36px;
     padding: 9px 12px 9px 18px;
     border-radius: 10px;
-    color: var(--admin-muted);
+    color: var(--admin-text);
     font-size: 13px;
     font-weight: 850;
     cursor: pointer;
@@ -225,4 +225,134 @@
     min-height: 32px;
     padding-left: 14px;
     font-size: 12px;
+}
+
+/* =========================================================
+   ADMIN NEWSLETTER SUBSCRIBERS
+========================================================= */
+
+.admin-newsletter-page-v2 {
+    gap: 14px;
+}
+
+.admin-newsletter-stats-v2 {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.admin-newsletter-stats-v2 > div {
+    padding: 14px;
+    border-radius: var(--admin-panel-radius);
+    background: var(--admin-panel);
+    border: 1px solid var(--admin-border);
+    box-shadow: var(--admin-shadow);
+    display: grid;
+    gap: 4px;
+}
+
+.admin-newsletter-stats-v2 span {
+    color: var(--admin-muted);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.admin-newsletter-stats-v2 strong {
+    color: var(--admin-text);
+    font-size: 22px;
+    font-weight: 950;
+}
+
+.admin-newsletter-filter-v2 {
+    margin-bottom: 14px;
+    display: grid;
+    grid-template-columns: minmax(240px, 1.4fr) repeat(3, minmax(145px, .6fr));
+    gap: 12px;
+}
+
+.admin-newsletter-filter-v2 label {
+    display: grid;
+    gap: 6px;
+    color: var(--admin-muted);
+    font-size: 12px;
+    font-weight: 850;
+}
+
+.admin-newsletter-filter-v2 input,
+.admin-newsletter-filter-v2 select {
+    width: 100%;
+    height: var(--admin-control-height);
+    padding: 0 12px;
+    border-radius: var(--admin-radius);
+    border: 1px solid var(--admin-border);
+    background: var(--admin-panel);
+    color: var(--admin-text);
+    outline: none;
+}
+
+.admin-newsletter-filter-v2 input:focus,
+.admin-newsletter-filter-v2 select:focus {
+    border-color: var(--admin-accent);
+}
+
+.admin-newsletter-actions-v2 {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.admin-newsletter-customer-v2 {
+    display: grid;
+    gap: 2px;
+}
+
+.admin-newsletter-customer-v2 strong {
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.admin-newsletter-customer-v2 small {
+    color: var(--admin-muted);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.admin-newsletter-muted-v2 {
+    color: var(--admin-muted);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.admin-newsletter-pill-v2 {
+    width: fit-content;
+    min-height: 24px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: rgba(100, 116, 139, .14);
+    color: var(--admin-muted);
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: capitalize;
+}
+
+.admin-newsletter-table-v2 td {
+    vertical-align: top;
+}
+
+@media (max-width: 1040px) {
+    .admin-newsletter-stats-v2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-newsletter-filter-v2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .admin-newsletter-stats-v2,
+    .admin-newsletter-filter-v2 {
+        grid-template-columns: 1fr;
+    }
 }
