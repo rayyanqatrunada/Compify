@@ -27,7 +27,7 @@
     background: var(--shop-white);
     width: 100%;
     max-width: var(--shop-page-max);
-    margin: 0 auto;
+    margin: 0 0;
 }
 
 .brand-logo,
@@ -47,9 +47,9 @@
 
 .header-right,
 .compact-header-actions {
-    margin-left: auto;
+    /* margin-left: auto; */
     display: flex;
-    align-items: center;
+    /* align-items: center; */
     justify-content: flex-end;
     gap: var(--header-action-gap);
     color: #2c2c2c;
