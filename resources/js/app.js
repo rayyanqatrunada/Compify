@@ -1,21 +1,5 @@
 // animasi nav sticky
 
-document.addEventListener('livewire:navigated', () => {
-    const navbar = document.querySelector('.main-nav');
-    const hero = document.querySelector('.hero-slider');
-
-    if (!navbar || !hero) return;
-
-    window.addEventListener('scroll', () => {
-        const heroBottom = hero.offsetTop + hero.offsetHeight;
-
-        navbar.classList.toggle(
-            'is-sticky',
-            window.scrollY >= heroBottom
-        );
-    });
-});
-
 //func tombol up scroll
 
 document.addEventListener('DOMContentLoaded', () => {

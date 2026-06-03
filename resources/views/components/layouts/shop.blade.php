@@ -8,6 +8,83 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
+<script>
+    document.addEventListener('livewire:navigated', () => {
+        const navbar = document.querySelector('.main-nav');
+        const hero = document.querySelector('.hero-slider');
+
+        if (!navbar) return;
+
+        window.addEventListener('scroll', () => {
+            let stickyThreshold;
+
+            if (hero) {
+                // Logika 1: Jika di halaman Home (ada hero-slider)
+                stickyThreshold = hero.offsetTop + hero.offsetHeight;
+            } else {
+                // Logika 2: Jika di halaman selain Home (tidak ada hero-slider)
+                stickyThreshold = navbar.offsetHeight; 
+            }
+
+            // Jalankan toggle class berdasarkan threshold yang aktif
+            navbar.classList.toggle(
+                'is-sticky',
+                window.scrollY >= stickyThreshold
+            );
+        });
+    });
+
+    function initNavbar() {
+        const burger = document.getElementById("navBurger");
+        const closeBtn = document.getElementById("sidebarClose");
+        const backdrop = document.getElementById("sidebarBackdrop");
+        const sidebar = document.getElementById("mainSidebar");
+
+        if (!burger || !sidebar) return;
+
+        function openSidebar() {
+        sidebar.classList.add("open");
+        backdrop.classList.add("show");
+        document.body.style.overflow = "hidden";
+        }
+
+        function closeSidebar() {
+        sidebar.classList.remove("open");
+        backdrop.classList.remove("show");
+        document.body.style.overflow = "";
+        }
+
+        burger.onclick = openSidebar;
+        if (closeBtn) closeBtn.onclick = closeSidebar;
+        if (backdrop) backdrop.onclick = closeSidebar;
+
+        // Accordion kategori & merk di sidebar
+        document.querySelectorAll(".sidebar-accordion-trigger").forEach(trigger => {
+        trigger.addEventListener("click", () => {
+            const sub = trigger.nextElementSibling;
+            const icon = trigger.querySelector(".sidebar-chevron");
+            sub.classList.toggle("open");
+            if (icon) icon.classList.toggle("rotated");
+        });
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", initNavbar);
+    document.addEventListener("livewire:navigated", initNavbar);
+
+    document.addEventListener("livewire:navigated", () => {
+        const navbar = document.querySelector(".main-nav");
+        const hero = document.querySelector(".hero-slider");
+        if (!navbar) return;
+        window.addEventListener("scroll", () => {
+        const threshold = hero
+            ? hero.offsetTop + hero.offsetHeight
+            : navbar.offsetHeight;
+        navbar.classList.toggle("is-sticky", window.scrollY >= threshold);
+        });
+    });
+</script>
+
 <body class="shop-body">
     @php
         $menuCategories = \App\Models\Category::active()
@@ -101,68 +178,137 @@
                 @endauth
             </div>
         </div>
-
-
     </header>
 
-    <nav class="main-nav">
-        <div class="main-nav-inner">
-            <a href="{{ route('home') }}" class="nav-link" wire:navigate>Beranda</a>
+        {{-- Sidebar backdrop --}}
+    <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
 
-            <div class="nav-dropdown">
-                <button type="button" class="nav-link nav-dropdown-trigger">
+    {{-- Mobile sidebar --}}
+    <aside id="mainSidebar" class="main-sidebar" aria-label="Menu navigasi">
+        <div class="sidebar-header">
+            <a href="{{ route('home') }}" class="sidebar-logo" wire:navigate>
+                <img src="{{ asset('assets/brand/compify-logo.svg') }}" alt="Compify Logo">
+            </a>
+            <button id="sidebarClose" class="sidebar-close-btn" aria-label="Tutup menu">✕</button>
+        </div>
+
+        <div class="sidebar-search">
+            <form action="{{ route('products.index') }}" method="GET">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari produk...">
+                <button type="submit" aria-label="Cari">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                        <path d="M10.8 4a6.8 6.8 0 0 1 5.3 11.1l3.4 3.4-1.4 1.4-3.4-3.4A6.8 6.8 0 1 1 10.8 4Zm0 2a4.8 4.8 0 1 0 0 9.6 4.8 4.8 0 0 0 0-9.6Z"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{{ route('home') }}" class="sidebar-link" wire:navigate>Beranda</a>
+
+            <div class="sidebar-accordion">
+                <button type="button" class="sidebar-accordion-trigger sidebar-link">
                     Kategori
+                    <span class="sidebar-chevron">▾</span>
                 </button>
-
-                <div class="mega-menu">
-                    <div class="mega-menu-inner">
-                        @forelse($menuCategories as $parent)
-                            <div class="mega-column">
-                                <a href="{{ route('categories.show', $parent) }}" class="mega-title" wire:navigate>
-                                    {{ $parent->name }}
-                                </a>
-
-                                @forelse($parent->children as $child)
-                                    <a href="{{ route('categories.show', $child) }}" class="mega-link" wire:navigate>
-                                        {{ $child->name }}
-                                    </a>
-                                @empty
-                                    <a href="{{ route('categories.show', $parent) }}" class="mega-link" wire:navigate>
-                                        Lihat Produk
-                                    </a>
-                                @endforelse
-                            </div>
-                        @empty
-                            <div class="mega-column">
-                                <span class="mega-title">Belum ada kategori</span>
-                            </div>
-                        @endforelse
-                    </div>
-                </div>
-            </div>
-
-            <div class="nav-dropdown">
-                <button type="button" class="nav-link nav-dropdown-trigger">
-                    Merk
-                </button>
-
-                <div class="mega-menu mega-menu-small">
-                    <div class="mega-menu-inner brand-menu-inner">
-                        @forelse($navBrands as $brand)
-                            <a href="{{ route('products.index', ['brand' => $brand->slug]) }}" class="brand-dropdown-item" wire:navigate>
-                                <span>{{ strtoupper(substr($brand->name, 0, 2)) }}</span>
-                                <strong>{{ $brand->name }}</strong>
+                <div class="sidebar-accordion-sub">
+                    @foreach($menuCategories as $parent)
+                        <a href="{{ route('categories.show', $parent) }}" class="sidebar-sub-title" wire:navigate>
+                            {{ $parent->name }}
+                        </a>
+                        @foreach($parent->children as $child)
+                            <a href="{{ route('categories.show', $child) }}" class="sidebar-sub-link" wire:navigate>
+                                {{ $child->name }}
                             </a>
-                        @empty
-                            <p>Belum ada merk.</p>
-                        @endforelse
-                    </div>
+                        @endforeach
+                    @endforeach
                 </div>
             </div>
 
-            <a href="{{ route('products.index') }}" class="nav-link" wire:navigate>Produk</a>
-            <a href="{{ route('event.index') }}" class="nav-link" wire:navigate>Event</a>
-            <a href="{{ route('about') }}" class="nav-link" wire:navigate>About Us</a>
+            <div class="sidebar-accordion">
+                <button type="button" class="sidebar-accordion-trigger sidebar-link">
+                    Merk
+                    <span class="sidebar-chevron">▾</span>
+                </button>
+                <div class="sidebar-accordion-sub">
+                    @foreach($navBrands as $brand)
+                        <a href="{{ route('products.index', ['brand' => $brand->slug]) }}" class="sidebar-sub-link" wire:navigate>
+                            {{ $brand->name }}
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+
+            <a href="{{ route('products.index') }}" class="sidebar-link" wire:navigate>Produk</a>
+            <a href="{{ route('event.index') }}" class="sidebar-link" wire:navigate>Event</a>
+            <a href="{{ route('about') }}" class="sidebar-link" wire:navigate>About Us</a>
+        </nav>
+    </aside>
+
+    <nav class="main-nav">
+        <button class="nav-burger" id="navBurger" aria-label="Menu">
+            ☰
+        </button>
+        <div class="main-nav-inner">
+            <div class="nav-links">
+                <a href="{{ route('home') }}" class="nav-link" wire:navigate>Beranda</a>
+
+                <div class="nav-dropdown">
+                    <button type="button" class="nav-link nav-dropdown-trigger">
+                        Kategori
+                    </button>
+
+                    <div class="mega-menu">
+                        <div class="mega-menu-inner">
+                            @forelse($menuCategories as $parent)
+                                <div class="mega-column">
+                                    <a href="{{ route('categories.show', $parent) }}" class="mega-title" wire:navigate>
+                                        {{ $parent->name }}
+                                    </a>
+
+                                    @forelse($parent->children as $child)
+                                        <a href="{{ route('categories.show', $child) }}" class="mega-link" wire:navigate>
+                                            {{ $child->name }}
+                                        </a>
+                                    @empty
+                                        <a href="{{ route('categories.show', $parent) }}" class="mega-link" wire:navigate>
+                                            Lihat Produk
+                                        </a>
+                                    @endforelse
+                                </div>
+                            @empty
+                                <div class="mega-column">
+                                    <span class="mega-title">Belum ada kategori</span>
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nav-dropdown">
+                    <button type="button" class="nav-link nav-dropdown-trigger">
+                        Merk
+                    </button>
+
+                    <div class="mega-menu mega-menu-small">
+                        <div class="mega-menu-inner brand-menu-inner">
+                            @forelse($navBrands as $brand)
+                                <a href="{{ route('products.index', ['brand' => $brand->slug]) }}" class="brand-dropdown-item" wire:navigate>
+                                    <span>{{ strtoupper(substr($brand->name, 0, 2)) }}</span>
+                                    <strong>{{ $brand->name }}</strong>
+                                </a>
+                            @empty
+                                <p>Belum ada merk.</p>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+
+                <a href="{{ route('products.index') }}" class="nav-link" wire:navigate>Produk</a>
+                <a href="{{ route('event.index') }}" class="nav-link" wire:navigate>Event</a>
+                <a href="{{ route('about') }}" class="nav-link" wire:navigate>About Us</a>
+
+            </div>
 
             <form action="{{ route('products.index') }}" method="GET" class="search-box compact-search-box">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari produk">
