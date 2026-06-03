@@ -776,3 +776,64 @@
 .payment-whatsapp-button:hover {
     background: #1fb85a !important;
 }
+
+/* =========================================================
+   MIDTRANS PAYMENT NOTE
+========================================================= */
+
+.payment-midtrans-note {
+    margin-top: 8px;
+    color: rgba(14, 10, 16, .62);
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1.45;
+}
+
+/* =========================================================
+   PAYMENT DETAIL ALERT + MIDTRANS BOX
+========================================================= */
+
+.payment-success-box,
+.payment-error-box {
+    margin: 14px 0;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 850;
+    line-height: 1.45;
+}
+
+.payment-success-box {
+    background: rgba(16, 185, 129, .12);
+    color: #047857;
+}
+
+.payment-error-box {
+    background: rgba(220, 38, 38, .10);
+    color: #b91c1c;
+}
+
+.payment-midtrans-box {
+    margin-top: 18px;
+    padding: 16px;
+    border-radius: 14px;
+    background: rgba(22, 8, 133, .08);
+    border: 1px solid rgba(22, 8, 133, .16);
+    display: grid;
+    gap: 10px;
+}
+
+.payment-midtrans-box h2 {
+    margin: 0;
+    color: #0e0a10;
+    font-size: 17px;
+    font-weight: 950;
+}
+
+.payment-midtrans-box p {
+    margin: 0;
+    color: rgba(14, 10, 16, .68);
+    font-size: 13px;
+    font-weight: 750;
+    line-height: 1.55;
+}

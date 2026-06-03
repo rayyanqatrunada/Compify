@@ -1,11 +1,11 @@
 <?php
 
 use App\Models\Order;
+use App\Services\WhatsAppOrderMessageService;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
-use App\Services\WhatsAppOrderMessageService;
 
 new
 #[Layout('components.layouts.shop')]
@@ -32,6 +32,23 @@ class extends Component
         return 'Rp ' . number_format((float) $value, 0, ',', '.');
     }
 
+    public function isMidtrans(): bool
+    {
+        $method = $this->order->paymentMethod;
+
+        return $method
+            && $method->type === 'api'
+            && strtolower((string) $method->api_provider) === 'midtrans';
+    }
+
+    public function paymentUrl(): ?string
+    {
+        $method = $this->order->paymentMethod;
+
+        return $this->order->payment_redirect_url
+            ?: (data_get($method, 'payment_url') ?? data_get($method, 'url'));
+    }
+
     public function whatsappUrl(): ?string
     {
         $method = $this->order->paymentMethod;
@@ -47,6 +64,18 @@ class extends Component
         return app(WhatsAppOrderMessageService::class)
             ->urlForOrder($this->order, $method);
     }
+
+    public function statusLabel(?string $status): string
+    {
+        return match ($status) {
+            'paid' => 'Paid',
+            'pending' => 'Pending',
+            'failed' => 'Failed',
+            'expired' => 'Expired',
+            'refunded' => 'Refunded',
+            default => ucfirst((string) ($status ?: 'pending')),
+        };
+    }
 };
 ?>
 
@@ -55,6 +84,18 @@ class extends Component
         <section class="payment-detail-card">
             <p class="payment-kicker">Order berhasil dibuat</p>
             <h1>Detail Pembayaran</h1>
+
+            @if(session('success'))
+                <div class="payment-success-box">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="payment-error-box">
+                    {{ session('error') }}
+                </div>
+            @endif
 
             <div class="payment-order-box">
                 <div>
@@ -69,7 +110,7 @@ class extends Component
 
                 <div>
                     <span>Status</span>
-                    <strong>{{ ucfirst($order->payment_status ?? 'pending') }}</strong>
+                    <strong>{{ $this->statusLabel($order->payment_status) }}</strong>
                 </div>
             </div>
 
@@ -77,7 +118,8 @@ class extends Component
                 $method = $order->paymentMethod;
                 $logo = data_get($method, 'logo');
                 $qrImage = data_get($method, 'qr_image') ?? data_get($method, 'image');
-                $paymentUrl = data_get($method, 'payment_url') ?? data_get($method, 'url');
+                $paymentUrl = $this->paymentUrl();
+
                 $accountNumber = data_get($method, 'account_number');
                 $accountName = data_get($method, 'account_name');
                 $instructions = data_get($method, 'instructions') ?? data_get($method, 'description');
@@ -95,14 +137,27 @@ class extends Component
                     </div>
                 </div>
 
-                @if($qrImage)
-                    <div class="payment-qr-box">
-                        <img src="{{ Storage::url($qrImage) }}" alt="QR Pembayaran">
-                        <p>Scan QR setelah memastikan nominal pembayaran sudah benar.</p>
-                    </div>
-                @endif
+                @if($this->isMidtrans())
+                    @if($paymentUrl)
+                        <div class="payment-midtrans-box">
+                            <h2>Pembayaran Midtrans</h2>
 
-                @if($paymentUrl)
+                            <p>
+                                Klik tombol di bawah untuk membuka halaman pembayaran Midtrans Sandbox.
+                                Setelah pembayaran selesai, status order masih bisa dicek manual dari dashboard Midtrans sampai fitur cek status otomatis ditambahkan.
+                            </p>
+
+                            <a href="{{ $paymentUrl }}" target="_blank" class="payment-url-button">
+                                Lanjutkan Pembayaran Midtrans
+                            </a>
+                        </div>
+                    @else
+                        <div class="payment-error-box">
+                            Link pembayaran Midtrans belum tersedia. Kemungkinan koneksi ke Midtrans gagal saat checkout.
+                            Silakan hubungi admin atau cek konfigurasi Midtrans.
+                        </div>
+                    @endif
+                @elseif($paymentUrl)
                     <a href="{{ $paymentUrl }}" target="_blank" class="payment-url-button">
                         Buka Link Pembayaran
                     </a>
@@ -123,6 +178,13 @@ class extends Component
                         <small>
                             Jika WhatsApp tidak terbuka otomatis, pastikan WhatsApp Web sudah login atau aplikasi WhatsApp tersedia di perangkat Anda.
                         </small>
+                    </div>
+                @endif
+
+                @if($qrImage)
+                    <div class="payment-qr-box">
+                        <img src="{{ Storage::url($qrImage) }}" alt="QR Pembayaran">
+                        <p>Scan QR setelah memastikan nominal pembayaran sudah benar.</p>
                     </div>
                 @endif
 
