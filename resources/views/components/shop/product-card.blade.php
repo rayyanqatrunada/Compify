@@ -4,6 +4,9 @@
     $hasDiscount = (bool) $product->has_discount;
     $discountPercent = $product->discount_percent;
     $isEventPrice = (bool) $product->is_event_price;
+
+    $maxPurchasableStock = app(\App\Services\EventFlashSaleStockService::class)
+        ->maxPurchasableForProduct($product);
 @endphp
 
 <div class="shop-product-card">
@@ -49,6 +52,7 @@
         <div class="shop-product-card__actions">
             <form method="POST" action="{{ route('wishlist.toggle', $product) }}">
                 @csrf
+
                 <button type="submit" class="shop-product-card__icon-btn" title="Wishlist">
                     ♡
                 </button>
@@ -56,9 +60,11 @@
 
             <form method="POST" action="{{ route('cart.add', $product) }}" class="shop-product-card__cart-form">
                 @csrf
+
                 <input type="hidden" name="quantity" value="1">
-                <button type="submit" @disabled($this->maxPurchasableStock() < 1)>
-                    {{ $this->maxPurchasableStock() < 1 ? 'Stok Habis' : 'Tambah ke Keranjang' }}
+
+                <button type="submit" @disabled($maxPurchasableStock < 1)>
+                    {{ $maxPurchasableStock < 1 ? 'Stok Habis' : 'Tambah ke Keranjang' }}
                 </button>
             </form>
         </div>

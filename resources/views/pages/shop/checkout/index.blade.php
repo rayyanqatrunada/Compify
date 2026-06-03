@@ -6,14 +6,15 @@ use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\ShippingMethod;
 use App\Models\ShippingSetting;
+use App\Services\CartService;
+use App\Services\MidtransPaymentService;
+use App\Services\WhatsAppOrderMessageService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
-use App\Services\CartService;
-use App\Services\WhatsAppOrderMessageService;
 
 new
 #[Layout('components.layouts.shop')]
@@ -95,9 +96,8 @@ class extends Component {
     #[Computed]
     public function selectedPaymentMethod()
     {
-        return $this->payment_method_id
-            ? PaymentMethod::find($this->payment_method_id)
-            : null;
+        return PaymentMethod::active()
+            ->find($this->payment_method_id);
     }
 
     #[Computed]
@@ -168,6 +168,22 @@ class extends Component {
         return $this->cartItems->sum(function (array $item) {
             return (int) ($item['discount_amount'] ?? 0) * (int) ($item['quantity'] ?? 1);
         });
+    }
+
+    private function isMidtransMethod($paymentMethod): bool
+    {
+        return $paymentMethod
+            && $paymentMethod->type === 'api'
+            && strtolower((string) $paymentMethod->api_provider) === 'midtrans';
+    }
+
+    private function paymentTypeForMethod($paymentMethod): string
+    {
+        if ($this->isMidtransMethod($paymentMethod)) {
+            return 'midtrans_snap';
+        }
+
+        return $paymentMethod?->type ?? 'manual';
     }
 
     private function createOrderItemSnapshot(Order $order, array $item): void
@@ -311,7 +327,14 @@ class extends Component {
             return;
         }
 
-        $order = DB::transaction(function () {
+        $paymentMethod = $this->selectedPaymentMethod;
+
+        if (! $paymentMethod) {
+            $this->addError('payment_method_id', 'Metode pembayaran tidak valid.');
+            return;
+        }
+
+        $order = DB::transaction(function () use ($paymentMethod) {
             $order = Order::create([
                 'user_id' => auth('customer')->id(),
                 'shipping_method_id' => $this->shipping_method_id,
@@ -333,7 +356,7 @@ class extends Component {
                 'discount_amount' => $this->cartDiscountTotal(),
                 'total_amount' => $this->total,
 
-                'payment_type' => $this->selectedPaymentMethod?->type,
+                'payment_type' => $this->paymentTypeForMethod($paymentMethod),
                 'payment_reference' => null,
                 'payment_redirect_url' => null,
 
@@ -348,8 +371,6 @@ class extends Component {
 
                 $this->createOrderItemSnapshot($order, $item);
             }
-
-            app(CartService::class)->clear();
 
             return $order;
         });
@@ -372,11 +393,60 @@ class extends Component {
                     'payment_redirect_url' => $whatsappUrl,
                 ]);
 
-                if ($paymentMethod->auto_redirect) {
-                    return redirect()->away($whatsappUrl);
+                app(CartService::class)->clear();
+
+                if ((bool) $paymentMethod->auto_redirect) {
+                    return $this->redirect($whatsappUrl, navigate: false);
                 }
+
+                return redirect()->route('checkout.payment', $order);
             }
         }
+
+        if ($this->isMidtransMethod($paymentMethod)) {
+            try {
+                $snapTransaction = app(MidtransPaymentService::class)
+                    ->createSnapTransaction($order);
+
+                $redirectUrl = $snapTransaction->redirect_url ?? null;
+                $snapToken = $snapTransaction->token ?? null;
+
+                if (! $redirectUrl) {
+                    throw new \RuntimeException('Midtrans tidak mengembalikan redirect URL.');
+                }
+
+                $order->update([
+                    'payment_type' => 'midtrans_snap',
+                    'payment_reference' => $snapToken ?: $order->order_number,
+                    'payment_redirect_url' => $redirectUrl,
+                ]);
+
+                app(CartService::class)->clear();
+
+                return $this->redirect($redirectUrl, navigate: false);
+            } catch (\Throwable $e) {
+                report($e);
+
+                $order->update([
+                    'payment_type' => 'midtrans_snap',
+                    'payment_reference' => $order->order_number,
+                ]);
+
+                app(CartService::class)->clear();
+
+                $message = 'Order berhasil dibuat, tapi koneksi ke Midtrans gagal. Silakan cek konfigurasi Midtrans atau lanjutkan proses manual dari admin.';
+
+                if (config('app.debug')) {
+                    $message .= ' Detail error: ' . $e->getMessage();
+                }
+
+                return redirect()
+                    ->route('checkout.payment', $order)
+                    ->with('error', $message);
+            }
+        }
+
+        app(CartService::class)->clear();
 
         return redirect()->route('checkout.payment', $order);
     }
@@ -461,6 +531,10 @@ class extends Component {
                 <label class="checkout-field full">
                     <input type="text" wire:model.live="phone" placeholder="Telepon">
                 </label>
+
+                @error('cart')
+                    <small class="checkout-error">{{ $message }}</small>
+                @enderror
 
                 <div class="checkout-section">
                     <h2>Metode Pengiriman</h2>
