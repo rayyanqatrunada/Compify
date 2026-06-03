@@ -99,7 +99,7 @@ Route::get('/auth/google/callback', function () {
         return redirect()
             ->route('customer.login')
             ->withErrors([
-                'email' => 'Akun admin tidak digunakan untuk login customer.',
+                'email' => 'Email atau password salah.',
             ]);
     }
 

@@ -115,7 +115,7 @@ class extends Component {
                 <label class="auth-input-wrap">
                     <span class="auth-input-icon">
                         <svg viewBox="0 0 24 24">
-                            <path d="M3 6.5A2.5 2.5 0 0 1 5.5 4h13A2.5 2.5 0 0 1 21 6.5v11a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5v-11Zm2.3-.5 6.7 5.1L18.7 6H5.3ZM19 8.1l-6.1 4.6a1.5 1.5 0 0 1-1.8 0L5 8.1v9.4c0 .3.2.5.5.5h13c.3 0 .5-.2.5-.5V8.1Z"/>
+                            <path d="M7 8V6a5 5 0 0 1 10 0v2h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h1Zm2 0h6V6a3 3 0 0 0-6 0v2Zm-3 2v9h12v-9H6Z"/>
                         </svg>
                     </span>
 
@@ -125,7 +125,7 @@ class extends Component {
                 <label class="auth-input-wrap">
                     <span class="auth-input-icon">
                         <svg viewBox="0 0 24 24">
-                            <path d="M3 6.5A2.5 2.5 0 0 1 5.5 4h13A2.5 2.5 0 0 1 21 6.5v11a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5v-11Zm2.3-.5 6.7 5.1L18.7 6H5.3ZM19 8.1l-6.1 4.6a1.5 1.5 0 0 1-1.8 0L5 8.1v9.4c0 .3.2.5.5.5h13c.3 0 .5-.2.5-.5V8.1Z"/>
+                            <path d="M7 8V6a5 5 0 0 1 10 0v2h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h1Zm2 0h6V6a3 3 0 0 0-6 0v2Zm-3 2v9h12v-9H6Z"/>
                         </svg>
                     </span>
 
