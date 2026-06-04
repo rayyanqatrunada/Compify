@@ -14,6 +14,8 @@ class Banner extends Model
         'image',
         'is_active',
         'sort_order',
+        'asset_type', // tambah
+        'video',      // tambah
     ];
 
     protected $casts = [

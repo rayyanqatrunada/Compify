@@ -20,7 +20,9 @@ class extends Component {
     public string $button_url = '';
     public bool $is_active = true;
     public int $sort_order = 0;
+    public string $asset_type = 'image'; // 'image' | 'video'
     public $imageFile = null;
+    public $videoFile = null;
 
     #[Computed]
     public function banners()
@@ -31,26 +33,36 @@ class extends Component {
     public function save(): void
     {
         $this->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'subtitle' => ['nullable', 'string', 'max:255'],
-            'button_text' => ['nullable', 'string', 'max:255'],
+            'title'      => ['required', 'string', 'max:255'],
+            'subtitle'   => ['nullable', 'string', 'max:255'],
+            'button_text'=> ['nullable', 'string', 'max:255'],
             'button_url' => ['nullable', 'string', 'max:255'],
-            'is_active' => ['boolean'],
+            'is_active'  => ['boolean'],
             'sort_order' => ['integer', 'min:0'],
-            'imageFile' => ['nullable', 'image', 'max:4096'],
+            'asset_type' => ['required', 'in:image,video'],
+            'imageFile'  => ['nullable', 'image', 'max:4096'],
+            // max 60 MB, format umum
+            'videoFile'  => ['nullable', 'mimetypes:video/mp4,video/webm,video/ogg', 'max:61440'],
         ]);
 
         $payload = [
-            'title' => $this->title,
-            'subtitle' => $this->subtitle,
-            'button_text' => $this->button_text,
+            'title'      => $this->title,
+            'subtitle'   => $this->subtitle,
+            'button_text'=> $this->button_text,
             'button_url' => $this->button_url,
-            'is_active' => $this->is_active,
+            'is_active'  => $this->is_active,
             'sort_order' => $this->sort_order,
+            'asset_type' => $this->asset_type,
         ];
 
-        if ($this->imageFile) {
+        if ($this->asset_type === 'image' && $this->imageFile) {
             $payload['image'] = $this->imageFile->store('banners', 'public');
+            $payload['video'] = null; // hapus video lama jika ganti ke image
+        }
+
+        if ($this->asset_type === 'video' && $this->videoFile) {
+            $payload['video'] = $this->videoFile->store('banners/videos', 'public');
+            $payload['image'] = null; // hapus image lama jika ganti ke video
         }
 
         Banner::updateOrCreate(
@@ -66,13 +78,14 @@ class extends Component {
     {
         $banner = Banner::findOrFail($id);
 
-        $this->editingId = $banner->id;
-        $this->title = $banner->title;
-        $this->subtitle = $banner->subtitle ?? '';
+        $this->editingId   = $banner->id;
+        $this->title       = $banner->title;
+        $this->subtitle    = $banner->subtitle ?? '';
         $this->button_text = $banner->button_text ?? '';
-        $this->button_url = $banner->button_url ?? '';
-        $this->is_active = $banner->is_active;
-        $this->sort_order = $banner->sort_order;
+        $this->button_url  = $banner->button_url ?? '';
+        $this->is_active   = $banner->is_active;
+        $this->sort_order  = $banner->sort_order;
+        $this->asset_type  = $banner->asset_type ?? 'image';
     }
 
     public function delete(int $id): void
@@ -84,16 +97,14 @@ class extends Component {
     public function resetForm(): void
     {
         $this->reset([
-            'editingId',
-            'title',
-            'subtitle',
-            'button_text',
-            'button_url',
-            'imageFile',
+            'editingId', 'title', 'subtitle',
+            'button_text', 'button_url',
+            'imageFile', 'videoFile',
         ]);
 
-        $this->is_active = true;
+        $this->is_active  = true;
         $this->sort_order = 0;
+        $this->asset_type = 'image';
     }
 };
 ?>
@@ -130,11 +141,31 @@ class extends Component {
                 <input type="text" wire:model="button_url" placeholder="/products">
             </label>
 
+            {{-- Toggle tipe asset --}}
             <label>
-                Gambar Banner
-                <input type="file" wire:model="imageFile">
-                @error('imageFile') <span class="error-text">{{ $message }}</span> @enderror
+                Tipe Asset
+                <select wire:model.live="asset_type">
+                    <option value="image">Gambar</option>
+                    <option value="video">Video</option>
+                </select>
             </label>
+
+            {{-- Kondisional: tampilkan input sesuai tipe --}}
+            @if($asset_type === 'image')
+                <label>
+                    Gambar Banner
+                    <small>(JPG/PNG, maks 4 MB)</small>
+                    <input type="file" wire:model="imageFile" accept="image/*">
+                    @error('imageFile') <span class="error-text">{{ $message }}</span> @enderror
+                </label>
+            @else
+                <label>
+                    Video Banner
+                    <small>(MP4/WebM, maks 60 MB, durasi &le;30 detik disarankan)</small>
+                    <input type="file" wire:model="videoFile" accept="video/mp4,video/webm,video/ogg">
+                    @error('videoFile') <span class="error-text">{{ $message }}</span> @enderror
+                </label>
+            @endif
 
             <label>
                 Status
@@ -158,6 +189,7 @@ class extends Component {
             <thead>
                 <tr>
                     <th>Judul</th>
+                    <th>Tipe</th>
                     <th>URL</th>
                     <th>Status</th>
                     <th>Urutan</th>
@@ -168,6 +200,13 @@ class extends Component {
                 @foreach($this->banners as $banner)
                     <tr>
                         <td>{{ $banner->title }}</td>
+                        <td>
+                            @if(($banner->asset_type ?? 'image') === 'video')
+                                Video
+                            @else
+                                Gambar
+                            @endif
+                        </td>
                         <td>{{ $banner->button_url }}</td>
                         <td>{{ $banner->is_active ? 'Aktif' : 'Nonaktif' }}</td>
                         <td>{{ $banner->sort_order }}</td>

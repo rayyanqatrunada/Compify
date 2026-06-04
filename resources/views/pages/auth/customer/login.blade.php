@@ -112,7 +112,7 @@ class extends Component {
                     </button>
                 </label>
 
-                <a href="#" class="auth-forgot-link">Forgot password?</a>
+                <!-- <a href="#" class="auth-forgot-link">Forgot password?</a> -->
 
                 <button type="submit" class="auth-submit-btn">
                     Login

@@ -20,6 +20,25 @@ new
 #[Title('Compify - Toko Perlengkapan Komputer')]
 class extends Component {
     public int $bannerIndex = 0;
+    public string $slideDirection = 'next'; // 'next' | 'prev'
+
+    public function nextBanner(): void
+    {
+        $count = $this->banners->count();
+        if ($count > 0) {
+            $this->slideDirection = 'next';
+            $this->bannerIndex = ($this->bannerIndex + 1) % $count;
+        }
+    }
+
+    public function prevBanner(): void
+    {
+        $count = $this->banners->count();
+        if ($count > 0) {
+            $this->slideDirection = 'prev';
+            $this->bannerIndex = ($this->bannerIndex - 1 + $count) % $count;
+        }
+    }
 
     #[Computed]
     public function banners()
@@ -155,24 +174,6 @@ class extends Component {
         return 'source:' . $source;
     }
 
-    public function nextBanner(): void
-    {
-        $count = $this->banners->count();
-
-        if ($count > 0) {
-            $this->bannerIndex = ($this->bannerIndex + 1) % $count;
-        }
-    }
-
-    public function prevBanner(): void
-    {
-        $count = $this->banners->count();
-
-        if ($count > 0) {
-            $this->bannerIndex = ($this->bannerIndex - 1 + $count) % $count;
-        }
-    }
-
     public function productsForLayoutSlot(HomeLayoutSlot $slot, int $offset = 0)
     {
         $source = $slot->product_source ?? HomeLayoutSlot::SOURCE_CATEGORY;
@@ -298,54 +299,201 @@ class extends Component {
 
 <div class="home-page">
     @php
-        $banner = $this->currentBanner;
-        $heroImage = $banner?->image ? Storage::url($banner->image) : null;
+        $allBanners = $this->banners;
     @endphp
+
 
     <section
         class="hero-slider"
-        @if($this->banners->count() > 1)
-            wire:poll.6000ms="nextBanner"
-        @endif
+        x-data
+        x-ref="slider"
+        wire:ignore
     >
-        <div
-            class="hero-slide hero-slide-animated"
-            @if($heroImage)
-                style="background-image: linear-gradient(90deg, rgba(0,0,0,.82), rgba(0,0,0,.42), rgba(0,0,0,.12)), url('{{ $heroImage }}')"
-            @endif
-            wire:key="banner-{{ $banner?->id ?? 'default' }}-{{ $bannerIndex }}"
-        >
-            <div class="hero-copy hero-copy-fade" wire:key="hero-copy-{{ $banner?->id ?? 'default' }}-{{ $bannerIndex }}">
-                <p class="hero-eyebrow">Compify Computer Store</p>
+        @foreach($allBanners as $index => $b)
+            @php
+                $bImage = $b->image ? Storage::url($b->image) : null;
+                $bVideo = ($b->asset_type === 'video' && $b->video) ? Storage::url($b->video) : null;
+            @endphp
 
-                <h1>{{ $banner?->title ?? 'Build PC Impianmu di Compify' }}</h1>
+            <div
+                class="hero-slide"
+                data-index="{{ $index }}"
+                @if($bImage && !$bVideo)
+                    style="background-image: url('{{ $bImage }}')"
+                @endif
+            >
+                @if($bVideo)
+                    <div class="hero-video-bg">
+                        <div class="hero-video-overlay"></div>
+                        <video
+                            src="{{ $bVideo }}"
+                            @if($bImage) poster="{{ $bImage }}" @endif
+                            autoplay muted loop playsinline
+                        ></video>
+                    </div>
+                @endif
 
-                <p class="hero-support">
-                    {{ $banner?->subtitle ?? 'Temukan motherboard, PSU, RAM, SSD, casing, dan perlengkapan komputer terbaik.' }}
-                </p>
-
-                <a href="{{ $banner?->button_url ?? route('products.index') }}" class="hero-button" wire:navigate>
-                    {{ $banner?->button_text ?? 'Belanja Sekarang' }}
-                </a>
-            </div>
-
-            @if($this->banners->count() > 1)
-                <button type="button" class="hero-arrow prev" wire:click="prevBanner">‹</button>
-                <button type="button" class="hero-arrow next" wire:click="nextBanner">›</button>
-
-                <div class="hero-dots">
-                    @foreach($this->banners as $index => $item)
-                        <button
-                            type="button"
-                            wire:click="$set('bannerIndex', {{ $index }})"
-                            @class(['active' => $bannerIndex === $index])
-                            aria-label="Banner {{ $index + 1 }}"
-                        ></button>
-                    @endforeach
+                <div class="hero-copy">
+                    <p class="hero-eyebrow">Compify Computer Store</p>
+                    <h1>{{ $b->title ?? 'Build PC Impianmu di Compify' }}</h1>
+                    <p class="hero-support">
+                        {{ $b->subtitle ?? 'Temukan motherboard, PSU, RAM, SSD, casing, dan perlengkapan komputer terbaik.' }}
+                    </p>
+                    <a href="{{ $b->button_url ?? route('products.index') }}" class="hero-button" wire:navigate>
+                        {{ $b->button_text ?? 'Belanja Sekarang' }}
+                    </a>
                 </div>
-            @endif
-        </div>
+            </div>
+        @endforeach
+
+        @if($allBanners->count() > 1)
+            <button type="button" class="hero-arrow prev" id="hero-prev">‹</button>
+            <button type="button" class="hero-arrow next" id="hero-next">›</button>
+
+            <div class="hero-dots" id="hero-dots">
+                @foreach($allBanners as $index => $b)
+                    <button
+                        type="button"
+                        data-dot="{{ $index }}"
+                        aria-label="Banner {{ $index + 1 }}"
+                    ></button>
+                @endforeach
+            </div>
+        @endif
     </section>
+
+    <script>
+        (function () {
+            const DURATION = 620;
+            const AUTO_MS  = 6000;
+
+            let autoTimer   = null;
+            let initialized = false;
+
+            function destroySlider() {
+                clearInterval(autoTimer);
+                autoTimer   = null;
+                initialized = false;
+            }
+
+            function animateCopy(slide) {
+                const copy = slide.querySelector('.hero-copy');
+                if (!copy) return;
+
+                copy.classList.remove('is-animating');
+                void copy.offsetHeight;
+
+                copy.querySelectorAll('*').forEach(el => {
+                    el.style.animation = 'none';
+                    void el.offsetHeight;
+                    el.style.animation = '';
+                });
+
+                copy.classList.add('is-animating');
+            }
+
+            function initSlider() {
+                if (initialized) return;
+
+                const slider = document.querySelector('.hero-slider');
+                if (!slider) return;
+
+                const slides = Array.from(slider.querySelectorAll('.hero-slide'));
+                if (!slides.length) return;
+
+                // slide tunggal: langsung tampil dan animasi teks
+                if (slides.length === 1) {
+                    slides[0].classList.add('is-active');
+                    setTimeout(() => animateCopy(slides[0]), 100);
+                    initialized = true;
+                    return;
+                }
+
+                const dots    = Array.from(slider.querySelectorAll('[data-dot]'));
+                const btnPrev = slider.querySelector('#hero-prev');
+                const btnNext = slider.querySelector('#hero-next');
+
+                let current = 0;
+                let busy    = false;
+
+                function goTo(next, direction) {
+                    if (busy || next === current) return;
+                    busy = true;
+
+                    const prev  = current;
+                    const enter = direction === 'next' ? 'is-entering-next' : 'is-entering-prev';
+                    const leave = direction === 'next' ? 'is-leaving-next'  : 'is-leaving-prev';
+
+                    // reset teks slide berikutnya SEBELUM slide masuk
+                    const nextCopy = slides[next].querySelector('.hero-copy');
+                    if (nextCopy) {
+                        nextCopy.classList.remove('is-animating');
+                        void nextCopy.offsetHeight;
+                        nextCopy.querySelectorAll('*').forEach(el => {
+                            el.style.animation = 'none';
+                            void el.offsetHeight;
+                            el.style.animation = '';
+                        });
+                    }
+
+                    slides.forEach(s => s.classList.remove(
+                        'is-active', 'is-entering-next', 'is-entering-prev',
+                        'is-leaving-next', 'is-leaving-prev'
+                    ));
+
+                    slides[prev].classList.add('is-active', leave);
+                    slides[next].classList.add(enter);
+
+                    dots.forEach((d, i) => d.classList.toggle('active', i === next));
+
+                    setTimeout(() => {
+                        slides.forEach(s => s.classList.remove(
+                            'is-active', 'is-entering-next', 'is-entering-prev',
+                            'is-leaving-next', 'is-leaving-prev'
+                        ));
+                        slides[next].classList.add('is-active');
+                        animateCopy(slides[next]); // teks baru muncul setelah slide selesai
+                        current = next;
+                        busy    = false;
+                    }, DURATION);
+                }
+
+                function next() { goTo((current + 1) % slides.length, 'next'); }
+                function prev() { goTo((current - 1 + slides.length) % slides.length, 'prev'); }
+
+                function startAuto() { autoTimer = setInterval(next, AUTO_MS); }
+                function resetAuto() { clearInterval(autoTimer); startAuto(); }
+
+                btnNext?.addEventListener('click', () => { resetAuto(); next(); });
+                btnPrev?.addEventListener('click', () => { resetAuto(); prev(); });
+
+                dots.forEach((dot, i) => {
+                    dot.addEventListener('click', () => {
+                        resetAuto();
+                        goTo(i, i > current ? 'next' : 'prev');
+                    });
+                });
+
+                slider.addEventListener('mouseenter', () => clearInterval(autoTimer));
+                slider.addEventListener('mouseleave', () => startAuto());
+
+                // tampilkan slide pertama, teks muncul setelah page load selesai
+                slides[0].classList.add('is-active');
+                startAuto();
+
+                // delay teks slide pertama = sama dengan DURATION
+                // supaya konsisten dengan putaran berikutnya
+                setTimeout(() => animateCopy(slides[0]), DURATION);
+
+                initialized = true;
+            }
+
+            // reset initialized setiap kali Livewire akan navigasi ke halaman baru
+            document.addEventListener('livewire:navigating', destroySlider);
+            document.addEventListener('DOMContentLoaded', initSlider);
+            document.addEventListener('livewire:navigated', initSlider);
+        })();
+    </script>
 
     @if($this->categoryGridSetting->is_active && $this->categoryGridItems->isNotEmpty())
         <section

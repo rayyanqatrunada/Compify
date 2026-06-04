@@ -12,28 +12,105 @@
 }
 
 .hero-slide {
-    position: relative;
-    height:  var(--hero-height);
+    position: absolute;
+    inset: 0;
     display: flex;
     align-items: center;
     background: linear-gradient(90deg, #050505, #161616);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    will-change: transform, opacity;
+    z-index: 0;
+}
+
+.hero-slide::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: linear-gradient(
+        90deg,
+        rgba(0,0,0,.80) 0%,
+        rgba(0,0,0,.40) 55%,
+        rgba(0,0,0,.08) 100%
+    );
+    pointer-events: none;
 }
 
 .hero-slide::after {
     content: "";
     position: absolute;
     inset: 0;
-    z-index: 1;
+    z-index: 3;
     background:
-        radial-gradient(circle at 72% 35%, rgba(255, 255, 255, .12), transparent 28%),
-        linear-gradient(to bottom, transparent, rgba(0, 0, 0, .18));
+        radial-gradient(circle at 72% 35%, rgba(255,255,255,.10), transparent 28%),
+        linear-gradient(to bottom, transparent, rgba(0,0,0,.18));
     pointer-events: none;
 }
 
+/* =========================================================
+   HERO SLIDE STATE CLASSES — dikontrol JS
+========================================================= */
+
+.hero-slide.is-active {
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 2;
+    transform: translateX(0);
+}
+
+.hero-slide.is-entering-next,
+.hero-slide.is-entering-prev {
+    opacity: 1;
+    pointer-events: none;
+}
+
+.hero-slide.is-entering-next {
+    z-index: 3;
+    animation: slideEnterFromRight .6s cubic-bezier(.77, 0, .18, 1) forwards;
+}
+
+.hero-slide.is-leaving-next {
+    opacity: 1;
+    pointer-events: none;
+    z-index: 2;
+    animation: slideLeaveToLeft .6s cubic-bezier(.77, 0, .18, 1) forwards;
+}
+
+.hero-slide.is-entering-prev {
+    z-index: 3;
+    animation: slideEnterFromLeft .6s cubic-bezier(.77, 0, .18, 1) forwards;
+}
+
+.hero-slide.is-leaving-prev {
+    opacity: 1;
+    pointer-events: none;
+    z-index: 2;
+    animation: slideLeaveToRight .6s cubic-bezier(.77, 0, .18, 1) forwards;
+}
+
+@keyframes slideEnterFromRight {
+    from { opacity: 1; transform: translateX(100%); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideLeaveToLeft {
+    from { opacity: 1; transform: translateX(0); }
+    to   { opacity: 1; transform: translateX(-30%); }
+}
+
+@keyframes slideEnterFromLeft {
+    from { opacity: 1; transform: translateX(-100%); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideLeaveToRight {
+    from { opacity: 1; transform: translateX(0); }
+    to   { opacity: 1; transform: translateX(30%); }
+}
 
 /* =========================================================
    HERO TEXT
@@ -96,81 +173,64 @@
     box-shadow: 0 14px 28px rgba(0, 0, 0, .22);
 }
 
+/* =========================================================
+   HERO TEXT ANIMATION — stagger naik per elemen
+   Teks muncul setelah slide selesai (.6s)
+========================================================= */
+
+.hero-copy > * {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: none;
+}
+
+.hero-copy.is-animating > *:nth-child(1) { animation: heroTextRise .45s .22s cubic-bezier(.22,.9,.24,1) forwards; }
+.hero-copy.is-animating > *:nth-child(2) { animation: heroTextRise .45s .32s cubic-bezier(.22,.9,.24,1) forwards; }
+.hero-copy.is-animating > *:nth-child(3) { animation: heroTextRise .45s .42s cubic-bezier(.22,.9,.24,1) forwards; }
+.hero-copy.is-animating > *:nth-child(4) { animation: heroTextRise .45s .52s cubic-bezier(.22,.9,.24,1) forwards; }
+
+@keyframes heroTextRise {
+    to { opacity: 1; transform: translateY(0); }
+}
 
 /* =========================================================
    HERO ARROWS
-   Panah tanpa background, muncul saat hover.
 ========================================================= */
 
 .hero-arrow {
     position: absolute;
     z-index: 50;
-
     width: 40px;
     height: 40px;
-
     border: none;
     border-radius: 999px;
-
     background: rgba(255,255,255,.14);
     backdrop-filter: blur(12px);
-
     color: #ffffff;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     font-size: 18px;
     font-weight: 700;
-
     cursor: pointer;
-
-    /* hidden by default */
     opacity: 0;
     pointer-events: none;
-
-    transition:
-        opacity .25s ease,
-        transform .25s ease,
-        background .25s ease;
+    transition: opacity .25s ease, transform .25s ease, background .25s ease;
 }
 
-.hero-arrow.prev {
-    bottom: 24px;
-    right: 72px;
+.hero-arrow.prev { bottom: 24px; right: 72px; top: auto; left: auto; transform: translateY(10px); }
+.hero-arrow.next { bottom: 24px; right: 24px; top: auto; left: auto; transform: translateY(10px); }
 
-    top: auto;
-    left: auto;
-
-    transform: translateY(10px);
-}
-
-.hero-arrow.next {
-    bottom: 24px;
-    right: 24px;
-
-    top: auto;
-    left: auto;
-
-    transform: translateY(10px);
-}
-
-/* muncul saat hover hero */
 .hero-slider:hover .hero-arrow {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0);
 }
 
-.hero-arrow:hover {
-    background: rgba(255,255,255,.24);
-}
-
+.hero-arrow:hover { background: rgba(255,255,255,.24); }
 
 /* =========================================================
    HERO DOTS
-   Penanda slide di kiri bawah.
 ========================================================= */
 
 .hero-dots {
@@ -178,25 +238,16 @@
     left: var(--slider-dots-left, 34px);
     bottom: var(--slider-dots-bottom, 24px);
     z-index: 35;
-
     display: flex;
     align-items: center;
     gap: 8px;
-
     opacity: 0;
     transform: translateY(10px);
     pointer-events: none;
-
-    transition:
-        opacity .35s ease,
-        transform .35s ease;
+    transition: opacity .35s ease, transform .35s ease;
 }
 
-.hero-slider:hover .hero-dots {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-}
+.hero-slider:hover .hero-dots { opacity: 1; transform: translateY(0); pointer-events: auto; }
 
 .hero-dots button {
     width: 8px;
@@ -204,79 +255,38 @@
     padding: 0;
     border: none;
     border-radius: 999px;
-    background: rgba(255, 255, 255, .45);
+    background: rgba(255,255,255,.45);
     cursor: pointer;
-
-    transition:
-        width .28s ease,
-        background .28s ease,
-        transform .28s ease;
+    transition: width .28s ease, background .28s ease, transform .28s ease;
 }
 
-.hero-dots button.active {
-    width: 28px;
-    background: #ffffff;
-}
-
-.hero-dots button:hover {
-    transform: scale(1.18);
-    background: rgba(255, 255, 255, .85);
-}
-
+.hero-dots button.active { width: 28px; background: #ffffff; }
+.hero-dots button:hover  { transform: scale(1.18); background: rgba(255,255,255,.85); }
 
 /* =========================================================
-   HERO ANIMATION
-   Gambar geser, teks fade.
+   HERO VIDEO
 ========================================================= */
 
-.hero-slide-animated {
-    animation: heroImageSlideIn .62s cubic-bezier(.22, .9, .24, 1) both;
-    will-change: transform, opacity;
+.hero-video-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
 }
 
-.hero-copy-fade > * {
-    opacity: 0;
-    animation: heroTextFade .48s ease forwards;
+.hero-video-bg video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
-.hero-copy-fade > *:nth-child(1) {
-    animation-delay: .08s;
+.hero-video-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(90deg, rgba(0,0,0,.82), rgba(0,0,0,.42), rgba(0,0,0,.12));
+    pointer-events: none;
 }
-
-.hero-copy-fade > *:nth-child(2) {
-    animation-delay: .16s;
-}
-
-.hero-copy-fade > *:nth-child(3) {
-    animation-delay: .24s;
-}
-
-.hero-copy-fade > *:nth-child(4) {
-    animation-delay: .32s;
-}
-
-@keyframes heroImageSlideIn {
-    from {
-        opacity: .75;
-        transform: translateX(42px) scale(1.015);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
-}
-
-@keyframes heroTextFade {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
 
 /* =========================================================
    RESPONSIVE
@@ -295,28 +305,9 @@
         margin-right: 24px;
     }
 
-    .hero-copy h1 {
-        font-size: calc(var(--hero-title-size) * .68);
-    }
-
-    .hero-support {
-        font-size: calc(var(--hero-support-size) * .9);
-    }
-
-    .hero-arrow {
-        font-size: 58px;
-    }
-
-    .hero-arrow.prev {
-        left: 14px;
-    }
-
-    .hero-arrow.next {
-        right: 14px;
-    }
-
-    .hero-dots {
-        left: 24px;
-        bottom: 18px;
-    }
+    .hero-copy h1    { font-size: calc(var(--hero-title-size) * .68); }
+    .hero-support    { font-size: calc(var(--hero-support-size) * .9); }
+    .hero-arrow.prev { left: 14px; }
+    .hero-arrow.next { right: 14px; }
+    .hero-dots       { left: 24px; bottom: 18px; }
 }
