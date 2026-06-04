@@ -67,7 +67,7 @@
     font-size: var(--shop-kicker-size);
     font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 1.4px;
+    letter-spacing: 0.8px;
 }
 
 .home-category-strip-head h2,
@@ -1104,15 +1104,15 @@
     display: grid;
     grid-template-columns: repeat(
         var(--category-grid-desktop, 6),
-        minmax(0, var(--home-category-card-size))
+        minmax(0, 1fr)
     );
     gap: var(--home-category-grid-gap);
-    justify-content: start;
+    width: 100%;
 }
 
 /* Card tetap polos */
 .home-category-grid-card {
-    width: var(--home-category-card-size);
+    width: 100%;
     max-width: 100%;
     min-width: 0;
     display: grid;
@@ -1163,15 +1163,12 @@
 
 @media (max-width: 980px) {
     .home-category-grid {
-        grid-template-columns: repeat(
-            var(--category-grid-tablet, 4),
-            minmax(0, var(--home-category-card-size-tablet))
-        );
+        grid-template-columns: repeat(var(--category-grid-tablet, 4), minmax(0, 1fr));
         gap: 14px;
     }
 
     .home-category-grid-card {
-        width: var(--home-category-card-size-tablet);
+        width: 100%;
     }
 
     .home-category-grid-head h2 {
@@ -1192,15 +1189,12 @@
     }
 
     .home-category-grid {
-        grid-template-columns: repeat(
-            var(--category-grid-mobile, 2),
-            minmax(0, var(--home-category-card-size-mobile))
-        );
+        grid-template-columns: repeat(var(--category-grid-mobile, 2), minmax(0, 1fr));
         gap: 12px;
     }
 
     .home-category-grid-card {
-        width: var(--home-category-card-size-mobile);
+        width: 100%;
     }
 
     .home-category-grid-card__image {
