@@ -21,6 +21,7 @@ class FonnteSetting extends Model
         'is_active' => 'boolean',
         'send_customer_order_created' => 'boolean',
         'send_admin_order_created' => 'boolean',
+        'token' => 'encrypted',
     ];
 
     public static function current(): self

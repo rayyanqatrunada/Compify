@@ -17,7 +17,12 @@ class extends Component
 
     public bool $is_active = false;
     public string $api_url = 'https://api.fonnte.com/send';
+
+    // Token hanya dipakai untuk input token baru.
+    // Token lama tidak pernah ditampilkan ulang ke frontend.
     public string $token = '';
+    public bool $has_token = false;
+
     public string $admin_phone = '';
 
     public bool $send_customer_order_created = true;
@@ -34,7 +39,11 @@ class extends Component
 
         $this->is_active = (bool) $setting->is_active;
         $this->api_url = $setting->api_url ?: 'https://api.fonnte.com/send';
-        $this->token = $setting->token ?? '';
+
+        // Jangan isi token asli ke property Livewire.
+        $this->token = '';
+        $this->has_token = filled($setting->token);
+
         $this->admin_phone = $setting->admin_phone ?? '';
 
         $this->send_customer_order_created = (bool) $setting->send_customer_order_created;
@@ -45,6 +54,11 @@ class extends Component
 
         $this->admin_order_created_template = $setting->admin_order_created_template
             ?: FonnteSetting::defaultAdminOrderTemplate();
+    }
+
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
     }
 
     #[Computed]
@@ -60,8 +74,11 @@ class extends Component
     {
         $this->validate([
             'is_active' => ['boolean'],
-            'api_url' => ['required', 'string', 'max:255'],
+            'api_url' => ['required', 'url', 'max:255'],
+
+            // Token boleh kosong kalau sudah pernah tersimpan.
             'token' => ['nullable', 'string'],
+
             'admin_phone' => ['nullable', 'string', 'max:30'],
 
             'send_customer_order_created' => ['boolean'],
@@ -71,10 +88,22 @@ class extends Component
             'admin_order_created_template' => ['required', 'string'],
         ]);
 
-        FonnteSetting::current()->update([
+        $setting = FonnteSetting::current();
+
+        if ($this->is_active && blank($this->token) && blank($setting->token)) {
+            $this->addError('token', 'Token Fonnte wajib diisi jika Fonnte diaktifkan.');
+            return;
+        }
+
+        if ($this->is_active && $this->send_admin_order_created && blank($this->admin_phone)) {
+            $this->addError('admin_phone', 'Nomor admin wajib diisi jika notifikasi admin aktif.');
+            return;
+        }
+
+        $payload = [
             'is_active' => $this->is_active,
             'api_url' => $this->api_url,
-            'token' => $this->token ?: null,
+
             'admin_phone' => $this->admin_phone ?: null,
 
             'send_customer_order_created' => $this->send_customer_order_created,
@@ -82,9 +111,35 @@ class extends Component
 
             'customer_order_created_template' => $this->customer_order_created_template,
             'admin_order_created_template' => $this->admin_order_created_template,
-        ]);
+        ];
+
+        // Token hanya diganti kalau input token baru diisi.
+        if (filled($this->token)) {
+            $payload['token'] = $this->token;
+        }
+
+        $setting->update($payload);
+
+        $setting->refresh();
+
+        $this->token = '';
+        $this->has_token = filled($setting->token);
 
         session()->flash('success', 'Fonnte settings berhasil disimpan.');
+    }
+
+    public function clearToken(): void
+    {
+        FonnteSetting::current()->update([
+            'token' => null,
+            'is_active' => false,
+        ]);
+
+        $this->token = '';
+        $this->has_token = false;
+        $this->is_active = false;
+
+        session()->flash('success', 'Token Fonnte berhasil dihapus dan Fonnte dinonaktifkan.');
     }
 
     public function resetTemplates(): void
@@ -133,14 +188,29 @@ class extends Component
             <label>
                 API URL
                 <input type="text" wire:model="api_url" placeholder="https://api.fonnte.com/send">
+                @error('api_url')
+                    <small style="color:#b91c1c;">{{ $message }}</small>
+                @enderror
             </label>
 
             <label>
-                Token Fonnte
-                <input type="password" wire:model="token" placeholder="Masukkan token Fonnte">
+                Token Fonnte Baru
+                <input
+                    type="password"
+                    wire:model="token"
+                    placeholder="Kosongkan kalau tidak ingin mengganti token"
+                    autocomplete="new-password"
+                >
+
                 <small class="admin-form-help-v2">
-                    Simpan token dengan aman. Jangan dibagikan ke user atau frontend.
+                    Status token:
+                    <strong>{{ $has_token ? 'Sudah tersimpan' : 'Belum tersimpan' }}</strong>.
+                    Token lama tidak ditampilkan ulang demi keamanan.
                 </small>
+
+                @error('token')
+                    <small style="color:#b91c1c;">{{ $message }}</small>
+                @enderror
             </label>
 
             <label>
@@ -149,6 +219,10 @@ class extends Component
                 <small class="admin-form-help-v2">
                     Nomor tujuan notifikasi admin. Boleh format 08xxx atau 62xxx.
                 </small>
+
+                @error('admin_phone')
+                    <small style="color:#b91c1c;">{{ $message }}</small>
+                @enderror
             </label>
 
             <label>
@@ -173,6 +247,10 @@ class extends Component
         <label>
             Template Pesan Customer - Order Dibuat
             <textarea wire:model="customer_order_created_template" rows="10"></textarea>
+
+            @error('customer_order_created_template')
+                <small style="color:#b91c1c;">{{ $message }}</small>
+            @enderror
         </label>
 
         <br>
@@ -180,13 +258,18 @@ class extends Component
         <label>
             Template Pesan Admin - Order Baru
             <textarea wire:model="admin_order_created_template" rows="10"></textarea>
+
+            @error('admin_order_created_template')
+                <small style="color:#b91c1c;">{{ $message }}</small>
+            @enderror
         </label>
 
         <small class="admin-form-help-v2">
             Placeholder yang bisa dipakai:
             {order_number}, {customer_name}, {customer_phone}, {customer_email},
-            {items}, {subtotal}, {shipping_cost}, {total_amount},
-            {payment_method}, {shipping_method}, {shipping_address}, {payment_url}
+            {items}, {subtotal}, {shipping_cost}, {discount_amount}, {total_amount},
+            {payment_method}, {shipping_method}, {shipping_address}, {payment_url},
+            {order_status}, {payment_status}
         </small>
 
         <div class="admin-actions">
@@ -197,6 +280,17 @@ class extends Component
             <button type="button" wire:click="resetTemplates" class="admin-btn secondary">
                 Reset Template
             </button>
+
+            @if($has_token)
+                <button
+                    type="button"
+                    wire:click="clearToken"
+                    wire:confirm="Yakin hapus token Fonnte? Fonnte akan dinonaktifkan."
+                    class="admin-btn danger"
+                >
+                    Hapus Token
+                </button>
+            @endif
         </div>
     </form>
 
