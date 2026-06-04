@@ -267,6 +267,9 @@ Route::middleware(['auth:admin', 'admin'])
             Route::livewire('/home-galleries', 'pages::admin.content.home-sections.galleries')
                 ->name('home-galleries');
 
+            Route::livewire('/home-category-grid', 'pages::admin.content.home-sections.category-grid')
+                ->name('home-category-grid');
+
             Route::prefix('about')->name('about.')->group(function () {
                 Route::livewire('/hero', 'pages::admin.content.about.hero')->name('hero');
                 Route::livewire('/intro', 'pages::admin.content.about.intro')->name('intro');
@@ -290,6 +293,11 @@ Route::middleware(['auth:admin', 'admin'])
         Route::prefix('sales')->name('sales.')->group(function () {
             Route::livewire('/orders', 'pages::admin.sales.orders.index')->name('orders');
             Route::livewire('/orders/{order}', 'pages::admin.sales.orders.show')->name('orders.show');
+        });
+
+        Route::prefix('layout')->name('layout.')->group(function () {
+            Route::livewire('/home', 'pages::admin.layout.home')
+                ->name('home');
         });
 
         Route::prefix('settings')->name('settings.')->group(function () {

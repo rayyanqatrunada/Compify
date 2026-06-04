@@ -1032,3 +1032,182 @@
 .newsletter-message--error {
     color: #b91c1c;
 }
+
+/* =========================================================
+   HOME CATEGORY GRID - SIZE CONTROL ONLY
+   Pakai ini untuk mengecilkan card tanpa ubah desain utama
+========================================================= */
+
+.home-category-grid-section {
+    /* ===== ADJUST AREA ===== */
+    --home-category-card-size: 135px;          /* ukuran card desktop */
+    --home-category-card-size-tablet: 120px;   /* ukuran card tablet */
+    --home-category-card-size-mobile: 105px;   /* ukuran card mobile */
+
+    --home-category-grid-gap: 18px;            /* jarak antar card */
+    --home-category-title-size: 12px;          /* ukuran teks nama kategori */
+    --home-category-image-radius: 6px;        /* rounded gambar */
+    --home-category-section-top: 18px;         /* jarak dari hero */
+    /* ===== END ADJUST AREA ===== */
+
+    width: min(var(--shop-page-max), calc(100% - (var(--shop-x) * 2)));
+    margin: 0 auto;
+    padding: var(--home-category-section-top) 0 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+/* Header tetap seperti display produk, cuma compact */
+.home-category-grid-head {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--shop-section-gap);
+}
+
+.home-category-grid-head h2 {
+    margin: 0;
+    color: #303030;
+    font-size: calc(var(--product-display-title-size) * .62);
+    line-height: 1.05;
+    font-weight: 950;
+}
+
+.home-category-grid-head p {
+    margin: 4px 0 0;
+    color: var(--shop-muted);
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.45;
+}
+
+/* Center title category grid
+.home-category-grid-head {
+    justify-content: center;
+    text-align: center;
+}
+
+.home-category-grid-head > div {
+    width: 100%;
+}
+
+.home-category-grid-head h2,
+.home-category-grid-head p {
+    text-align: center;
+} */
+
+/* Ini kuncinya: kolom tidak lagi 1fr penuh, tapi pakai ukuran card */
+.home-category-grid {
+    display: grid;
+    grid-template-columns: repeat(
+        var(--category-grid-desktop, 6),
+        minmax(0, var(--home-category-card-size))
+    );
+    gap: var(--home-category-grid-gap);
+    justify-content: start;
+}
+
+/* Card tetap polos */
+.home-category-grid-card {
+    width: var(--home-category-card-size);
+    max-width: 100%;
+    min-width: 0;
+    display: grid;
+    gap: 7px;
+    color: var(--shop-text);
+    text-align: center;
+    transition: transform .18s ease;
+}
+
+.home-category-grid-card:hover {
+    transform: translateY(-3px);
+}
+
+/* Image tetap 1:1, tapi ukurannya ikut card */
+.home-category-grid-card__image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--home-category-image-radius);
+    overflow: hidden;
+    background: #f4f4f4;
+    border: 1px solid var(--shop-border);
+    display: block;
+}
+
+.home-category-grid-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .24s ease;
+}
+
+.home-category-grid-card:hover .home-category-grid-card__image img {
+    transform: scale(1.055);
+}
+
+.home-category-grid-card strong {
+    display: block;
+    color: #303030;
+    font-size: var(--home-category-title-size);
+    font-weight: 900;
+    line-height: 1.25;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 980px) {
+    .home-category-grid {
+        grid-template-columns: repeat(
+            var(--category-grid-tablet, 4),
+            minmax(0, var(--home-category-card-size-tablet))
+        );
+        gap: 14px;
+    }
+
+    .home-category-grid-card {
+        width: var(--home-category-card-size-tablet);
+    }
+
+    .home-category-grid-head h2 {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 640px) {
+    .home-category-grid-section {
+        --home-category-section-top: 10px;
+    }
+
+    .home-category-grid-head {
+        margin-bottom: 10px;
+        align-items: start;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .home-category-grid {
+        grid-template-columns: repeat(
+            var(--category-grid-mobile, 2),
+            minmax(0, var(--home-category-card-size-mobile))
+        );
+        gap: 12px;
+    }
+
+    .home-category-grid-card {
+        width: var(--home-category-card-size-mobile);
+    }
+
+    .home-category-grid-card__image {
+        border-radius: 10px;
+    }
+
+    .home-category-grid-card strong {
+        font-size: 11.5px;
+    }
+}

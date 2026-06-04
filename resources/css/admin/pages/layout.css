@@ -1,0 +1,91 @@
+/* =========================================================
+   ADMIN HOME LAYOUT MANAGER
+========================================================= */
+
+.admin-home-layout-page-v2 {
+    gap: 14px;
+}
+
+.admin-home-layout-slot-list-v2 {
+    display: grid;
+    gap: 12px;
+}
+
+.admin-home-layout-slot-v2 {
+    padding: 14px;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-panel-radius);
+    background: rgba(100, 116, 139, .05);
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 14px;
+}
+
+.admin-home-layout-slot-v2__number {
+    display: grid;
+    align-content: start;
+    gap: 5px;
+}
+
+.admin-home-layout-slot-v2__number strong {
+    color: var(--admin-text);
+    font-size: 16px;
+    font-weight: 950;
+}
+
+.admin-home-layout-slot-v2__number span {
+    width: fit-content;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: rgba(14, 10, 16, .08);
+    color: var(--admin-muted);
+    font-size: 11px;
+    font-weight: 850;
+}
+
+.admin-home-layout-slot-v2__fields {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.admin-home-layout-slot-v2__fields label {
+    display: grid;
+    gap: 6px;
+    color: var(--admin-muted);
+    font-size: 12px;
+    font-weight: 850;
+}
+
+.admin-home-layout-slot-v2__fields input,
+.admin-home-layout-slot-v2__fields select {
+    width: 100%;
+    min-height: var(--admin-control-height);
+    padding: 0 12px;
+    border-radius: var(--admin-radius);
+    border: 1px solid var(--admin-border);
+    background: var(--admin-panel);
+    color: var(--admin-text);
+    outline: none;
+}
+
+.admin-home-layout-slot-v2__fields input:focus,
+.admin-home-layout-slot-v2__fields select:focus {
+    border-color: var(--admin-accent);
+}
+
+@media (max-width: 1040px) {
+    .admin-home-layout-slot-v2 {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-home-layout-slot-v2__fields {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .admin-home-layout-slot-v2__fields {
+        grid-template-columns: 1fr;
+    }
+}

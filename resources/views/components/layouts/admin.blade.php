@@ -31,6 +31,7 @@
 
         $isBannerOpen =
             request()->routeIs('admin.content.banners') ||
+            request()->routeIs('admin.content.home-category-grid') ||
             request()->routeIs('admin.content.home-category-products') ||
             request()->routeIs('admin.content.home-full-banners') ||
             request()->routeIs('admin.content.home-split-banners') ||
@@ -50,7 +51,10 @@
             request()->routeIs('admin.event.*');
 
         $isCustomerOpen =
-    request()->routeIs('admin.customers.*');
+            request()->routeIs('admin.customers.*');
+
+        $isLayoutOpen =
+            request()->routeIs('admin.layout.*');
     @endphp
 
     <div class="admin-shell-v2" id="adminShell" data-admin-theme="light">
@@ -112,6 +116,11 @@
                         <a href="{{ route('admin.content.home-category-products') }}" wire:navigate
                         @class(['active' => request()->routeIs('admin.content.home-category-products')])>
                             Category Products
+                        </a>
+
+                        <a href="{{ route('admin.content.home-category-grid') }}" wire:navigate
+                        @class(['active' => request()->routeIs('admin.content.home-category-grid')])>
+                            Category Grid
                         </a>
 
                         <a href="{{ route('admin.content.banners') }}" wire:navigate
@@ -243,6 +252,20 @@
                         <a href="{{ route('admin.customers.reviews') }}" wire:navigate
                         @class(['active' => request()->routeIs('admin.customers.reviews')])>
                             Reviews
+                        </a>
+                    </div>
+                </details>
+
+                <details {{ $isLayoutOpen ? 'open' : '' }}>
+                    <summary>
+                        <span>▦</span>
+                        Layout
+                    </summary>
+
+                    <div class="admin-submenu-v2">
+                        <a href="{{ route('admin.layout.home') }}" wire:navigate
+                        @class(['active' => request()->routeIs('admin.layout.home')])>
+                            Home Layout
                         </a>
                     </div>
                 </details>

@@ -60,3 +60,26 @@
     gap: 8px;
 }
 
+/* =========================================================
+   ADMIN HOME CATEGORY GRID PREVIEW
+========================================================= */
+
+.home-category-grid-admin-preview {
+    width: 120px;
+    aspect-ratio: 1 / 1;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px dashed var(--admin-border);
+    background: rgba(100, 116, 139, .08);
+    display: grid;
+    place-items: center;
+    color: var(--admin-muted);
+    font-size: 12px;
+    font-weight: 850;
+}
+
+.home-category-grid-admin-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
