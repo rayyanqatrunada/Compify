@@ -13,10 +13,58 @@ new
 #[Layout('components.layouts.admin')]
 #[Title('Dashboard')]
 class extends Component {
+    /*
+    |--------------------------------------------------------------------------
+    | DASHBOARD STATUS RULES
+    |--------------------------------------------------------------------------
+    | Ubah array ini kalau nama status di database kamu berbeda.
+    */
+
+    private const PAID_PAYMENT_STATUSES = [
+        'paid',
+        'settlement',
+        'capture',
+    ];
+
+    private const PENDING_PAYMENT_STATUSES = [
+        'pending',
+    ];
+
+    private const BAD_PAYMENT_STATUSES = [
+        'failed',
+        'expired',
+        'deny',
+        'cancel',
+        'cancelled',
+    ];
+
+    private const BAD_ORDER_STATUSES = [
+        'failed',
+        'expired',
+        'cancel',
+        'cancelled',
+        'canceled',
+        'refunded',
+    ];
+
+    private function validOrdersQuery()
+    {
+        return Order::query()
+            ->whereNotIn('payment_status', self::BAD_PAYMENT_STATUSES)
+            ->whereNotIn('order_status', self::BAD_ORDER_STATUSES);
+    }
+
+    private function paidOrdersQuery()
+    {
+        return Order::query()
+            ->whereIn('payment_status', self::PAID_PAYMENT_STATUSES)
+            ->whereNotIn('order_status', self::BAD_ORDER_STATUSES);
+    }
+
     #[Computed]
     public function totalOrders()
     {
-        return Order::count();
+        return $this->validOrdersQuery()->count();
     }
 
     #[Computed]
@@ -28,7 +76,7 @@ class extends Component {
     #[Computed]
     public function totalRevenue()
     {
-        return Order::where('payment_status', 'paid')->sum('total_amount');
+        return $this->paidOrdersQuery()->sum('total_amount');
     }
 
     #[Computed]
@@ -46,7 +94,10 @@ class extends Component {
     #[Computed]
     public function latestOrders()
     {
-        return Order::latest()->limit(7)->get();
+        return $this->validOrdersQuery()
+            ->latest()
+            ->limit(7)
+            ->get();
     }
 
     #[Computed]
@@ -57,8 +108,15 @@ class extends Component {
         }
 
         return DB::table('order_items')
-            ->select('product_name', DB::raw('SUM(quantity) as total_sold'), DB::raw('SUM(total) as total_sales'))
-            ->groupBy('product_name')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->select(
+                'order_items.product_name',
+                DB::raw('SUM(order_items.quantity) as total_sold'),
+                DB::raw('SUM(order_items.total) as total_sales')
+            )
+            ->whereIn('orders.payment_status', self::PAID_PAYMENT_STATUSES)
+            ->whereNotIn('orders.order_status', self::BAD_ORDER_STATUSES)
+            ->groupBy('order_items.product_name')
             ->orderByDesc('total_sold')
             ->limit(5)
             ->get();
@@ -70,7 +128,7 @@ class extends Component {
         $months = collect(range(11, 0))->map(fn ($i) => now()->subMonths($i));
 
         $values = $months->map(function ($date) {
-            return (float) Order::where('payment_status', 'paid')
+            return (float) $this->paidOrdersQuery()
                 ->whereYear('created_at', $date->year)
                 ->whereMonth('created_at', $date->month)
                 ->sum('total_amount');
@@ -101,7 +159,9 @@ class extends Component {
     {
         $total = max($this->totalOrders, 1);
 
-        $count = Order::where('order_status', $status)->count();
+        $count = $this->validOrdersQuery()
+            ->where('order_status', $status)
+            ->count();
 
         return (int) round(($count / $total) * 100);
     }
