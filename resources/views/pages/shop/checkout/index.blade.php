@@ -9,6 +9,7 @@ use App\Models\ShippingSetting;
 use App\Services\CartService;
 use App\Services\MidtransPaymentService;
 use App\Services\WhatsAppOrderMessageService;
+use App\Services\FonnteMessageService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
@@ -296,6 +297,22 @@ class extends Component {
         }
     }
 
+    private function notifyOrderCreated(Order $order): void
+    {
+        try {
+            app(FonnteMessageService::class)
+                ->sendOrderCreatedNotifications(
+                    $order->fresh()->load([
+                        'items',
+                        'paymentMethod',
+                        'shippingMethod',
+                    ])
+                );
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
     public function placeOrder()
     {
         $this->validate([
@@ -393,6 +410,8 @@ class extends Component {
                     'payment_redirect_url' => $whatsappUrl,
                 ]);
 
+                $this->notifyOrderCreated($order);
+
                 app(CartService::class)->clear();
 
                 if ((bool) $paymentMethod->auto_redirect) {
@@ -421,6 +440,8 @@ class extends Component {
                     'payment_redirect_url' => $redirectUrl,
                 ]);
 
+                $this->notifyOrderCreated($order);
+
                 app(CartService::class)->clear();
 
                 return $this->redirect($redirectUrl, navigate: false);
@@ -430,7 +451,10 @@ class extends Component {
                 $order->update([
                     'payment_type' => 'midtrans_snap',
                     'payment_reference' => $order->order_number,
+                    'payment_redirect_url' => route('checkout.payment', $order),
                 ]);
+
+                $this->notifyOrderCreated($order);
 
                 app(CartService::class)->clear();
 
@@ -445,6 +469,12 @@ class extends Component {
                     ->with('error', $message);
             }
         }
+
+        $order->update([
+            'payment_redirect_url' => route('checkout.payment', $order),
+        ]);
+
+        $this->notifyOrderCreated($order);
 
         app(CartService::class)->clear();
 
