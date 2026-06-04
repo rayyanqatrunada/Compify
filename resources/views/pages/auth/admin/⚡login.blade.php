@@ -25,25 +25,9 @@ class extends Component {
             'password' => $this->password,
             'role' => 'admin',
         ])) {
-            Auth::guard('admin')->logout();
-
             $this->addError('email', 'Email atau password admin salah.');
             return;
         }
-
-        $admin = Auth::guard('admin')->user();
-
-        if (! $admin || $admin->role !== 'admin') {
-            Auth::guard('admin')->logout();
-
-            request()->session()->regenerateToken();
-
-            $this->addError('email', 'Akun ini bukan admin.');
-            return;
-        }
-
-        Auth::guard('customer')->logout();
-        Auth::guard('web')->logout();
 
         session()->regenerate();
 
