@@ -34,13 +34,16 @@ class extends Component {
             'role' => 'customer',
         ]);
 
+        Auth::guard('admin')->logout();
+        Auth::guard('web')->logout();
+
         Auth::guard('customer')->login($user);
 
         request()->session()->regenerate();
 
-        $intended = session()->pull('url.intended', route('home'));
+        session()->forget('url.intended');
 
-        $this->redirect($intended, navigate: true);
+        $this->redirectRoute('home', navigate: true);
     }
 };
 ?>
