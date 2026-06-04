@@ -15,6 +15,20 @@ class EnsureCustomerAuthenticated
             return redirect()->guest(route('customer.login'));
         }
 
+        $customer = Auth::guard('customer')->user();
+
+        if (! $customer || $customer->role !== 'customer') {
+            Auth::guard('customer')->logout();
+
+            $request->session()->regenerateToken();
+
+            return redirect()
+                ->route('customer.login')
+                ->withErrors([
+                    'email' => 'Silakan login menggunakan akun customer.',
+                ]);
+        }
+
         Auth::shouldUse('customer');
 
         return $next($request);

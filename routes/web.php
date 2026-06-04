@@ -81,33 +81,51 @@ Route::get('/auth/google/redirect', function () {
 Route::get('/auth/google/callback', function () {
     $googleUser = Socialite::driver('google')->user();
 
-    $user = User::updateOrCreate(
-        [
-            'email' => $googleUser->getEmail(),
-        ],
-        [
+    $email = $googleUser->getEmail();
+
+    $existingUser = User::where('email', $email)->first();
+
+    if ($existingUser && $existingUser->role === 'admin') {
+        Auth::guard('customer')->logout();
+
+        return redirect()
+            ->route('customer.login')
+            ->withErrors([
+                'email' => 'Akun admin tidak digunakan untuk login customer.',
+            ]);
+    }
+
+    if ($existingUser) {
+        $existingUser->update([
+            'name' => $existingUser->name ?: ($googleUser->getName() ?: $googleUser->getNickname() ?: 'Customer'),
+            'google_id' => $googleUser->getId(),
+            'provider' => 'google',
+            'avatar' => $googleUser->getAvatar(),
+        ]);
+
+        $user = $existingUser;
+    } else {
+        $user = User::create([
             'name' => $googleUser->getName() ?: $googleUser->getNickname() ?: 'Customer',
+            'email' => $email,
             'google_id' => $googleUser->getId(),
             'provider' => 'google',
             'avatar' => $googleUser->getAvatar(),
             'password' => Hash::make(str()->random(32)),
             'role' => 'customer',
-        ]
-    );
-
-    if ($user->role === 'admin') {
-        return redirect()
-            ->route('customer.login')
-            ->withErrors([
-                'email' => 'Email atau password salah.',
-            ]);
+        ]);
     }
+
+    Auth::guard('admin')->logout();
+    Auth::guard('web')->logout();
 
     Auth::guard('customer')->login($user, true);
 
     request()->session()->regenerate();
 
-    return redirect()->intended(route('home'));
+    session()->forget('url.intended');
+
+    return redirect()->route('home');
 })->middleware('guest:customer')->name('customer.google.callback');
 
 

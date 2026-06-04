@@ -23,23 +23,50 @@ class extends Component {
         if (! Auth::guard('customer')->attempt([
             'email' => $this->email,
             'password' => $this->password,
+            'role' => 'customer',
         ], true)) {
+            Auth::guard('customer')->logout();
+
             $this->addError('email', 'Email atau password salah.');
             return;
         }
 
-        request()->session()->regenerate();
+        $customer = Auth::guard('customer')->user();
 
-        if (Auth::guard('customer')->user()->role === 'admin') {
+        if (! $customer || $customer->role !== 'customer') {
             Auth::guard('customer')->logout();
+
+            request()->session()->regenerateToken();
 
             $this->addError('email', 'Akun admin tidak digunakan untuk login customer.');
             return;
         }
 
+        Auth::guard('admin')->logout();
+        Auth::guard('web')->logout();
+
+        request()->session()->regenerate();
+
+        $this->redirect($this->safeCustomerRedirectUrl(), navigate: true);
+    }
+
+    private function safeCustomerRedirectUrl(): string
+    {
         $intended = session()->pull('url.intended', route('home'));
 
-        $this->redirect($intended, navigate: true);
+        $path = trim((string) parse_url($intended, PHP_URL_PATH), '/');
+
+        $adminPanelPath = trim((string) config('compify.admin_panel_path'), '/');
+        $adminLoginPath = trim((string) config('compify.admin_login_path'), '/');
+
+        if (
+            ($adminPanelPath !== '' && str_starts_with($path, $adminPanelPath)) ||
+            ($adminLoginPath !== '' && str_starts_with($path, $adminLoginPath))
+        ) {
+            return route('home');
+        }
+
+        return $intended ?: route('home');
     }
 };
 ?>

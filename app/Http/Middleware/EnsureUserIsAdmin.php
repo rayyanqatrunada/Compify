@@ -15,8 +15,14 @@ class EnsureUserIsAdmin
             return redirect()->route('login');
         }
 
-        if (Auth::guard('admin')->user()->role !== 'admin') {
-            abort(403);
+        $admin = Auth::guard('admin')->user();
+
+        if (! $admin || $admin->role !== 'admin') {
+            Auth::guard('admin')->logout();
+
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login');
         }
 
         Auth::shouldUse('admin');
