@@ -34,12 +34,11 @@ class extends Component {
             'role' => 'customer',
         ]);
 
-        Auth::guard('admin')->logout();
-        Auth::guard('web')->logout();
-
-        Auth::guard('customer')->login($user);
+        Auth::guard('customer')->login($user, true);
 
         request()->session()->regenerate();
+
+        Auth::shouldUse('customer');
 
         session()->forget('url.intended');
 

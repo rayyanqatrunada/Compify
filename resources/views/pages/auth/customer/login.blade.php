@@ -25,29 +25,17 @@ class extends Component {
             'password' => $this->password,
             'role' => 'customer',
         ], true)) {
-            Auth::guard('customer')->logout();
-
             $this->addError('email', 'Email atau password salah.');
             return;
         }
 
-        $customer = Auth::guard('customer')->user();
-
-        if (! $customer || $customer->role !== 'customer') {
-            Auth::guard('customer')->logout();
-
-            request()->session()->regenerateToken();
-
-            $this->addError('email', 'Akun admin tidak digunakan untuk login customer.');
-            return;
-        }
-
-        Auth::guard('admin')->logout();
-        Auth::guard('web')->logout();
-
         request()->session()->regenerate();
 
-        $this->redirect($this->safeCustomerRedirectUrl(), navigate: true);
+        Auth::shouldUse('customer');
+
+        session()->forget('url.intended');
+
+        $this->redirectRoute('home', navigate: true);
     }
 
     private function safeCustomerRedirectUrl(): string
