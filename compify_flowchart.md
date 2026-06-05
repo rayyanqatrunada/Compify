@@ -2,12 +2,6 @@
 
 Dibuat: 05 June 2026 03:42
 
-## Cara pakai file ini
-
-- Buka file `.md` di GitHub, VS Code dengan ekstensi Mermaid, Obsidian, atau Mermaid Live Editor untuk melihat diagram visual.
-- Buka file `.docx` untuk versi dokumentasi baca. Kode Mermaid tetap disertakan agar bisa disalin dan dirender ulang.
-- Semua diagram dibuat berdasarkan file project yang dikirim di chat: auth.php, Middleware, Models, Services, migrations, admin views, shop views, dan layout.
-
 ## Daftar Isi
 1. [Ringkasan Sistem](#ringkasan-sistem)
 2. [Flow Utama dari User Masuk Website](#flow-utama-dari-user-masuk-website)
