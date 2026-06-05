@@ -34,12 +34,25 @@ class Order extends Model
         'payment_type',
         'payment_reference',
         'payment_redirect_url',
+
+        'universal_discount_eligible_subtotal',
+        'universal_discount_amount',
+        'universal_discount_percent',
+        'universal_discount_label',
+        'universal_discount_campaign_key',
+        'universal_discount_snapshot',
     ];
 
     protected $casts = [
         'subtotal' => 'decimal:2',
         'shipping_cost' => 'decimal:2',
         'discount_amount' => 'decimal:2',
+        
+        'universal_discount_eligible_subtotal' => 'decimal:2',
+        'universal_discount_amount' => 'decimal:2',
+        'universal_discount_percent' => 'decimal:2',
+        'universal_discount_snapshot' => 'array',
+        
         'total_amount' => 'decimal:2',
     ];
 

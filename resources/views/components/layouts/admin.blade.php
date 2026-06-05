@@ -204,6 +204,11 @@
                             Atur Event
                         </a>
 
+                        <a href="{{ route('admin.event.universal-discount') }}" wire:navigate
+                            @class(['active' => request()->routeIs('admin.event.universal-discount')])>
+                            Diskon Pembelian
+                        </a>
+
                         <a href="{{ route('admin.event.hero-images') }}" wire:navigate
                         @class(['active' => request()->routeIs('admin.event.hero-images')])>
                             Image Hero

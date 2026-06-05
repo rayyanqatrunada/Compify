@@ -305,6 +305,7 @@ Route::middleware(['auth:admin', 'admin'])
             Route::livewire('/flash-sale', 'pages::admin.event.flash-sale')->name('flash-sale');
             Route::livewire('/full-banners', 'pages::admin.event.full-banners')->name('full-banners');
             Route::livewire('/combo-packages', 'pages::admin.event.combo-packages')->name('combo-packages');
+            Route::livewire('/universal-discount', 'pages::admin.event.universal-discount')->name('universal-discount');
         });
 
 

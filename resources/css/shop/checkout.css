@@ -42,13 +42,15 @@
 }
 
 .checkout-right {
-    min-height: calc(100vh - 123px);
+    /* min-height: calc(100vh - 123px); */
     padding: 18px var(--checkout-x) 42px;
     background: var(--checkout-right-bg);
+    min-height: 100%;
+    align-self: stretch;
 }
 
 .checkout-summary {
-    position: sticky;
+    /* position: sticky; */
     top: 18px;
 }
 
@@ -836,4 +838,495 @@
     font-size: 13px;
     font-weight: 750;
     line-height: 1.55;
+}
+
+/* =========================================================
+   CHECKOUT COMPACT OVERRIDE
+   Tetap pakai style checkout lama, hanya mengecilkan ukuran
+========================================================= */
+
+:root {
+    --checkout-max-width: 1240px;
+    --checkout-left-width: 52%;
+    --checkout-x: clamp(16px, 2.4vw, 28px);
+    --checkout-y: 18px;
+
+    --checkout-field-height: 46px;
+    --checkout-title-size: 17px;
+    --checkout-text-size: 13px;
+    --checkout-small-size: 11px;
+}
+
+/* Layout utama tetap split seperti sebelumnya */
+.checkout-shell {
+    grid-template-columns: minmax(0, var(--checkout-left-width)) minmax(340px, 1fr);
+}
+
+.checkout-left {
+    padding: var(--checkout-y) var(--checkout-x) 30px;
+}
+
+.checkout-right {
+    min-height: calc(100vh - 105px);
+    padding: 16px var(--checkout-x) 30px;
+}
+
+/* Account lebih compact */
+.checkout-account-row {
+    margin-bottom: 12px;
+    gap: 12px;
+}
+
+.checkout-user {
+    gap: 10px;
+}
+
+.checkout-user-avatar,
+.checkout-user > span {
+    width: 34px;
+    height: 34px;
+    border-width: 1px;
+    flex-basis: 34px;
+}
+
+.checkout-user strong {
+    font-size: 14px;
+    line-height: 1.25;
+}
+
+.checkout-logout-btn {
+    min-width: 62px;
+    height: 30px;
+    font-size: 11px;
+    border-radius: 3px;
+}
+
+.checkout-check {
+    margin: 0 0 22px 3px;
+    gap: 9px;
+    font-size: 11px;
+}
+
+.checkout-check input {
+    width: 14px;
+    height: 14px;
+}
+
+/* Form lebih rapat, style tetap sama */
+.checkout-form {
+    gap: 10px;
+}
+
+.checkout-grid-2 {
+    gap: 10px;
+}
+
+.checkout-field input,
+.checkout-field select {
+    height: var(--checkout-field-height);
+    padding: 0 10px;
+    font-size: var(--checkout-text-size);
+}
+
+.checkout-field.floating span {
+    top: 5px;
+    left: 9px;
+    font-size: 9px;
+}
+
+.checkout-field.floating input {
+    padding-top: 14px;
+}
+
+/* Section */
+.checkout-section {
+    margin-top: 8px;
+    gap: 9px;
+}
+
+.checkout-section h2 {
+    font-size: var(--checkout-title-size);
+}
+
+.checkout-section > p {
+    font-size: var(--checkout-small-size);
+    line-height: 1.35;
+}
+
+/* Shipping / payment box */
+.checkout-muted-box {
+    min-height: 46px;
+    padding: 13px 10px;
+    font-size: 12px;
+}
+
+.checkout-method-list {
+    gap: 7px;
+}
+
+.checkout-method-card {
+    min-height: 50px;
+    padding: 9px 10px;
+    gap: 9px;
+}
+
+.checkout-method-card.active {
+    border-width: 2px;
+}
+
+.checkout-method-card input {
+    width: 13px;
+    height: 13px;
+}
+
+.checkout-method-card strong {
+    font-size: 12px;
+}
+
+.checkout-method-card small,
+.checkout-method-card p {
+    margin-top: 2px;
+    font-size: 10px;
+    line-height: 1.35;
+}
+
+.checkout-method-card b {
+    font-size: 12px;
+}
+
+.checkout-method-card img {
+    max-width: 42px;
+    max-height: 22px;
+}
+
+/* Billing */
+.checkout-billing-box label {
+    min-height: 46px;
+    padding: 0 14px;
+    gap: 10px;
+    font-size: 12px;
+}
+
+.checkout-billing-box label.active {
+    border-width: 2px;
+}
+
+/* Tombol bayar */
+.checkout-pay-button {
+    height: 50px;
+    margin-top: 0;
+    font-size: 15px;
+}
+
+/* Summary kanan */
+.checkout-summary {
+    top: 14px;
+}
+
+.checkout-summary-product {
+    margin-bottom: 18px;
+    grid-template-columns: 76px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: start;
+}
+
+.checkout-product-image {
+    width: 76px;
+    height: 58px;
+}
+
+.checkout-product-image b {
+    top: -7px;
+    right: -7px;
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+}
+
+.checkout-summary-product strong {
+    font-size: 14px;
+    line-height: 1.25;
+}
+
+.checkout-summary-product small {
+    margin-top: 4px;
+    font-size: 12px;
+}
+
+.checkout-summary-product p {
+    font-size: 14px;
+}
+
+/* Combo mini */
+.checkout-combo-mini {
+    margin-top: 4px;
+    gap: 2px;
+}
+
+.checkout-combo-mini span {
+    font-size: 10px;
+}
+
+/* Discount row tetap style lama, cuma dikecilkan */
+.checkout-discount-row {
+    margin-bottom: 20px;
+    grid-template-columns: 1fr 88px;
+    gap: 10px;
+}
+
+.checkout-discount-row input,
+.checkout-discount-row button {
+    height: 44px;
+    border-width: 1px;
+    font-size: 12px;
+}
+
+.checkout-discount-row input {
+    padding: 0 10px;
+}
+
+/* Price list */
+.checkout-price-list {
+    gap: 10px;
+}
+
+.checkout-price-list div,
+.checkout-total-row {
+    gap: 12px;
+}
+
+.checkout-price-list span,
+.checkout-price-list strong {
+    font-size: 12px;
+}
+
+.checkout-price-list strong.muted {
+    max-width: 170px;
+    text-align: right;
+    line-height: 1.35;
+}
+
+.checkout-total-row {
+    margin-top: 11px;
+    padding-top: 11px;
+}
+
+.checkout-total-row span,
+.checkout-total-row strong {
+    font-size: 18px;
+}
+
+/* Error */
+.checkout-error {
+    font-size: 11px;
+}
+
+/* =========================================================
+   PAYMENT DETAIL COMPACT OVERRIDE
+   Tetap style lama, hanya mengecilkan
+========================================================= */
+
+.payment-detail-page {
+    padding: 24px var(--shop-x) 46px;
+}
+
+.payment-detail-shell {
+    width: min(1040px, 100%);
+    grid-template-columns: minmax(0, 1fr) 330px;
+    gap: 16px;
+}
+
+.payment-detail-card,
+.payment-detail-summary {
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.payment-kicker {
+    margin-bottom: 4px;
+    font-size: 11px;
+}
+
+.payment-detail-card h1,
+.payment-detail-summary h2 {
+    margin-bottom: 14px;
+    font-size: 24px;
+}
+
+.payment-order-box,
+.payment-bank-box {
+    gap: 8px;
+    padding: 13px;
+}
+
+.payment-order-box span,
+.payment-bank-box span,
+.payment-summary-item span {
+    font-size: 12px;
+}
+
+.payment-order-box strong,
+.payment-bank-box strong,
+.payment-summary-item strong {
+    font-size: 13px;
+}
+
+.payment-method-detail {
+    margin-top: 18px;
+    gap: 14px;
+}
+
+.payment-method-title {
+    gap: 10px;
+}
+
+.payment-method-title img {
+    width: 52px;
+    height: 34px;
+}
+
+.payment-method-title span {
+    font-size: 11px;
+}
+
+.payment-method-title strong {
+    font-size: 17px;
+}
+
+.payment-qr-box {
+    width: min(260px, 100%);
+    padding: 14px;
+}
+
+.payment-qr-box p,
+.payment-instruction div {
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.payment-url-button {
+    min-height: 40px;
+    padding: 0 14px;
+    font-size: 12px;
+}
+
+.payment-instruction h2 {
+    font-size: 15px;
+}
+
+.payment-detail-summary hr {
+    margin: 14px 0;
+}
+
+.payment-summary-total {
+    margin-top: 12px;
+}
+
+.payment-summary-total span,
+.payment-summary-total strong {
+    font-size: 18px;
+}
+
+/* Payment boxes */
+.payment-whatsapp-box,
+.payment-midtrans-box {
+    margin-top: 14px;
+    padding: 14px;
+    gap: 8px;
+}
+
+.payment-whatsapp-box h2,
+.payment-midtrans-box h2 {
+    font-size: 15px;
+}
+
+.payment-whatsapp-box p,
+.payment-midtrans-box p {
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.payment-whatsapp-box small,
+.payment-whatsapp-note,
+.payment-midtrans-note {
+    font-size: 11px;
+}
+
+/* Alert */
+.payment-success-box,
+.payment-error-box {
+    margin: 12px 0;
+    padding: 10px 12px;
+    font-size: 12px;
+}
+
+/* Snapshot detail */
+.payment-item-label {
+    padding: 2px 7px;
+    font-size: 10px;
+}
+
+.payment-item-discount {
+    font-size: 11px;
+}
+
+.payment-combo-children {
+    margin-top: 5px;
+    padding: 7px;
+    gap: 3px;
+}
+
+.payment-combo-children small {
+    font-size: 10px;
+}
+
+/* Responsive tetap aman */
+@media (max-width: 980px) {
+    .checkout-shell,
+    .payment-detail-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .checkout-right {
+        min-height: auto;
+    }
+
+    .checkout-summary {
+        position: static;
+    }
+}
+
+@media (max-width: 640px) {
+    :root {
+        --checkout-x: 16px;
+        --checkout-y: 16px;
+    }
+
+    .checkout-grid-2,
+    .checkout-discount-row {
+        grid-template-columns: 1fr;
+    }
+
+    .checkout-summary-product {
+        grid-template-columns: 66px minmax(0, 1fr);
+    }
+
+    .checkout-summary-product p {
+        grid-column: 2;
+    }
+
+    .checkout-product-image {
+        width: 66px;
+        height: 56px;
+    }
+
+    .checkout-left,
+    .checkout-right {
+        padding-inline: 16px;
+    }
+}
+
+/* Hide voucher input karena fitur voucher belum aktif */
+.checkout-discount-row {
+    display: none !important;
 }

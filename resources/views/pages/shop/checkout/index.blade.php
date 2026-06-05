@@ -16,6 +16,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use App\Services\UniversalDiscountService;
 
 new
 #[Layout('components.layouts.shop')]
@@ -121,9 +122,22 @@ class extends Component {
     }
 
     #[Computed]
+    public function universalDiscount(): array
+    {
+        return app(UniversalDiscountService::class)
+            ->calculateForCart($this->cartItems, auth('customer')->id());
+    }
+
+    #[Computed]
+    public function universalDiscountAmount(): int
+    {
+        return (int) ($this->universalDiscount['amount'] ?? 0);
+    }
+
+    #[Computed]
     public function total(): int
     {
-        return $this->subtotal + ($this->shippingCost ?? 0);
+        return max(0, $this->subtotal + ($this->shippingCost ?? 0) - $this->universalDiscountAmount);
     }
 
     private function calculateShippingCost(ShippingMethod $method, int $subtotal): int
@@ -351,7 +365,20 @@ class extends Component {
             return;
         }
 
-        $order = DB::transaction(function () use ($paymentMethod) {
+        $universalDiscount = app(UniversalDiscountService::class)
+            ->calculateForCart($this->cartItems, auth('customer')->id());
+
+        $universalDiscountAmount = (int) ($universalDiscount['amount'] ?? 0);
+        $shippingCost = $this->shippingCost ?? 0;
+        $totalAmount = max(0, $this->subtotal + $shippingCost - $universalDiscountAmount);
+
+        $order = DB::transaction(function () use (
+            $paymentMethod,
+            $universalDiscount,
+            $universalDiscountAmount,
+            $shippingCost,
+            $totalAmount
+        ) {
             $order = Order::create([
                 'user_id' => auth('customer')->id(),
                 'shipping_method_id' => $this->shipping_method_id,
@@ -369,9 +396,17 @@ class extends Component {
                 'shipping_postal_code' => $this->postal_code ?: null,
 
                 'subtotal' => $this->subtotal,
-                'shipping_cost' => $this->shippingCost ?? 0,
+                'shipping_cost' => $shippingCost,
                 'discount_amount' => $this->cartDiscountTotal(),
-                'total_amount' => $this->total,
+
+                'universal_discount_eligible_subtotal' => $universalDiscount['eligible_subtotal'] ?? 0,
+                'universal_discount_amount' => $universalDiscountAmount,
+                'universal_discount_percent' => $universalDiscount['percent'] ?? 0,
+                'universal_discount_label' => $universalDiscount['label'] ?? null,
+                'universal_discount_campaign_key' => $universalDiscount['campaign_key'] ?? null,
+                'universal_discount_snapshot' => $universalDiscount,
+
+                'total_amount' => $totalAmount,
 
                 'payment_type' => $this->paymentTypeForMethod($paymentMethod),
                 'payment_reference' => null,
@@ -388,6 +423,9 @@ class extends Component {
 
                 $this->createOrderItemSnapshot($order, $item);
             }
+
+            app(UniversalDiscountService::class)
+                ->recordUsage($order, $universalDiscount);
 
             return $order;
         });
@@ -723,6 +761,13 @@ class extends Component {
                         <span>Subtotal</span>
                         <strong>Rp {{ number_format($this->subtotal, 0, ',', '.') }}</strong>
                     </div>
+
+                    @if($this->universalDiscountAmount > 0)
+                        <div>
+                            <span>{{ $this->universalDiscount['label'] ?? 'Diskon Belanja' }}</span>
+                            <strong>- Rp {{ number_format($this->universalDiscountAmount, 0, ',', '.') }}</strong>
+                        </div>
+                    @endif
 
                     <div>
                         <span>Pengiriman</span>
