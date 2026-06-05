@@ -326,6 +326,9 @@ Route::middleware(['auth:admin', 'admin'])
 
             Route::livewire('/shipping-methods', 'pages::admin.settings.shipping-methods.index')
                 ->name('shipping-methods');
+            
+            Route::livewire('/fonnte', 'pages::admin.settings.fonnte.index')
+                ->name('fonnte');
         });
     });
 

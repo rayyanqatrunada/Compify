@@ -291,6 +291,11 @@
                             @class(['active' => request()->routeIs('admin.settings.shipping-methods')])>
                             Shipping Methods
                         </a>
+
+                        <a href="{{ route('admin.settings.fonnte') }}" wire:navigate
+                            @class(['active' => request()->routeIs('admin.settings.fonnte')])>
+                            Fonnte Settings
+                        </a>
                     </div>
                 </details>
             </nav>
