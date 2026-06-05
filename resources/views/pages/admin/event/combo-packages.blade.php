@@ -27,7 +27,7 @@ class extends Component
     public ?string $description = null;
 
     public string $discount_type = 'percent';
-    public float|int|string $discount_value = 0;
+    public string $discount_value = '0';
 
     public bool $is_active = true;
     public int $sort_order = 0;
@@ -35,7 +35,7 @@ class extends Component
     public $image = null;
     public ?string $currentImage = null;
 
-    public ?int $selected_category_id = null;
+    public string $selected_category_id = '';
     public string $product_search = '';
 
     public array $items = [];
@@ -79,13 +79,13 @@ class extends Component
         return Product::query()
             ->with(['category', 'brand'])
             ->active()
-            ->when($this->selected_category_id, function ($query) {
-                $category = Category::query()->find($this->selected_category_id);
+            ->when($this->selected_category_id !== '', function ($query) {
+                $category = Category::query()->find((int) $this->selected_category_id);
 
                 if ($category && method_exists($category, 'selfAndActiveDescendantIds')) {
                     $query->whereIn('category_id', $category->selfAndActiveDescendantIds());
                 } else {
-                    $query->where('category_id', $this->selected_category_id);
+                    $query->where('category_id', (int) $this->selected_category_id);
                 }
             })
             ->when($search !== '', function ($query) use ($search) {
@@ -139,17 +139,19 @@ class extends Component
 
     public function getDiscountAmountProperty(): int
     {
-        $originalTotal = $this->originalTotal;
+        $originalTotal = (int) $this->originalTotal;
 
         if ($originalTotal <= 0) {
             return 0;
         }
 
+        $discountValue = max(0, (float) str_replace(',', '.', $this->discount_value));
+
         if ($this->discount_type === 'amount') {
-            return min($originalTotal, (int) $this->discount_value);
+            return min($originalTotal, (int) round($discountValue));
         }
 
-        $percent = min(100, max(0, (float) $this->discount_value));
+        $percent = min(100, $discountValue);
 
         return (int) round($originalTotal * ($percent / 100));
     }
@@ -254,7 +256,7 @@ class extends Component
         $this->subtitle = $package->subtitle;
         $this->description = $package->description;
         $this->discount_type = $package->discount_type ?? 'percent';
-        $this->discount_value = $package->discount_value ?? 0;
+        $this->discount_value = (string) ($package->discount_value ?? 0);$this->discount_value = $package->discount_value ?? 0;
         $this->is_active = (bool) $package->is_active;
         $this->sort_order = (int) $package->sort_order;
         $this->currentImage = $package->image;
@@ -295,12 +297,12 @@ class extends Component
         $this->subtitle = null;
         $this->description = null;
         $this->discount_type = 'percent';
-        $this->discount_value = 0;
         $this->is_active = true;
         $this->sort_order = 0;
         $this->image = null;
         $this->currentImage = null;
-        $this->selected_category_id = null;
+        $this->discount_value = '0';
+        $this->selected_category_id = '';
         $this->product_search = '';
 
         $this->resetItems();
