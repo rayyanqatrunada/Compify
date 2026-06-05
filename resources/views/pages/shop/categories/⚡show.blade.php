@@ -159,19 +159,6 @@ class extends Component {
 
 <div class="category-page">
     <div class="container">
-        <div class="category-page__header">
-            <div>
-                <div class="category-page__breadcrumbs">
-                    <a href="{{ route('home') }}" wire:navigate>Beranda</a>
-                    <span>/</span>
-                    <span>Kategori</span>
-                    <span>/</span>
-                    <span>{{ $category->name }}</span>
-                </div>
-
-                <h1 class="category-page__title">{{ $category->name }}</h1>
-            </div>
-        </div>
 
         <div class="category-page__layout">
             {{-- Sidebar --}}
@@ -266,6 +253,21 @@ class extends Component {
 
             {{-- Content --}}
             <section class="category-content">
+
+                <div class="category-page__header">
+                    <div>
+                        <div class="category-page__breadcrumbs">
+                            <a href="{{ route('home') }}" wire:navigate>Beranda</a>
+                            <span>/</span>
+                            <span>Kategori</span>
+                            <span>/</span>
+                            <span>{{ $category->name }}</span>
+                        </div>
+
+                        <h1 class="category-page__title">{{ $category->name }}</h1>
+                    </div>
+                </div>
+
                 <div class="category-toolbar">
                     <div class="category-toolbar__left">
                         <span class="category-toolbar__label">View As</span>

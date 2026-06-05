@@ -20,7 +20,7 @@
     position: relative;
     display: block;
     height: var(--shop-product-image-height);
-    background: linear-gradient(180deg, #fbfbfb 0%, #f3f3f3 100%);
+    background: #ffffff;
     padding: var(--shop-product-image-padding);
 }
 

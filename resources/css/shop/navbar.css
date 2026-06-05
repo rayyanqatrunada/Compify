@@ -566,7 +566,7 @@
 /* Di mobile: sembunyikan nav-links desktop */
 @media (max-width: 768px) {
     html, body {
-        overflow-x: hidden;
+        overflow-x: clip;
         max-width: 100%;
     }
 
@@ -580,7 +580,7 @@
     }
 
     .main-nav {
-        overflow-x: hidden;
+        overflow-x: clip;
     }
 
     .top-header,
@@ -620,4 +620,9 @@
     .compact-header-link span:not(.header-icon) {
         display: none;
     }
+}
+
+.main-nav.is-sticky ~ main,
+.main-nav.is-sticky + main {
+    padding-top: var(--nav-height);
 }
