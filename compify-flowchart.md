@@ -45,18 +45,20 @@ flowchart TD
     B --> B1[Home]
     B --> B2[Produk dan Kategori]
     B --> B3[Event]
-    B --> B4[Cart]
-    B --> B5[Checkout]
-    B --> B6[Account Customer]
+    B --> B4[About Compify]
+    B --> B5[Cart]
+    B --> B6[Checkout]
+    B --> B7[Account Customer]
 
     C --> C1[Dashboard]
+    C --> C1[Analytic]
     C --> C2[Catalog]
     C --> C3[Content]
     C --> C4[Event Management]
     C --> C5[Orders]
     C --> C6[Customers]
     C --> C7[Layout]
-    C --> C8[Configure]
+    C --> C8[Configure Settings]
 ```
 
 Catatan:
@@ -75,8 +77,8 @@ flowchart TD
 
     C --> C1[Shop Layout]
     C1 --> C2[Header: Logo, Cart, Wishlist, Account]
-    C1 --> C3[Navbar: Home, Kategori, Merk, Produk, Event, About]
-    C1 --> C4[Footer: Info, Support, Company, Newsletter]
+    C1 --> C3[Navbar: Beranda, Kategori, Merk, Produk, Event, About Us]
+    C1 --> C4[Footer: Info, Products, Support, Company, Newsletter]
     C1 --> E[Halaman Shop]
 
     E --> E1[Home]
