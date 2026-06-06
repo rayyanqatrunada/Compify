@@ -78,3 +78,30 @@ document.addEventListener('submit', async function (event) {
         button.classList.remove('is-loading');
     }
 });
+
+// product card combo
+document.addEventListener('click', function (event) {
+    const card = event.target.closest('.js-clickable-card');
+
+    if (!card) {
+        return;
+    }
+
+    // Kalau yang diklik memang link/button/form, jangan ganggu.
+    if (event.target.closest('a, button, input, select, textarea, form')) {
+        return;
+    }
+
+    const href = card.dataset.href;
+
+    if (!href) {
+        return;
+    }
+
+    if (window.Livewire && typeof window.Livewire.navigate === 'function') {
+        window.Livewire.navigate(href);
+        return;
+    }
+
+    window.location.href = href;
+});
