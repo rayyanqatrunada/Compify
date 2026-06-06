@@ -9,12 +9,11 @@
         (function () {
             const savedTheme = localStorage.getItem('compify_admin_theme') || 'light';
             const theme = savedTheme === 'dark' ? 'dark' : 'light';
-
             document.documentElement.setAttribute('data-admin-theme', theme);
         })();
     </script>
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/css/analytics.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
 
@@ -26,35 +25,41 @@
             ? \Illuminate\Support\Facades\Storage::url($admin->avatar)
             : null;
 
-        $isProductOpen =
+        // --- SALES ---
+        $isCatalogOpen =
             request()->routeIs('admin.catalog.*');
 
-        $isBannerOpen =
+        // --- CONTENT ---
+        $isHomePageOpen =
             request()->routeIs('admin.content.banners') ||
             request()->routeIs('admin.content.home-category-grid') ||
-            request()->routeIs('admin.content.home-category-products') ||
             request()->routeIs('admin.content.home-full-banners') ||
             request()->routeIs('admin.content.home-split-banners') ||
-            request()->routeIs('admin.content.home-galleries');
+            request()->routeIs('admin.content.home-galleries') ||
+            request()->routeIs('admin.layout.home');
 
         $isAboutOpen =
             request()->routeIs('admin.content.about.*');
 
-        $isInfoOpen =
-            request()->routeIs('admin.content.about.*') ||
+        $isContentOpen =
+            $isHomePageOpen ||
+            $isAboutOpen ||
             request()->routeIs('admin.content.pages');
 
-        $isConfigureOpen =
-            request()->routeIs('admin.settings.*');
-
-        $isEventOpen = 
+        // --- MARKETING ---
+        $isMarketingOpen =
             request()->routeIs('admin.event.*');
 
-        $isCustomerOpen =
+        // --- CUSTOMERS ---
+        $isCustomersOpen =
             request()->routeIs('admin.customers.*');
 
-        $isLayoutOpen =
-            request()->routeIs('admin.layout.*');
+        // --- SETTINGS ---
+        $isIntegrationsOpen =
+            request()->routeIs('admin.settings.fonnte');
+
+        $isSettingsOpen =
+            request()->routeIs('admin.settings.*');
     @endphp
 
     <div class="admin-shell-v2" id="adminShell" data-admin-theme="light">
@@ -70,6 +75,8 @@
             </a>
 
             <nav class="admin-menu-v2">
+
+                {{-- ==================== OVERVIEW ==================== --}}
                 <a href="{{ route('admin.dashboard') }}" wire:navigate
                    @class(['active' => request()->routeIs('admin.dashboard')])>
                     <span>▦</span>
@@ -79,206 +86,179 @@
                 <a href="{{ route('admin.analytics.index') }}" wire:navigate
                    @class(['active' => request()->routeIs('admin.analytics.*')])>
                     <span>▥</span>
-                    Analytic
+                    Analytics
                 </a>
 
-                <details {{ $isProductOpen ? 'open' : '' }}>
-                    <summary>
-                        <span>▤</span>
-                        Product
-                    </summary>
-
-                    <div class="admin-submenu-v2">
-                        <a href="{{ route('admin.catalog.products') }}" wire:navigate
-                        @class(['active' => request()->routeIs('admin.catalog.products')])>
-                            Products
-                        </a>
-
-                        <a href="{{ route('admin.catalog.categories') }}" wire:navigate
-                        @class(['active' => request()->routeIs('admin.catalog.categories')])>
-                            Categories
-                        </a>
-
-                        <a href="{{ route('admin.catalog.brands') }}" wire:navigate
-                        @class(['active' => request()->routeIs('admin.catalog.brands')])>
-                            Brands
-                        </a>
-                    </div>
-                </details>
-
-                <details {{ $isBannerOpen ? 'open' : '' }}>
-                    <summary>
-                        <span>▥</span>
-                        Banner
-                    </summary>
-
-                    <div class="admin-submenu-v2">
-                        <a href="{{ route('admin.content.home-category-products') }}" wire:navigate
-                        @class(['active' => request()->routeIs('admin.content.home-category-products')])>
-                            Category Products
-                        </a>
-
-                        <a href="{{ route('admin.content.home-category-grid') }}" wire:navigate
-                        @class(['active' => request()->routeIs('admin.content.home-category-grid')])>
-                            Category Grid
-                        </a>
-
-                        <a href="{{ route('admin.content.banners') }}" wire:navigate
-                        @class(['active' => request()->routeIs('admin.content.banners')])>
-                            Hero Banners
-                        </a>
-
-                        <a href="{{ route('admin.content.home-full-banners') }}" wire:navigate
-                        @class(['active' => request()->routeIs('admin.content.home-full-banners')])>
-                            Full Banners
-                        </a>
-
-                        <a href="{{ route('admin.content.home-split-banners') }}" wire:navigate
-                        @class(['active' => request()->routeIs('admin.content.home-split-banners')])>
-                            Split Banners
-                        </a>
-
-                        <a href="{{ route('admin.content.home-galleries') }}" wire:navigate
-                        @class(['active' => request()->routeIs('admin.content.home-galleries')])>
-                            Gallery 3 Images
-                        </a>
-                    </div>
-                </details>
-
-                <details {{ $isInfoOpen ? 'open' : '' }}>
-                    <summary>
-                        <span>ⓘ</span>
-                        Info
-                    </summary>
-
-                    <div class="admin-submenu-v2 admin-submenu-nested-v2">
-                        <details {{ $isAboutOpen ? 'open' : '' }}>
-                            <summary>
-                                About Page
-                            </summary>
-
-                            <div class="admin-submenu-v2 admin-submenu-child-v2">
-                                <a href="{{ route('admin.content.about.hero') }}" wire:navigate
-                                @class(['active' => request()->routeIs('admin.content.about.hero')])>
-                                    About Hero
-                                </a>
-
-                                <a href="{{ route('admin.content.about.intro') }}" wire:navigate
-                                @class(['active' => request()->routeIs('admin.content.about.intro')])>
-                                    About Intro
-                                </a>
-
-                                <a href="{{ route('admin.content.about.stats') }}" wire:navigate
-                                @class(['active' => request()->routeIs('admin.content.about.stats')])>
-                                    About Stats
-                                </a>
-
-                                <a href="{{ route('admin.content.about.quote') }}" wire:navigate
-                                @class(['active' => request()->routeIs('admin.content.about.quote')])>
-                                    About Quote
-                                </a>
-
-                                <a href="{{ route('admin.content.about.values') }}" wire:navigate
-                                @class(['active' => request()->routeIs('admin.content.about.values')])>
-                                    About Values
-                                </a>
-                            </div>
-                        </details>
-
-                        <a href="{{ route('admin.content.pages') }}" wire:navigate
-                        @class(['active' => request()->routeIs('admin.content.pages')])>
-                            Static Pages
-                        </a>
-                    </div>
-                </details>
-
-                <details {{ $isEventOpen ? 'open' : '' }}>
-                    <summary>
-                        <span>✦</span>
-                        Event
-                    </summary>
-
-                    <div class="admin-submenu-v2">
-                        <a href="{{ route('admin.event.settings') }}" wire:navigate
-                        @class(['active' => request()->routeIs('admin.event.settings')])>
-                            Atur Event
-                        </a>
-
-                        <a href="{{ route('admin.event.universal-discount') }}" wire:navigate
-                            @class(['active' => request()->routeIs('admin.event.universal-discount')])>
-                            Diskon Pembelian
-                        </a>
-
-                        <a href="{{ route('admin.event.hero-images') }}" wire:navigate
-                        @class(['active' => request()->routeIs('admin.event.hero-images')])>
-                            Image Hero
-                        </a>
-
-                        <a href="{{ route('admin.event.flash-sale') }}" wire:navigate
-                        @class(['active' => request()->routeIs('admin.event.flash-sale')])>
-                            Flash Sale
-                        </a>
-
-                        <a href="{{ route('admin.event.full-banners') }}" wire:navigate
-                        @class(['active' => request()->routeIs('admin.event.full-banners')])>
-                            Full Banner
-                        </a>
-
-                        <a href="{{ route('admin.event.combo-packages') }}" wire:navigate
-                        @class(['active' => request()->routeIs('admin.event.combo-packages')])>
-                            Paket Kombo
-                        </a>
-                    </div>
-                </details>
-
+                {{-- ==================== SALES ==================== --}}
                 <a href="{{ route('admin.sales.orders') }}" wire:navigate
                    @class(['active' => request()->routeIs('admin.sales.orders')])>
                     <span>▧</span>
                     Orders
                 </a>
 
-                <details {{ $isCustomerOpen ? 'open' : '' }}>
+                <details {{ $isCatalogOpen ? 'open' : '' }}>
+                    <summary>
+                        <span>▤</span>
+                        Catalog
+                    </summary>
+
+                    <div class="admin-submenu-v2">
+                        <a href="{{ route('admin.catalog.products') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.catalog.products')])>
+                            Products
+                        </a>
+
+                        <a href="{{ route('admin.catalog.categories') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.catalog.categories')])>
+                            Categories
+                        </a>
+
+                        <a href="{{ route('admin.catalog.brands') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.catalog.brands')])>
+                            Brands
+                        </a>
+                    </div>
+                </details>
+
+                {{-- ==================== CONTENT ==================== --}}
+                <details {{ $isContentOpen ? 'open' : '' }}>
+                    <summary>
+                        <span>▤</span>
+                        Content
+                    </summary>
+
+                    <div class="admin-submenu-v2">
+
+                        <details {{ $isHomePageOpen ? 'open' : '' }}>
+                            <summary>Home Page</summary>
+
+                            <div class="admin-submenu-v2 admin-submenu-nested-v2">
+                                <a href="{{ route('admin.content.banners') }}" wire:navigate
+                                   @class(['active' => request()->routeIs('admin.content.banners')])>
+                                    Hero Banners
+                                </a>
+
+                                <a href="{{ route('admin.content.home-category-grid') }}" wire:navigate
+                                   @class(['active' => request()->routeIs('admin.content.home-category-grid')])>
+                                    Category Grid
+                                </a>
+
+                                <a href="{{ route('admin.content.home-full-banners') }}" wire:navigate
+                                   @class(['active' => request()->routeIs('admin.content.home-full-banners')])>
+                                    Full Banners
+                                </a>
+
+                                <a href="{{ route('admin.content.home-split-banners') }}" wire:navigate
+                                   @class(['active' => request()->routeIs('admin.content.home-split-banners')])>
+                                    Split Banners
+                                </a>
+
+                                <a href="{{ route('admin.content.home-galleries') }}" wire:navigate
+                                   @class(['active' => request()->routeIs('admin.content.home-galleries')])>
+                                    Gallery 3 Images
+                                </a>
+
+                                <a href="{{ route('admin.layout.home') }}" wire:navigate
+                                   @class(['active' => request()->routeIs('admin.layout.home')])>
+                                    Home Layout
+                                </a>
+                            </div>
+                        </details>
+
+                        <details {{ $isAboutOpen ? 'open' : '' }}>
+                            <summary>About Page</summary>
+
+                            <div class="admin-submenu-v2 admin-submenu-nested-v2">
+                                <a href="{{ route('admin.content.about.images') }}" wire:navigate
+                                   @class(['active' => request()->routeIs('admin.content.about.images')])>
+                                    Images
+                                </a>
+
+                                <a href="{{ route('admin.content.about.content') }}" wire:navigate
+                                   @class(['active' => request()->routeIs('admin.content.about.content')])>
+                                    Content
+                                </a>
+
+                                <a href="{{ route('admin.content.about.cards') }}" wire:navigate
+                                   @class(['active' => request()->routeIs('admin.content.about.cards')])>
+                                    Cards
+                                </a>
+
+                                <a href="{{ route('admin.content.about.testimonial') }}" wire:navigate
+                                   @class(['active' => request()->routeIs('admin.content.about.testimonial')])>
+                                    Testimonials
+                                </a>
+                            </div>
+                        </details>
+
+                        <a href="{{ route('admin.content.pages') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.content.pages')])>
+                            Static Pages
+                        </a>
+
+                    </div>
+                </details>
+
+                {{-- ==================== EVENTS & PROMOTIONS ==================== --}}
+                <details {{ $isMarketingOpen ? 'open' : '' }}>
+                    <summary>
+                        <span>✦</span>
+                        Events & Promotions
+                    </summary>
+
+                    <div class="admin-submenu-v2">
+                        <a href="{{ route('admin.event.settings') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.event.settings')])>
+                            Event Settings
+                        </a>
+
+                        <a href="{{ route('admin.event.flash-sale') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.event.flash-sale')])>
+                            Flash Sale
+                        </a>
+
+                        <a href="{{ route('admin.event.universal-discount') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.event.universal-discount')])>
+                            Universal Discount
+                        </a>
+
+                        <a href="{{ route('admin.event.combo-packages') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.event.combo-packages')])>
+                            Combo Packages
+                        </a>
+                    </div>
+                </details>
+
+                {{-- ==================== CUSTOMERS ==================== --}}
+                <details {{ $isCustomersOpen ? 'open' : '' }}>
                     <summary>
                         <span>☻</span>
-                        Customer
+                        Customers
                     </summary>
 
                     <div class="admin-submenu-v2">
                         <a href="{{ route('admin.customers.index') }}" wire:navigate
-                        @class(['active' => request()->routeIs('admin.customers.*')])>
+                           @class(['active' => request()->routeIs('admin.customers.index')])>
                             Data Customer
                         </a>
 
-                        <a href="{{ route('admin.customers.newsletter') }}" wire:navigate
-                        @class(['active' => request()->routeIs('admin.customers.newsletter')])>
-                            Newsletter Subscribers
-                        </a>
-
                         <a href="{{ route('admin.customers.reviews') }}" wire:navigate
-                        @class(['active' => request()->routeIs('admin.customers.reviews')])>
+                           @class(['active' => request()->routeIs('admin.customers.reviews')])>
                             Reviews
                         </a>
-                    </div>
-                </details>
 
-                <details {{ $isLayoutOpen ? 'open' : '' }}>
-                    <summary>
-                        <span>▦</span>
-                        Layout
-                    </summary>
-
-                    <div class="admin-submenu-v2">
-                        <a href="{{ route('admin.layout.home') }}" wire:navigate
-                        @class(['active' => request()->routeIs('admin.layout.home')])>
-                            Home Layout
+                        <a href="{{ route('admin.customers.newsletter') }}" wire:navigate
+                           @class(['active' => request()->routeIs('admin.customers.newsletter')])>
+                            Newsletter Subscribers
                         </a>
                     </div>
                 </details>
 
-                <details {{ $isConfigureOpen ? 'open' : '' }}>
+                {{-- ==================== SETTINGS ==================== --}}
+                <details {{ $isSettingsOpen ? 'open' : '' }}>
                     <summary>
                         <span>⚙</span>
-                        Configure
+                        Settings
                     </summary>
 
                     <div class="admin-submenu-v2">
@@ -293,21 +273,21 @@
                         </a>
 
                         <a href="{{ route('admin.settings.shipping-methods') }}" wire:navigate
-                            @class(['active' => request()->routeIs('admin.settings.shipping-methods')])>
+                           @class(['active' => request()->routeIs('admin.settings.shipping-methods')])>
                             Shipping Methods
                         </a>
 
                         <a href="{{ route('admin.settings.fonnte') }}" wire:navigate
                             @class(['active' => request()->routeIs('admin.settings.fonnte')])>
-                            Fonnte Settings
+                            Fonnte Notification
                         </a>
                     </div>
                 </details>
+
             </nav>
 
             <form method="POST" action="{{ route('admin.logout') }}" class="admin-logout-v2">
                 @csrf
-
                 <button type="submit">
                     <span>⇥</span>
                     Logout
@@ -346,7 +326,6 @@
                                 {{ strtoupper(substr($admin?->name ?? 'A', 0, 1)) }}
                             @endif
                         </span>
-
                         <span>
                             <strong>{{ $admin?->name ?? 'Admin' }}</strong>
                             <small>Administrator</small>
@@ -383,7 +362,6 @@
                 icon.src = finalTheme === 'dark'
                     ? button.dataset.darkIcon
                     : button.dataset.lightIcon;
-
                 icon.alt = finalTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
             }
 
@@ -398,17 +376,14 @@
 
         function bootAdminThemeToggle() {
             const savedTheme = localStorage.getItem('compify_admin_theme') || 'light';
-
             applyAdminTheme(savedTheme);
 
             const button = document.getElementById('adminThemeToggle');
-
             if (!button) return;
 
             button.onclick = function () {
                 const currentTheme = document.documentElement.getAttribute('data-admin-theme') || 'light';
                 const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
-
                 applyAdminTheme(nextTheme);
             };
         }

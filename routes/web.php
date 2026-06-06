@@ -217,159 +217,173 @@ Route::get('/checkout/success/{order}', function (Order $order) {
 | ADMIN AUTH
 |--------------------------------------------------------------------------
 */
-
+ 
 Route::livewire(config('compify.admin_login_path'), 'pages::auth.admin.login')
     ->middleware(['guest:admin', 'throttle:5,1'])
     ->name('login');
-
-
+ 
+ 
 /*
 |--------------------------------------------------------------------------
 | ADMIN PANEL
 |--------------------------------------------------------------------------
 */
-
+ 
 Route::middleware(['auth:admin', 'admin'])
     ->prefix(config('compify.admin_panel_path'))
     ->name('admin.')
     ->group(function () {
-        Route::livewire('/', 'pages::admin.dashboard.index')->name('dashboard');
-
-        Route::livewire('/profile', 'pages::admin.profile.index')->name('profile');
-
-        Route::livewire('/analytics', 'pages::admin.analytics.index')->name('analytics.index');
-        
-        Route::prefix('customers')->name('customers.')->group(function () {
-            Route::livewire('/', 'pages::admin.customers.index')
-                ->name('index');
-
-            Route::livewire('/newsletter-subscribers', 'pages::admin.customers.newsletter-subscribers')
-                ->name('newsletter');
-
-            Route::livewire('/reviews', 'pages::admin.customers.reviews')
-                ->name('reviews');
-        });
-
+ 
         Route::post('/logout', function (Request $request) {
             Auth::guard('admin')->logout();
-
             $request->session()->regenerateToken();
-
             return redirect()->route('login');
         })->name('logout');
-
-        Route::prefix('catalog')->name('catalog.')->group(function () {
-            Route::livewire('/products', 'pages::admin.catalog.products.index')->name('products');
-            Route::livewire('/categories', 'pages::admin.catalog.categories.index')->name('categories');
-            Route::livewire('/brands', 'pages::admin.catalog.brands.index')->name('brands');
-
-            Route::get('/products/export', [ProductExcelController::class, 'export'])
-                ->name('products.export');
-
-            Route::post('/products/import', [ProductExcelController::class, 'import'])
-                ->name('products.import');
-        });
-
-        Route::prefix('content')->name('content.')->group(function () {
-            Route::livewire('/banners', 'pages::admin.content.banners.index')->name('banners');
-
-            Route::livewire('/home-category-products', 'pages::admin.content.home-sections.category-products')
-                ->name('home-category-products');
-
-            Route::livewire('/home-full-banners', 'pages::admin.content.home-sections.full-banners')
-                ->name('home-full-banners');
-
-            Route::livewire('/home-split-banners', 'pages::admin.content.home-sections.split-banners')
-                ->name('home-split-banners');
-
-            Route::livewire('/home-galleries', 'pages::admin.content.home-sections.galleries')
-                ->name('home-galleries');
-
-            Route::livewire('/home-category-grid', 'pages::admin.content.home-sections.category-grid')
-                ->name('home-category-grid');
-
-            Route::prefix('about')->name('about.')->group(function () {
-                Route::livewire('/hero', 'pages::admin.content.about.hero')->name('hero');
-                Route::livewire('/intro', 'pages::admin.content.about.intro')->name('intro');
-                Route::livewire('/stats', 'pages::admin.content.about.stats')->name('stats');
-                Route::livewire('/quote', 'pages::admin.content.about.quote')->name('quote');
-                Route::livewire('/values', 'pages::admin.content.about.values')->name('values');
-            });
-
-            Route::livewire('/pages', 'pages::admin.content.pages.index')->name('pages');
-        });
-
-        Route::prefix('event')->name('event.')->group(function () {
-            Route::livewire('/settings', 'pages::admin.event.settings')->name('settings');
-            Route::livewire('/hero-images', 'pages::admin.event.hero-images')->name('hero-images');
-            Route::livewire('/flash-sale', 'pages::admin.event.flash-sale')->name('flash-sale');
-            Route::livewire('/full-banners', 'pages::admin.event.full-banners')->name('full-banners');
-            Route::livewire('/combo-packages', 'pages::admin.event.combo-packages')->name('combo-packages');
-            Route::livewire('/universal-discount', 'pages::admin.event.universal-discount')->name('universal-discount');
-        });
-
-
+ 
+        Route::livewire('/profile', 'pages::admin.profile.index')->name('profile');
+ 
+        /*
+        |----------------------------------------------------------------------
+        | OVERVIEW
+        |----------------------------------------------------------------------
+        */
+ 
+        Route::livewire('/', 'pages::admin.dashboard.index')->name('dashboard');
+ 
+        Route::livewire('/analytics', 'pages::admin.analytics.index')->name('analytics.index');
+ 
+        /*
+        |----------------------------------------------------------------------
+        | SALES — Orders & Catalog
+        |----------------------------------------------------------------------
+        */
+ 
         Route::prefix('sales')->name('sales.')->group(function () {
             Route::livewire('/orders', 'pages::admin.sales.orders.index')->name('orders');
             Route::livewire('/orders/{order}', 'pages::admin.sales.orders.show')->name('orders.show');
         });
-
-        Route::prefix('layout')->name('layout.')->group(function () {
-            Route::livewire('/home', 'pages::admin.layout.home')
-                ->name('home');
+ 
+        Route::prefix('catalog')->name('catalog.')->group(function () {
+            Route::livewire('/products', 'pages::admin.catalog.products.index')->name('products');
+            Route::livewire('/categories', 'pages::admin.catalog.categories.index')->name('categories');
+            Route::livewire('/brands', 'pages::admin.catalog.brands.index')->name('brands');
+ 
+            Route::get('/products/export', [ProductExcelController::class, 'export'])->name('products.export');
+            Route::post('/products/import', [ProductExcelController::class, 'import'])->name('products.import');
         });
-
+ 
+        /*
+        |----------------------------------------------------------------------
+        | CONTENT (CMS) — Home, About, Static Pages, Layout
+        |----------------------------------------------------------------------
+        */
+ 
+        Route::prefix('content')->name('content.')->group(function () {
+ 
+            // Home Page sections
+            Route::livewire('/banners', 'pages::admin.content.banners.index')->name('banners');
+            Route::livewire('/home-category-grid', 'pages::admin.content.home-sections.category-grid')->name('home-category-grid');
+            Route::livewire('/home-full-banners', 'pages::admin.content.home-sections.full-banners')->name('home-full-banners');
+            Route::livewire('/home-split-banners', 'pages::admin.content.home-sections.split-banners')->name('home-split-banners');
+            Route::livewire('/home-galleries', 'pages::admin.content.home-sections.galleries')->name('home-galleries');
+ 
+            // About Page sections
+            Route::prefix('about')->name('about.')->group(function () {
+                Route::livewire('/images', 'pages::admin.content.about.hero-banner')->name('images');
+                Route::livewire('/content', 'pages::admin.content.about.content')->name('content');
+                Route::livewire('/cards', 'pages::admin.content.about.cards')->name('cards');
+                Route::livewire('/testimonial', 'pages::admin.content.about.testimonial')->name('testimonial');
+            });
+ 
+            // Static Pages
+            Route::livewire('/pages', 'pages::admin.content.pages.index')->name('pages');
+        });
+ 
+        // Home Layout (grouped under Content visually, kept under layout.* route prefix)
+        Route::prefix('layout')->name('layout.')->group(function () {
+            Route::livewire('/home', 'pages::admin.layout.home')->name('home');
+        });
+ 
+        /*
+        |----------------------------------------------------------------------
+        | MARKETING — Events & Promotions
+        |----------------------------------------------------------------------
+        */
+ 
+        Route::prefix('event')->name('event.')->group(function () {
+            Route::livewire('/settings', 'pages::admin.event.settings')->name('settings');
+            Route::livewire('/flash-sale', 'pages::admin.event.flash-sale')->name('flash-sale');
+            Route::livewire('/universal-discount', 'pages::admin.event.universal-discount')->name('universal-discount');
+            Route::livewire('/combo-packages', 'pages::admin.event.combo-packages')->name('combo-packages');
+            Route::livewire('/full-banners', 'pages::admin.event.full-banners')->name('full-banners');
+            Route::livewire('/hero-images', 'pages::admin.event.hero-images')->name('hero-images');
+        });
+ 
+        /*
+        |----------------------------------------------------------------------
+        | CUSTOMERS
+        |----------------------------------------------------------------------
+        */
+ 
+        Route::prefix('customers')->name('customers.')->group(function () {
+            Route::livewire('/', 'pages::admin.customers.index')->name('index');
+            Route::livewire('/reviews', 'pages::admin.customers.reviews')->name('reviews');
+            Route::livewire('/newsletter-subscribers', 'pages::admin.customers.newsletter-subscribers')->name('newsletter');
+        });
+ 
+        /*
+        |----------------------------------------------------------------------
+        | SETTINGS
+        |----------------------------------------------------------------------
+        */
+ 
         Route::prefix('settings')->name('settings.')->group(function () {
             Route::livewire('/shop', 'pages::admin.settings.shop.index')->name('shop');
-
-            Route::livewire('/payment-methods', 'pages::admin.settings.payment-methods.index')
-                ->name('payment-methods');
-
-            Route::livewire('/shipping-methods', 'pages::admin.settings.shipping-methods.index')
-                ->name('shipping-methods');
-            
-            Route::livewire('/fonnte', 'pages::admin.settings.fonnte.index')
-                ->name('fonnte');
+            Route::livewire('/payment-methods', 'pages::admin.settings.payment-methods.index')->name('payment-methods');
+            Route::livewire('/shipping-methods', 'pages::admin.settings.shipping-methods.index')->name('shipping-methods');
+ 
+            // Integrations
+            Route::livewire('/fonnte', 'pages::admin.settings.fonnte.index')->name('fonnte');
         });
     });
-
+ 
+ 
 /*
 |--------------------------------------------------------------------------
-| SUBMIT EMAIL
+| NEWSLETTER SUBSCRIBE
 |--------------------------------------------------------------------------
 */
-
+ 
 Route::post('/newsletter/subscribe', function (Request $request) {
     $validator = Validator::make($request->all(), [
         'newsletter_email' => ['required', 'email', 'max:255'],
     ], [
         'newsletter_email.required' => 'Email wajib diisi.',
-        'newsletter_email.email' => 'Format email tidak valid.',
-        'newsletter_email.max' => 'Email terlalu panjang.',
+        'newsletter_email.email'    => 'Format email tidak valid.',
+        'newsletter_email.max'      => 'Email terlalu panjang.',
     ]);
-
+ 
     if ($validator->fails()) {
-        return back()
-            ->withErrors($validator)
-            ->withInput();
+        return back()->withErrors($validator)->withInput();
     }
-
+ 
     $email = strtolower(trim($request->newsletter_email));
-
+ 
     $subscriber = NewsletterSubscriber::firstOrCreate(
         ['email' => $email],
         [
-            'customer_id' => auth('customer')->id(),
-            'source' => 'footer',
-            'ip_address' => $request->ip(),
-            'user_agent' => substr((string) $request->userAgent(), 0, 1000),
+            'customer_id'  => auth('customer')->id(),
+            'source'       => 'footer',
+            'ip_address'   => $request->ip(),
+            'user_agent'   => substr((string) $request->userAgent(), 0, 1000),
             'subscribed_at' => now(),
         ]
     );
-
+ 
     if (! $subscriber->wasRecentlyCreated) {
         return back()->with('newsletter_info', 'Email ini sudah terdaftar di newsletter.');
     }
-
+ 
     return back()->with('newsletter_success', 'Terima kasih! Email kamu berhasil didaftarkan.');
 })->name('newsletter.subscribe');
+ 

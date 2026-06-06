@@ -11,7 +11,7 @@ use Livewire\WithPagination;
 
 new
 #[Layout('components.layouts.admin')]
-#[Title('About Hero - Admin Compify')]
+#[Title('About Testimonial - Admin Compify')]
 class extends Component {
     use WithFileUploads;
     use WithPagination;
@@ -20,6 +20,8 @@ class extends Component {
 
     public ?int $editingId = null;
     public string $title = '';
+    public string $description = '';
+    public int $rating = 5;
     public bool $is_active = true;
     public int $sort_order = 0;
 
@@ -34,7 +36,7 @@ class extends Component {
     #[Computed]
     public function sections()
     {
-        return AboutSection::type(AboutSection::TYPE_HERO)
+        return AboutSection::type(AboutSection::TYPE_TESTIMONIAL)
             ->orderBy('sort_order')
             ->latest()
             ->paginate($this->perPage);
@@ -43,17 +45,21 @@ class extends Component {
     public function save(): void
     {
         $this->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'is_active' => ['boolean'],
-            'sort_order' => ['nullable', 'integer', 'min:0'],
-            'imageFile' => ['nullable', 'image', 'max:4096'],
+            'title'       => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string'],
+            'rating'      => ['required', 'integer', 'min:1', 'max:5'],
+            'is_active'   => ['boolean'],
+            'sort_order'  => ['nullable', 'integer', 'min:0'],
+            'imageFile'   => ['nullable', 'image', 'max:2048'],
         ]);
 
         $payload = [
-            'section_type' => AboutSection::TYPE_HERO,
-            'title' => $this->title,
-            'is_active' => $this->is_active,
-            'sort_order' => $this->sort_order,
+            'section_type' => AboutSection::TYPE_TESTIMONIAL,
+            'title'        => $this->title,
+            'description'  => $this->description,
+            'rating'       => $this->rating,
+            'is_active'    => $this->is_active,
+            'sort_order'   => $this->sort_order,
         ];
 
         if ($this->imageFile) {
@@ -70,7 +76,7 @@ class extends Component {
             AboutSection::create($payload);
         }
 
-        session()->flash('success', 'About hero berhasil disimpan.');
+        session()->flash('success', 'About testimonial berhasil disimpan.');
         $this->resetForm();
     }
 
@@ -78,12 +84,14 @@ class extends Component {
     {
         $section = AboutSection::findOrFail($id);
 
-        $this->editingId = $section->id;
-        $this->title = $section->title ?? '';
-        $this->is_active = (bool) $section->is_active;
-        $this->sort_order = $section->sort_order ?? 0;
+        $this->editingId    = $section->id;
+        $this->title        = $section->title ?? '';
+        $this->description  = $section->description ?? '';
+        $this->rating       = $section->rating ?? 5;
+        $this->is_active    = (bool) $section->is_active;
+        $this->sort_order   = $section->sort_order ?? 0;
         $this->currentImage = $section->image;
-        $this->imageFile = null;
+        $this->imageFile    = null;
     }
 
     public function delete(int $id): void
@@ -96,17 +104,19 @@ class extends Component {
 
         $section->delete();
 
-        session()->flash('success', 'About hero berhasil dihapus.');
+        session()->flash('success', 'About testimonial berhasil dihapus.');
         $this->resetForm();
     }
 
     public function resetForm(): void
     {
-        $this->editingId = null;
-        $this->title = '';
-        $this->is_active = true;
-        $this->sort_order = 0;
-        $this->imageFile = null;
+        $this->editingId    = null;
+        $this->title        = '';
+        $this->description  = '';
+        $this->rating       = 5;
+        $this->is_active    = true;
+        $this->sort_order   = 0;
+        $this->imageFile    = null;
         $this->currentImage = null;
         $this->resetValidation();
     }
@@ -115,8 +125,8 @@ class extends Component {
 
 <div class="admin-page-v2">
     <div class="admin-section-title-v2">
-        <h2>About Hero Manager</h2>
-        <p>Mengatur judul dan background hero halaman About.</p>
+        <h2>About Testimonial Manager</h2>
+        <p>Mengatur testimoni pelanggan pada halaman About.</p>
     </div>
 
     @if(session('success'))
@@ -124,13 +134,23 @@ class extends Component {
     @endif
 
     <form wire:submit="save" class="admin-panel-v2 admin-form">
-        <h2>{{ $editingId ? 'Edit About Hero' : 'Tambah About Hero' }}</h2>
+        <h2>{{ $editingId ? 'Edit About Testimonial' : 'Tambah About Testimonial' }}</h2>
 
         <div class="admin-grid">
             <label>
-                Judul
-                <input type="text" wire:model="title" placeholder="About Us">
+                Nama Pelanggan
+                <input type="text" wire:model="title" placeholder="Budi Santoso">
                 @error('title') <span class="error-text">{{ $message }}</span> @enderror
+            </label>
+
+            <label>
+                Rating (1–5)
+                <select wire:model="rating">
+                    @foreach(range(1, 5) as $star)
+                        <option value="{{ $star }}">{{ $star }} Bintang</option>
+                    @endforeach
+                </select>
+                @error('rating') <span class="error-text">{{ $message }}</span> @enderror
             </label>
 
             <label>
@@ -148,22 +168,28 @@ class extends Component {
             </label>
 
             <label>
-                Background Hero
+                Foto Avatar
                 <input type="file" wire:model="imageFile" accept="image/*">
                 @error('imageFile') <span class="error-text">{{ $message }}</span> @enderror
             </label>
         </div>
 
+        <label>
+            Teks Testimoni
+            <textarea wire:model="description" rows="4" placeholder="Tulis isi testimoni pelanggan..."></textarea>
+            @error('description') <span class="error-text">{{ $message }}</span> @enderror
+        </label>
+
         <div class="home-section-preview-grid">
             <div>
-                <strong>Preview Gambar</strong>
+                <strong>Preview Avatar</strong>
 
                 @if($imageFile)
                     <img src="{{ $imageFile->temporaryUrl() }}" alt="Preview">
                 @elseif($currentImage)
-                    <img src="{{ Storage::url($currentImage) }}" alt="Current image">
+                    <img src="{{ Storage::url($currentImage) }}" alt="Current avatar">
                 @else
-                    <span>Belum ada gambar</span>
+                    <span>Belum ada foto</span>
                 @endif
             </div>
         </div>
@@ -176,7 +202,7 @@ class extends Component {
 
     <div class="admin-panel-v2">
         <div class="admin-table-head">
-            <h2>Data About Hero</h2>
+            <h2>Data About Testimonial</h2>
 
             <select wire:model.live="perPage">
                 <option value="10">10 data</option>
@@ -189,8 +215,10 @@ class extends Component {
             <thead>
                 <tr>
                     <th>Urutan</th>
-                    <th>Gambar</th>
-                    <th>Judul</th>
+                    <th>Avatar</th>
+                    <th>Nama</th>
+                    <th>Rating</th>
+                    <th>Testimoni</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
@@ -201,21 +229,23 @@ class extends Component {
                         <td>{{ $section->sort_order }}</td>
                         <td>
                             @if($section->image)
-                                <img src="{{ Storage::url($section->image) }}" class="admin-table-thumb" alt="About hero">
+                                <img src="{{ Storage::url($section->image) }}" class="admin-table-thumb" alt="Avatar">
                             @else
                                 -
                             @endif
                         </td>
                         <td>{{ $section->title ?? '-' }}</td>
+                        <td>{{ $section->rating ?? '-' }} ★</td>
+                        <td>{{ str($section->description)->limit(80) }}</td>
                         <td>{{ $section->is_active ? 'Aktif' : 'Nonaktif' }}</td>
                         <td>
                             <button class="admin-btn" type="button" wire:click="edit({{ $section->id }})">Edit</button>
-                            <button class="admin-btn danger" type="button" wire:click="delete({{ $section->id }})" wire:confirm="Yakin hapus about hero ini?">Hapus</button>
+                            <button class="admin-btn danger" type="button" wire:click="delete({{ $section->id }})" wire:confirm="Yakin hapus testimoni ini?">Hapus</button>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5">Belum ada about hero.</td>
+                        <td colspan="7">Belum ada about testimonial.</td>
                     </tr>
                 @endforelse
             </tbody>

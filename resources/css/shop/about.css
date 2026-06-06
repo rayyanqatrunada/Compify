@@ -10,6 +10,10 @@
     padding: 90px 80px;
 }
 
+/* =========================================
+   HERO
+   ========================================= */
+
 .about-hero {
     min-height: 355px;
     background: #d9d9d9;
@@ -31,6 +35,10 @@
     text-align: center;
     text-shadow: 0 8px 26px rgba(0, 0, 0, .26);
 }
+
+/* =========================================
+   INTRO
+   ========================================= */
 
 .about-intro {
     padding-top: 24px;
@@ -62,6 +70,10 @@
 .about-page .shop-btn:hover {
     transform: translateY(-3px);
 }
+
+/* =========================================
+   STATS
+   ========================================= */
 
 .about-stats {
     display: flex;
@@ -95,6 +107,10 @@
     opacity: .85;
 }
 
+/* =========================================
+   QUOTE
+   ========================================= */
+
 .about-quote {
     position: relative;
     max-width: 974px;
@@ -127,6 +143,10 @@
     right: -70px;
     bottom: -20px;
 }
+
+/* =========================================
+   VALUES
+   ========================================= */
 
 .about-values {
     display: grid;
@@ -179,6 +199,247 @@
     line-height: 22px;
 }
 
+/* =========================================
+   SECTION HEADING (shared — History & Testimonial)
+   ========================================= */
+
+.about-section-heading {
+    margin: 0 0 48px;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 40px;
+    text-align: center;
+}
+
+/* =========================================
+   BANNER TENGAH
+   ========================================= */
+
+.about-banner {
+    min-height: 280px;
+    background: #0e0a10;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 24px;
+    margin: 90px 0;
+    text-align: center;
+}
+
+.about-banner-content {
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.about-banner-content h2 {
+    margin: 0;
+    color: #ececec;
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-shadow: 0 8px 26px rgba(0, 0, 0, .26);
+}
+
+.about-banner-content p {
+    margin: 0;
+    color: rgba(236, 236, 236, .8);
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.6;
+}
+
+.about-banner .shop-btn {
+    background: #fff;
+    color: #0e0a10;
+    margin-top: 8px;
+}
+
+.about-banner .shop-btn:hover {
+    transform: translateY(-3px);
+}
+
+/* =========================================
+   HISTORY TIMELINE
+   ========================================= */
+
+.about-history {
+    padding: 48px 0 90px;
+}
+
+.history-timeline {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.history-timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #0e0a10;
+    opacity: .12;
+    transform: translateX(-50%);
+}
+
+.history-item {
+    display: grid;
+    grid-template-columns: 1fr 32px 1fr;
+    align-items: start;
+    gap: 0 24px;
+    padding: 28px 0;
+    position: relative;
+}
+
+.history-item--left .history-year { text-align: right; order: 1; }
+.history-item--left .history-dot  { order: 2; }
+.history-item--left .history-card { order: 3; }
+
+.history-item--right .history-card { text-align: right; order: 1; }
+.history-item--right .history-dot  { order: 2; }
+.history-item--right .history-year { order: 3; text-align: left; }
+
+.history-year {
+    font-family: 'Poppins', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+    padding-top: 6px;
+    opacity: .9;
+}
+
+.history-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #0e0a10;
+    border: 3px solid #fff;
+    outline: 2px solid #0e0a10;
+    margin: 6px auto 0;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.history-card {
+    padding: 20px 24px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, .1);
+    background: rgba(236, 236, 236, .25);
+}
+
+.history-card h3 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.history-card p {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.65;
+    opacity: .75;
+}
+
+/* =========================================
+   TESTIMONIALS
+   ========================================= */
+
+.about-testimonials {
+    padding: 0 0 90px;
+}
+
+.testimonial-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.testimonial-card {
+    padding: 28px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, .1);
+    background: rgba(236, 236, 236, .25);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: box-shadow .4s ease, transform .4s ease;
+}
+
+.testimonial-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, .04);
+}
+
+.testimonial-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.testimonial-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #0e0a10;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.testimonial-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.testimonial-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.testimonial-meta strong {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.testimonial-stars {
+    display: flex;
+    gap: 2px;
+    font-size: 14px;
+}
+
+.star-filled { color: #f59e0b; }
+.star-empty  { opacity: .2; }
+
+.testimonial-card > p {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.65;
+    opacity: .8;
+}
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
 @media (max-width: 992px) {
     .about-container {
         padding: 72px 24px;
@@ -191,6 +452,10 @@
     .quote-left,
     .quote-right {
         display: none;
+    }
+
+    .testimonial-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
@@ -223,5 +488,56 @@
 
     .about-values {
         margin: 72px 0;
+    }
+
+    .about-banner {
+        min-height: 220px;
+        margin: 72px 0;
+        padding: 48px 24px;
+    }
+
+    .about-banner-content h2 {
+        font-size: 28px;
+    }
+
+    .about-banner-content p {
+        font-size: 16px;
+    }
+
+    .about-section-heading {
+        font-size: 24px;
+    }
+
+    .history-timeline::before {
+        left: 7px;
+    }
+
+    .history-item {
+        grid-template-columns: 16px 1fr;
+    }
+
+    .history-item--left .history-year,
+    .history-item--right .history-year {
+        display: none;
+    }
+
+    .history-item--left .history-dot,
+    .history-item--right .history-dot {
+        grid-column: 1;
+        grid-row: 1;
+        margin: 4px 0 0 0;
+        order: 1;
+    }
+
+    .history-item--left .history-card,
+    .history-item--right .history-card {
+        grid-column: 2;
+        grid-row: 1;
+        text-align: left;
+        order: 2;
+    }
+
+    .testimonial-grid {
+        grid-template-columns: 1fr;
     }
 }

@@ -23,6 +23,7 @@
 @import './admin/16-responsive.css';
 @import './admin/17-theme-global.css';
 @import './admin/18-checkout.css';
+@import './admin/19-admin-tabs.css';
 
 @import './admin/components/topbar-actions.css';
 @import './admin/components/v2-forms-tables.css';

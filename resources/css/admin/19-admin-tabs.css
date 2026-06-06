@@ -1,0 +1,131 @@
+/* =========================================================
+   ADMIN TABS
+   Class:  .admin-tabs-v2      → wrapper strip tab
+           .admin-tab-v2       → tombol tab individual
+           .admin-tab-v2.active → tab yang sedang aktif
+
+   Dipakai di halaman yang memakai scoped class
+   .admin-event-page-v2 maupun halaman admin lain.
+========================================================= */
+
+
+/* ---------------------------------------------------------
+   Strip tab
+--------------------------------------------------------- */
+
+.admin-tabs-v2 {
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    padding: 4px;
+    background: var(--admin-soft);
+    border: 1px solid var(--admin-border);
+    border-radius: calc(var(--admin-panel-radius) + 2px);
+    width: fit-content;
+}
+
+
+/* ---------------------------------------------------------
+   Tombol tab
+--------------------------------------------------------- */
+
+.admin-tab-v2 {
+    position: relative;
+    height: 32px;
+    padding: 0 14px;
+
+    border: 1px solid transparent;
+    border-radius: var(--admin-radius);
+    background: transparent;
+
+    color: var(--admin-muted);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 850;
+    white-space: nowrap;
+
+    cursor: pointer;
+    user-select: none;
+
+    transition:
+        background   .16s ease,
+        color        .16s ease,
+        border-color .16s ease,
+        box-shadow   .16s ease,
+        transform    .12s ease;
+}
+
+.admin-tab-v2:hover:not(.active) {
+    background: var(--admin-panel);
+    color: var(--admin-text);
+    border-color: var(--admin-border);
+}
+
+.admin-tab-v2:active {
+    transform: scale(.97);
+}
+
+
+/* ---------------------------------------------------------
+   Tab aktif
+--------------------------------------------------------- */
+
+.admin-tab-v2.active {
+    background: var(--admin-panel);
+    color: var(--admin-text);
+    border-color: var(--admin-border);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .08), 0 0 0 0 transparent;
+    font-weight: 950;
+    cursor: default;
+}
+
+
+/* ---------------------------------------------------------
+   Dark mode overrides
+   Scoped ke .admin-shell-v2 agar tidak bocor ke shop.
+--------------------------------------------------------- */
+
+.admin-shell-v2[data-admin-theme="dark"] .admin-tabs-v2 {
+    background: var(--admin-soft);
+    border-color: var(--admin-border);
+}
+
+.admin-shell-v2[data-admin-theme="dark"] .admin-tab-v2 {
+    color: var(--admin-muted);
+}
+
+.admin-shell-v2[data-admin-theme="dark"] .admin-tab-v2:hover:not(.active) {
+    background: var(--admin-panel);
+    color: var(--admin-text);
+    border-color: var(--admin-border-strong);
+}
+
+.admin-shell-v2[data-admin-theme="dark"] .admin-tab-v2.active {
+    background: var(--admin-panel);
+    color: var(--admin-text);
+    border-color: var(--admin-border-strong);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, .3);
+}
+
+
+/* ---------------------------------------------------------
+   Responsive — scroll horizontal di layar sempit
+--------------------------------------------------------- */
+
+@media (max-width: 640px) {
+    .admin-tabs-v2 {
+        width: 100%;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .admin-tabs-v2::-webkit-scrollbar {
+        display: none;
+    }
+
+    .admin-tab-v2 {
+        flex-shrink: 0;
+    }
+}

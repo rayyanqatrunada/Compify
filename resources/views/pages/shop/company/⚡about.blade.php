@@ -57,6 +57,33 @@ class extends Component {
     }
 
     #[Computed]
+    public function banner(): ?AboutSection
+    {
+        return AboutSection::type(AboutSection::TYPE_BANNER)
+            ->active()
+            ->orderBy('sort_order')
+            ->first();
+    }
+
+    #[Computed]
+    public function histories()
+    {
+        return AboutSection::type(AboutSection::TYPE_HISTORY)
+            ->active()
+            ->orderBy('sort_order')
+            ->get();
+    }
+
+    #[Computed]
+    public function testimonials()
+    {
+        return AboutSection::type(AboutSection::TYPE_TESTIMONIAL)
+            ->active()
+            ->orderBy('sort_order')
+            ->get();
+    }
+
+    #[Computed]
     public function heroExists(): bool
     {
         return AboutSection::type(AboutSection::TYPE_HERO)->exists();
@@ -85,6 +112,24 @@ class extends Component {
     {
         return AboutSection::type(AboutSection::TYPE_VALUE)->exists();
     }
+
+    #[Computed]
+    public function bannerExists(): bool
+    {
+        return AboutSection::type(AboutSection::TYPE_BANNER)->exists();
+    }
+
+    #[Computed]
+    public function historiesExist(): bool
+    {
+        return AboutSection::type(AboutSection::TYPE_HISTORY)->exists();
+    }
+
+    #[Computed]
+    public function testimonialsExist(): bool
+    {
+        return AboutSection::type(AboutSection::TYPE_TESTIMONIAL)->exists();
+    }
 };
 ?>
 
@@ -92,6 +137,7 @@ class extends Component {
     $hero = $this->hero;
     $intro = $this->intro;
     $quote = $this->quote;
+    $banner = $this->banner;
 
     $heroImage = $hero?->image ? Storage::url($hero->image) : null;
 
@@ -146,9 +192,72 @@ class extends Component {
             ],
         ]);
     }
+
+    $bannerImage = $banner?->image ? Storage::url($banner->image) : null;
+
+    $histories = $this->histories
+        ->map(fn ($item) => [
+            'year' => $item->year ?: '-',
+            'title' => $item->title ?: '',
+            'description' => $item->description ?: '',
+        ])
+        ->values();
+
+    if ($histories->isEmpty() && ! $this->historiesExist) {
+        $histories = collect([
+            [
+                'year' => '2020',
+                'title' => 'Compify Didirikan',
+                'description' => 'Compify lahir dari semangat untuk menghadirkan komponen komputer orisinal yang mudah diakses oleh semua kalangan.',
+            ],
+            [
+                'year' => '2021',
+                'title' => 'Ekspansi Produk',
+                'description' => 'Katalog produk diperluas mencakup ratusan SKU dari brand-brand ternama dunia.',
+            ],
+            [
+                'year' => '2023',
+                'title' => 'Ribuan Pelanggan',
+                'description' => 'Compify telah melayani ribuan pelanggan setia dari seluruh Indonesia.',
+            ],
+        ]);
+    }
+
+    $testimonials = $this->testimonials
+        ->map(fn ($item) => [
+            'name' => $item->title ?: 'Pelanggan',
+            'description' => $item->description ?: '',
+            'rating' => $item->rating ?? 5,
+            'avatar' => $item->image ? Storage::url($item->image) : null,
+        ])
+        ->values();
+
+    if ($testimonials->isEmpty() && ! $this->testimonialsExist) {
+        $testimonials = collect([
+            [
+                'name' => 'Andi Prasetyo',
+                'description' => 'Produk original, pengiriman cepat, dan harga sangat kompetitif. Compify jadi pilihan utama untuk belanja komponen!',
+                'rating' => 5,
+                'avatar' => null,
+            ],
+            [
+                'name' => 'Siti Rahma',
+                'description' => 'Pelayanan ramah dan responsif. Barang sesuai deskripsi, garansi resmi. Sangat rekomendasikan!',
+                'rating' => 5,
+                'avatar' => null,
+            ],
+            [
+                'name' => 'Budi Santoso',
+                'description' => 'Stok lengkap dan selalu update. Senang berbelanja di Compify karena prosesnya mudah dan aman.',
+                'rating' => 4,
+                'avatar' => null,
+            ],
+        ]);
+    }
 @endphp
 
 <section class="about-page">
+    {{-- HERO --}}
     @if($hero || ! $this->heroExists)
         <section
             class="about-hero"
@@ -161,6 +270,7 @@ class extends Component {
     @endif
 
     <div class="about-container">
+        {{-- INTRO --}}
         @if($intro || ! $this->introExists)
             <section class="about-intro">
                 <h2>{!! nl2br(e($introDescription)) !!}</h2>
@@ -171,6 +281,7 @@ class extends Component {
             </section>
         @endif
 
+        {{-- STATS --}}
         @if($stats->isNotEmpty())
             <section class="about-stats">
                 @foreach($stats as $stat)
@@ -182,6 +293,7 @@ class extends Component {
             </section>
         @endif
 
+        {{-- QUOTE --}}
         @if($quote || ! $this->quoteExists)
             <section class="about-quote">
                 <span class="quote-left">"</span>
@@ -192,6 +304,7 @@ class extends Component {
             </section>
         @endif
 
+        {{-- VALUES --}}
         @if($values->isNotEmpty())
             <section class="about-values">
                 @foreach($values as $value)
@@ -203,6 +316,88 @@ class extends Component {
                         <p>{{ $value['description'] }}</p>
                     </div>
                 @endforeach
+            </section>
+        @endif
+
+        {{-- BANNER TENGAH --}}
+        @if($banner || ! $this->bannerExists)
+            <section
+                class="about-banner"
+                @if($bannerImage)
+                    style="background-image: linear-gradient(rgba(14,10,16,.65), rgba(14,10,16,.65)), url('{{ $bannerImage }}')"
+                @endif
+            >
+                <div class="about-banner-content">
+                    <h2>{{ $banner?->title ?: 'Jadilah Bagian dari Compify' }}</h2>
+
+                    @if($banner?->subtitle)
+                        <p>{{ $banner->subtitle }}</p>
+                    @endif
+
+                    @if($banner?->button_text && $banner?->button_url)
+                        <a href="{{ $banner->button_url }}" class="shop-btn" wire:navigate>
+                            {{ $banner->button_text }} ->
+                        </a>
+                    @elseif(! $this->bannerExists)
+                        <a href="{{ route('products.index') }}" class="shop-btn" wire:navigate>
+                            Mulai Belanja ->
+                        </a>
+                    @endif
+                </div>
+            </section>
+        @endif
+
+        {{-- SEJARAH / TIMELINE --}}
+        @if($histories->isNotEmpty())
+            <section class="about-history">
+                <h2 class="about-section-heading">Sejarah Compify</h2>
+
+                <div class="history-timeline">
+                    @foreach($histories as $index => $history)
+                        <div class="history-item {{ $index % 2 === 0 ? 'history-item--left' : 'history-item--right' }}">
+                            <div class="history-year">{{ $history['year'] }}</div>
+                            <div class="history-dot"></div>
+                            <div class="history-card">
+                                <h3>{{ $history['title'] }}</h3>
+                                <p>{{ $history['description'] }}</p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        {{-- TESTIMONI --}}
+        @if($testimonials->isNotEmpty())
+            <section class="about-testimonials">
+                <h2 class="about-section-heading">Apa Kata Pelanggan</h2>
+
+                <div class="testimonial-grid">
+                    @foreach($testimonials as $testimonial)
+                        <div class="testimonial-card">
+                            <div class="testimonial-header">
+                                <div class="testimonial-avatar">
+                                    @if($testimonial['avatar'])
+                                        <img src="{{ $testimonial['avatar'] }}" alt="{{ $testimonial['name'] }}">
+                                    @else
+                                        <span>{{ strtoupper(substr($testimonial['name'], 0, 1)) }}</span>
+                                    @endif
+                                </div>
+
+                                <div class="testimonial-meta">
+                                    <strong>{{ $testimonial['name'] }}</strong>
+                                    <div class="testimonial-stars">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            <span class="{{ $i <= $testimonial['rating'] ? 'star-filled' : 'star-empty' }}">★</span>
+                                        @endfor
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p>{{ $testimonial['description'] }}</p>
+                        </div>
+                    @endforeach
+                </div>
             </section>
         @endif
     </div>
