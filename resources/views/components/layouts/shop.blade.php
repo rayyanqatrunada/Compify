@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>{{ $title ?? 'Compify' }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
@@ -58,7 +59,7 @@
                             <path d="M12 21s-7.5-4.7-9.4-9.1C1.1 8.5 3.2 5 6.7 5c2 0 3.4 1 4.3 2.2C11.9 6 13.3 5 15.3 5c3.5 0 5.6 3.5 4.1 6.9C19.5 16.3 12 21 12 21Zm0-2.4c2.3-1.6 5.1-4.2 5.8-7.5.9-2-.2-4.1-2.5-4.1-1.7 0-2.7 1.1-3.3 2.4h-2C9.4 8.1 8.4 7 6.7 7 4.4 7 3.3 9.1 4.2 11.1c.7 3.3 3.5 5.9 7.8 7.5Z"/>
                         </svg>
                     </span>
-                    <b>{{ $wishlistCount }}</b>
+                    <b data-wishlist-count>{{ $wishlistCount }}</b>
                 </a>
 
                 @auth('customer')
