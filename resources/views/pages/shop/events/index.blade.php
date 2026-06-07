@@ -328,7 +328,10 @@ class extends Component {
 
                 <div class="event-combo-grid" id="paket">
                     @forelse($this->comboPackages as $package)
-                        <article class="event-combo-card">
+                        <article
+                            class="event-combo-card event-combo-card--clickable js-clickable-card"
+                            data-href="{{ route('event.packages.show', $package) }}"
+                        >
                             @if($package->savings > 0)
                                 <span class="event-combo-save">Hemat {{ $package->formatted_savings }}</span>
                             @endif

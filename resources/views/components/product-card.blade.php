@@ -31,11 +31,20 @@
         @endif
     </div>
 
-    <form method="POST" action="{{ route('wishlist.toggle', $product) }}" class="wishlist-form">
+    <form
+        method="POST"
+        action="{{ route('wishlist.toggle', $product) }}"
+        class="wishlist-form js-wishlist-form"
+    >
         @csrf
 
-        <button type="submit" class="wishlist-button {{ $isWishlisted ? 'active' : '' }}" title="Wishlist">
-            {{ $isWishlisted ? '♥' : '♡' }}
+        <button
+            type="submit"
+            class="wishlist-button js-wishlist-button {{ $isWishlisted ? 'active' : '' }}"
+            title="Wishlist"
+            aria-label="Toggle wishlist"
+        >
+            <span class="js-wishlist-icon">{{ $isWishlisted ? '♥' : '♡' }}</span>
         </button>
     </form>
 

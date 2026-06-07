@@ -135,16 +135,26 @@ Route::get('/auth/google/callback', function () {
 |--------------------------------------------------------------------------
 */
 
-Route::post('/wishlist/{product}/toggle', function (Product $product) {
+Route::post('/wishlist/{product}/toggle', function (Request $request, Product $product) {
     $wishlist = session()->get('wishlist', []);
 
     if (in_array($product->id, $wishlist)) {
         $wishlist = array_values(array_diff($wishlist, [$product->id]));
+        $wishlisted = false;
     } else {
         $wishlist[] = $product->id;
+        $wishlist = array_values(array_unique($wishlist));
+        $wishlisted = true;
     }
 
     session()->put('wishlist', $wishlist);
+
+    if ($request->expectsJson()) {
+        return response()->json([
+            'wishlisted' => $wishlisted,
+            'count' => count($wishlist),
+        ]);
+    }
 
     return back();
 })->name('wishlist.toggle');

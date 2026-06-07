@@ -486,11 +486,6 @@ class extends Component
                     </div>
                 @endforeach
             </div>
-
-            <div class="admin-discount-note">
-                Contoh: minimal 1.000.000 diskon 3%, minimal 3.000.000 diskon 5%.
-                Jika subtotal eligible 4.000.000, sistem memakai 5% saja.
-            </div>
         </section>
     </form>
 

@@ -308,3 +308,14 @@
     background: var(--shop-black);
     color: var(--shop-white);
 }
+
+.wishlist-button.is-loading {
+    opacity: .55;
+    pointer-events: none;
+}
+
+.wishlist-button.active {
+    color: #ffffff;
+    background: #111111;
+    border-color: #111111;
+}
