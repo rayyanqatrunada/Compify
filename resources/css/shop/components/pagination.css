@@ -1,0 +1,95 @@
+/* =========================================================
+   COMPIFY PAGINATION - SAME LAYOUT, MINIMAL BUTTON
+========================================================= */
+
+.compify-pagination {
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 0;
+    border: none;
+    background: transparent;
+}
+
+.compify-pagination__info {
+    display: block;
+    color: var(--shop-muted, #8a8a8a);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.compify-pagination__links {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.compify-pagination__btn,
+.compify-pagination__page,
+.compify-pagination__dots {
+    min-width: auto;
+    height: auto;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--shop-muted, #8a8a8a);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.compify-pagination__btn,
+.compify-pagination__page {
+    cursor: pointer;
+    transition: color .18s ease, transform .18s ease;
+}
+
+.compify-pagination__btn:hover,
+.compify-pagination__page:hover {
+    color: var(--shop-text, #111);
+    transform: translateY(-1px);
+}
+
+.compify-pagination__page.is-active {
+    color: var(--shop-text, #111);
+    font-weight: 950;
+}
+
+.compify-pagination__btn.is-disabled {
+    opacity: .35;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.compify-pagination__dots {
+    color: var(--shop-muted, #aaa);
+}
+
+@media (max-width: 640px) {
+    .compify-pagination {
+        align-items: center;
+        flex-direction: column;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .compify-pagination__links {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .compify-pagination__info {
+        text-align: center;
+        font-size: 13px;
+    }
+}
