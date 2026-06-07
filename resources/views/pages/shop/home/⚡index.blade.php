@@ -365,7 +365,7 @@ class extends Component {
     <script>
         (function () {
             const DURATION = 620;
-            const AUTO_MS  = 6000;
+            const AUTO_MS  = 20000;
 
             let autoTimer   = null;
             let initialized = false;

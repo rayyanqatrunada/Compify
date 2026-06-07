@@ -186,36 +186,53 @@
 
     {{-- ── MAIN NAVBAR ──────────────────────────────────────────── --}}
     <nav class="main-nav" aria-label="Navigasi utama">
+
+        {{-- Burger (mobile) --}}
         <button class="nav-burger" id="navBurger" aria-label="Buka menu" aria-expanded="false">
-            ☰
+            <span></span>
+            <span></span>
+            <span></span>
         </button>
 
         <div class="main-nav-inner">
+
+            {{-- ── Links group ── --}}
             <div class="nav-links">
+
                 <a href="{{ route('home') }}" class="nav-link" wire:navigate>Beranda</a>
 
                 {{-- Dropdown: Kategori --}}
                 <div class="nav-dropdown">
-                    <button type="button" class="nav-link nav-dropdown-trigger"
-                            aria-haspopup="true" aria-expanded="false">
+                    <button type="button"
+                            class="nav-link nav-dropdown-trigger"
+                            aria-haspopup="true"
+                            aria-expanded="false">
                         Kategori
+                        <span class="nav-chevron" aria-hidden="true">▾</span>
                     </button>
+
                     <div class="mega-menu" role="menu">
                         <div class="mega-menu-inner">
                             @forelse($menuCategories as $parent)
                                 <div class="mega-column">
                                     <a href="{{ route('categories.show', $parent) }}"
-                                       class="mega-title" wire:navigate role="menuitem">
+                                    class="mega-title"
+                                    wire:navigate
+                                    role="menuitem">
                                         {{ $parent->name }}
                                     </a>
                                     @forelse($parent->children as $child)
                                         <a href="{{ route('categories.show', $child) }}"
-                                           class="mega-link" wire:navigate role="menuitem">
+                                        class="mega-link"
+                                        wire:navigate
+                                        role="menuitem">
                                             {{ $child->name }}
                                         </a>
                                     @empty
                                         <a href="{{ route('categories.show', $parent) }}"
-                                           class="mega-link" wire:navigate role="menuitem">
+                                        class="mega-link"
+                                        wire:navigate
+                                        role="menuitem">
                                             Lihat Produk
                                         </a>
                                     @endforelse
@@ -231,20 +248,26 @@
 
                 {{-- Dropdown: Merk --}}
                 <div class="nav-dropdown">
-                    <button type="button" class="nav-link nav-dropdown-trigger"
-                            aria-haspopup="true" aria-expanded="false">
+                    <button type="button"
+                            class="nav-link nav-dropdown-trigger"
+                            aria-haspopup="true"
+                            aria-expanded="false">
                         Merk
+                        <span class="nav-chevron" aria-hidden="true">▾</span>
                     </button>
+
                     <div class="mega-menu mega-menu-small" role="menu">
                         <div class="mega-menu-inner brand-menu-inner">
                             @forelse($navBrands as $brand)
                                 <a href="{{ route('products.index', ['brand' => $brand->slug]) }}"
-                                   class="brand-dropdown-item" wire:navigate role="menuitem">
+                                class="brand-dropdown-item"
+                                wire:navigate
+                                role="menuitem">
                                     @if($brand->logo_url)
                                         <span class="brand-logo-icon">
                                             <img src="{{ $brand->logo_url }}"
-                                                 alt=""
-                                                 loading="lazy">
+                                                alt=""
+                                                loading="lazy">
                                         </span>
                                     @else
                                         <span class="brand-initials-icon" aria-hidden="true">
@@ -254,7 +277,7 @@
                                     <strong>{{ $brand->name }}</strong>
                                 </a>
                             @empty
-                                <p style="padding:1rem;opacity:.5">Belum ada merk.</p>
+                                <p style="padding:1rem;opacity:.4;font-size:13px">Belum ada merk.</p>
                             @endforelse
                         </div>
                     </div>
@@ -263,18 +286,26 @@
                 <a href="{{ route('products.index') }}" class="nav-link" wire:navigate>Produk</a>
                 <a href="{{ route('event.index') }}"    class="nav-link" wire:navigate>Event</a>
                 <a href="{{ route('about') }}"          class="nav-link" wire:navigate>About Us</a>
+
             </div>
 
-            <form action="{{ route('products.index') }}" method="GET" class="search-box compact-search-box"
-                  role="search">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari produk"
-                       aria-label="Cari produk">
+            {{-- ── Search pill ── --}}
+            <form action="{{ route('products.index') }}"
+                method="GET"
+                class="search-box compact-search-box"
+                role="search">
                 <button type="submit" aria-label="Cari">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M10.8 4a6.8 6.8 0 0 1 5.3 11.1l3.4 3.4-1.4 1.4-3.4-3.4A6.8 6.8 0 1 1 10.8 4Zm0 2a4.8 4.8 0 1 0 0 9.6 4.8 4.8 0 0 0 0-9.6Z"/>
                     </svg>
                 </button>
+                <input type="text"
+                    name="search"
+                    value="{{ request('search') }}"
+                    placeholder="Cari produk…"
+                    aria-label="Cari produk">
             </form>
+
         </div>
     </nav>
 

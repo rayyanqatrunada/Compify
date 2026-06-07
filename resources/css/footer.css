@@ -1,181 +1,237 @@
 /* =========================================================
-   FOOTER
+   FOOTER — REDESIGN
+   Mengikuti estetika: bersih, tipografi kuat, monokromatik.
 ========================================================= */
-
+ 
 .modern-footer {
-    background: #ffffff;
-    color: #222222;
-    border-top: 1px solid #eeeeee;
-    padding: 0 56px;
-    display: block;
+    background: #0a0a0a;
+    color: #ffffff;
+    border-top: none;
+    padding: 0;
 }
-
+ 
+/* ── Main grid ── */
 .footer-main {
-    padding: 58px 0;
+    padding: 56px var(--shop-x, 40px);
+    max-width: var(--shop-page-max, 1400px);
+    margin: 0 auto;
     display: grid;
-    grid-template-columns: 1.4fr .9fr .9fr .9fr 1.2fr;
-    gap: 42px;
-    border-bottom: 1px solid #eeeeee;
+    grid-template-columns: 1.4fr .85fr .85fr .85fr 1.2fr;
+    gap: var(--footer-column-gap, 40px);
+    border-bottom: 0.5px solid rgba(255,255,255,.08);
 }
-
+ 
+/* ── Column headings ── */
 .footer-main h3 {
-    margin: 0 0 22px;
-    color: #111111;
-    font-size: 22px;
+    margin: 0 0 20px;
+    color: #ffffff;
+    font-size: var(--footer-title-size, 11px);
     font-weight: 800;
-    text-transform: none;
-    letter-spacing: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding-bottom: 10px;
+    /* border-bottom: 1.5px solid rgba(255,255,255,.15); */
 }
-
+ 
+/* ── Links & paragraphs ── */
 .footer-main a,
 .footer-main p {
     display: block;
-    margin: 0 0 13px;
-    color: #777777;
-    font-size: 16px;
-    line-height: 1.5;
+    margin: 0 0 11px;
+    color: rgba(255,255,255,.5);
+    font-size: var(--footer-text-size, 13.5px);
+    line-height: 1.6;
+    text-decoration: none;
+    transition: color .18s, padding-left .18s;
 }
-
+ 
 .footer-main a:hover {
-    color: #111111;
+    color: #ffffff;
+    padding-left: 4px;
 }
-
+ 
+/* ── About column ── */
+.footer-logo {
+    display: block;
+    margin-bottom: 18px;
+}
+ 
 .footer-logo img {
-    width: 210px;
-    max-height: 64px;
+    width: var(--footer-logo-width, 160px);
+    max-height: 48px;
     object-fit: contain;
-    margin-bottom: 20px;
+    /* invert logo to white */
+    filter: brightness(0) invert(1);
 }
-
+ 
 .footer-about p {
-    max-width: 360px;
+    max-width: 320px;
 }
-
+ 
+/* ── Social icons ── */
 .footer-socials {
     display: flex;
-    gap: 12px;
-    margin-top: 22px;
+    gap: 8px;
+    margin-top: 20px;
+    flex-wrap: wrap;
 }
-
+ 
 .footer-socials a {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     margin: 0;
-    border-radius: 50%;
-    background: #eeeeee;
-    color: #555555;
+    border-radius: 8px;
+    background: rgba(255,255,255,.07);
+    border: 0.5px solid rgba(255,255,255,.1);
+    color: rgba(255,255,255,.6);
     display: grid;
     place-items: center;
-    transition: .2s ease;
+    transition: background .18s, color .18s, transform .18s, border-color .18s;
+    text-decoration: none;
+    padding: 0;
 }
-
+ 
 .footer-socials a:hover {
-    background: #111111;
-    color: #ffffff;
-    transform: translateY(-3px);
-}
-
-.footer-socials svg {
-    width: 20px;
-    height: 20px;
-    fill: currentColor;
-}
-
-.newsletter-box {
-    display: flex;
-    height: 48px;
-    margin-top: 18px;
-}
-
-.newsletter-box input {
-    flex: 1;
-    border: 1px solid #dddddd;
     background: #ffffff;
     color: #111111;
-    padding: 0 14px;
-    min-width: 0;
+    border-color: #ffffff;
+    transform: translateY(-2px);
+    padding-left: 0;
 }
-
+ 
+.footer-socials svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+ 
+/* ── Newsletter ── */
+.footer-main .newsletter-box {
+    display: flex;
+    height: 40px;
+    margin-top: 14px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 0.5px solid rgba(255,255,255,.15);
+}
+ 
+.newsletter-box input {
+    flex: 1;
+    border: none;
+    background: rgba(255,255,255,.06);
+    color: #ffffff;
+    padding: 0 12px;
+    font-size: 12.5px;
+    min-width: 0;
+    outline: none;
+    font-family: inherit;
+}
+ 
+.newsletter-box input::placeholder {
+    color: rgba(255,255,255,.3);
+}
+ 
 .newsletter-box button {
     border: none;
-    background: #111111;
-    color: #ffffff;
-    padding: 0 20px;
-    font-weight: 900;
+    background: #ffffff;
+    color: #111111;
+    padding: 0 16px;
+    font-size: 11px;
+    font-weight: 800;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .18s, color .18s;
+    font-family: inherit;
 }
-
+ 
+.newsletter-box button:hover {
+    background: #e0e0e0;
+}
+ 
+.newsletter-message {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+}
+ 
+.newsletter-message--success { color: #5dca9e; }
+.newsletter-message--info    { color: #7ab8f5; }
+.newsletter-message--error   { color: #f08080; }
+ 
+/* ── Footer bottom bar ── */
 .footer-bottom {
-    min-height: 82px;
+    max-width: var(--shop-page-max, 1400px);
+    margin: 0 auto;
+    padding: 20px var(--shop-x, 40px);
+    min-height: 64px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 24px;
-    color: #888888;
+    gap: 16px;
+    color: rgba(255,255,255,.28);
 }
-
+ 
 .footer-bottom p {
     margin: 0;
+    font-size: 12px;
 }
-
-/* =========================================================
-   MINIMAL FOOTER - NON HOME PAGE
-========================================================= */
-
+ 
+/* ── Minimal footer (non-home pages) ── */
 .shop-footer-minimal {
-    min-height: 88px;
-    padding: 0 40px;
-    border-top: 1px solid #eeeeee;
+    min-height: var(--footer-minimal-height, 72px);
+    padding: 0 var(--footer-minimal-padding-x, 40px);
+    padding-inline: var(--footer-minimal-padding-x, 40px);
+    border-top: 0.5px solid rgba(0,0,0,.08);
     background: #ffffff;
-    color: #777777;
+    color: rgba(0,0,0,.4);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 24px;
-    font-size: 16px;
+    font-size: var(--footer-minimal-font-size, 12px);
 }
-
+ 
 .shop-footer-minimal p {
     margin: 0;
 }
-
-@media (max-width: 640px) {
-    .shop-footer-minimal {
-        min-height: auto;
-        padding: 22px 18px;
-        align-items: flex-start;
-        flex-direction: column;
-        font-size: 14px;
+ 
+/* ── Footer responsive ── */
+@media (max-width: 1024px) {
+    .footer-main {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 32px;
+    }
+ 
+    .footer-about {
+        grid-column: 1 / -1;
     }
 }
-
-/* =========================================================
-   FOOTER CONTROL FROM settings.css
-========================================================= */
-
-.shop-footer {
-    padding: var(--footer-padding-y) var(--footer-padding-x);
-}
-
-.footer-main {
-    gap: var(--footer-column-gap);
-}
-
-.footer-logo img {
-    width: var(--footer-logo-width);
-}
-
-.shop-footer h3 {
-    font-size: var(--footer-title-size);
-}
-
-.shop-footer p,
-.shop-footer a {
-    font-size: var(--footer-text-size);
-}
-
-.shop-footer-minimal {
-    min-height: var(--footer-minimal-height);
-    padding-inline: var(--footer-minimal-padding-x);
-    font-size: var(--footer-minimal-font-size);
+ 
+@media (max-width: 640px) {
+    .footer-main {
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+        padding: 36px 20px;
+    }
+ 
+    .footer-about {
+        grid-column: 1 / -1;
+    }
+ 
+    .footer-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px 20px;
+        gap: 4px;
+    }
+ 
+    .shop-footer-minimal {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px 16px;
+        min-height: auto;
+        gap: 4px;
+    }
 }
