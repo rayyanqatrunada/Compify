@@ -330,7 +330,7 @@ class extends Component {
                 </div>
 
                 <div class="category-pagination">
-                    {{ $this->products->links() }}
+                    {{ $this->products->links('components.pagination.compify') }}
                 </div>
             </section>
         </div>

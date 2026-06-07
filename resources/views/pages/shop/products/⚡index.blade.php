@@ -152,6 +152,6 @@ class extends Component {
     </div>
 
     <div style="margin-top: 34px;">
-        {{ $this->products->links() }}
+        {{ $this->products->links('components.pagination.compify') }}
     </div>
 </section>

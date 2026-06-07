@@ -608,7 +608,7 @@ class extends Component {
         </table>
 
         <div class="admin-pagination">
-            {{ $this->products->links() }}
+            {{ $this->products->links('components.pagination.compify') }}
         </div>
     </div>
 

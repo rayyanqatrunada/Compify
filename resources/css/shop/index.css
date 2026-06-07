@@ -4,6 +4,7 @@
 @import './hero.css';
 @import './home.css';
 @import './components/product-card.css';
+@import './components/pagination.css';
 @import './pages/category-show.css';
 @import './auth-product.css';
 @import './account.css';
