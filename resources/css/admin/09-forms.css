@@ -5,6 +5,7 @@
 .admin-form {
     display: grid;
     gap: 14px;
+    margin-bottom: 20px;
 }
 
 .admin-grid {
@@ -54,7 +55,7 @@
 }
 
 .admin-actions {
-    margin-top: 12px;
+    margin: 0 12px;
     display: flex;
     flex-wrap: wrap;
     gap: 8px;

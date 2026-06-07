@@ -638,7 +638,7 @@ class extends Component {
     {{-- ── HEADER ── --}}
     <div class="an-header">
         <div class="an-header-left">
-            <h1>Analitik</h1>
+            <h1>Analytics</h1>
             <p>Wawasan bisnis & ringkasan performa toko</p>
         </div>
 

@@ -347,25 +347,40 @@ class extends Component {
             </section>
         @endif
 
-        {{-- SEJARAH / TIMELINE --}}
+       {{-- SEJARAH / TIMELINE --}}
         @if($histories->isNotEmpty())
             <section class="about-history">
                 <h2 class="about-section-heading">Sejarah Compify</h2>
 
-                <div class="history-timeline">
-                    @foreach($histories as $index => $history)
-                        <div class="history-item {{ $index % 2 === 0 ? 'history-item--left' : 'history-item--right' }}">
-                            <div class="history-year">{{ $history['year'] }}</div>
-                            <div class="history-dot"></div>
-                            <div class="history-card">
-                                <h3>{{ $history['title'] }}</h3>
-                                <p>{{ $history['description'] }}</p>
+                <div class="history-layout">
+                    {{-- Nav tahun kiri --}}
+                    <nav class="history-nav" aria-label="Navigasi tahun sejarah">
+                        @foreach($histories as $i => $history)
+                            <button
+                                class="history-nav-year {{ $i === 0 ? 'is-active' : '' }}"
+                                data-index="{{ $i }}"
+                                type="button"
+                            >{{ $history['year'] }}</button>
+                        @endforeach
+                    </nav>
+
+                    {{-- Item kanan --}}
+                    <div class="history-items">
+                        @foreach($histories as $i => $history)
+                            <div class="history-entry" data-index="{{ $i }}">
+                                <div class="history-entry-year-bg">
+                                    {{ substr($history['year'], -2) }}
+                                </div>
+                                <div class="history-entry-body">
+                                    <h3>{{ $history['title'] }}</h3>
+                                    <p>{{ $history['description'] }}</p>
+                                </div>
                             </div>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
                 </div>
             </section>
-        @endif
+        @endif 
 
         {{-- TESTIMONI --}}
         @if($testimonials->isNotEmpty())

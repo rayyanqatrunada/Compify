@@ -218,20 +218,23 @@
 /* ── KPI GRID — sama persis pola admin-stat-card-v2 ───────────── */
 .an-kpi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: var(--admin-grid-gap, 14px);
 }
 
 .an-kpi-card {
-    min-height: 100px;
+    min-height: 180px;
     padding: 18px 20px 16px;
-    border-radius: var(--admin-panel-radius, 16px);
+    border-radius: var(--admin-panel-radius, 5px);
     background: var(--admin-panel, #ffffff);
     border: 1px solid var(--admin-border, #e2e8f0);
     box-shadow: var(--admin-shadow);
     position: relative;
     overflow: hidden;
     transition: transform 180ms ease, box-shadow 180ms ease;
+
+    display: flex;
+    flex-direction: column;
 }
 
 .an-kpi-card:hover {
@@ -250,12 +253,12 @@
 }
 
 /* Individual accent colors */
-.an-kpi-card.accent-teal::before   { background: #0d9488; }
-.an-kpi-card.accent-blue::before   { background: #2563eb; }
-.an-kpi-card.accent-green::before  { background: #16a34a; }
-.an-kpi-card.accent-amber::before  { background: #d97706; }
-.an-kpi-card.accent-purple::before { background: #9333ea; }
-.an-kpi-card.accent-red::before    { background: #dc2626; }
+/* .an-kpi-card.accent-teal::before   { background: #66666679; }
+.an-kpi-card.accent-blue::before   { background: #66666679; }
+.an-kpi-card.accent-green::before  { background: #66666679; }
+.an-kpi-card.accent-amber::before  { background: #66666679; }
+.an-kpi-card.accent-purple::before { background: #66666679; }
+.an-kpi-card.accent-red::before    { background: #66666679; } */
 
 .an-kpi-label {
     font-size: 0.72rem;
@@ -273,24 +276,29 @@
     color: var(--admin-text, #0f172a);
     line-height: 1.08;
     word-break: break-all;
+
+    position: absolute;
+    top: 40%;
+    left: 20px;
+    transform: translateY(-40%);
 }
 
 .an-kpi-sub {
     font-size: 0.75rem;
     color: var(--admin-muted, #94a3b8);
-    margin-top: 6px;
     font-weight: 750;
+    margin-top: auto; /* ini yang dorong ke bawah */
 }
 
 .an-kpi-trend {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    margin-top: 8px;
+    margin-top: auto;
     font-size: 0.75rem;
     font-weight: 800;
-    padding: 3px 8px;
-    border-radius: 99px;
+    padding: 12px 8px;
+    border-radius: 5px;
 }
 
 .an-kpi-trend.up   { background: rgba(22,163,74,0.12);  color: #16a34a; }

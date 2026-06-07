@@ -44,7 +44,7 @@
 .admin-page-actions a {
     min-height: 32px;
     padding: 0 12px;
-    border-radius: var(--admin-radius);
+    border-radius: 5px;
     background: var(--admin-accent);
     color: var(--admin-panel);
     display: inline-flex;

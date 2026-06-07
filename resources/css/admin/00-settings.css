@@ -10,9 +10,9 @@
     --admin-content-y: 22px;
 
     /* Size */
-    --admin-radius: 10px;
-    --admin-panel-radius: 12px;
-    --admin-panel-padding: 18px;
+    --admin-radius: 8px;
+    --admin-panel-radius: 8px;
+    --admin-panel-padding: 12px;
     --admin-grid-gap: 12px;
     --admin-control-height: 38px;
 

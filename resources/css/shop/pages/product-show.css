@@ -1,191 +1,57 @@
 /* =========================================================
-   PRODUCT DETAIL PAGE - COMPACT VERSION
-   Edit bagian :root untuk mengatur ukuran dengan mudah.
+   PRODUCT DETAIL PAGE — Modern Minimal Redesign
+   Semua class name dipertahankan persis sama.
 ========================================================= */
 
-
 /* =========================================================
-   1. PRODUCT DETAIL SETTINGS
+   1. CSS VARIABLES (tetap ada untuk kompatibilitas)
 ========================================================= */
 
 :root {
-    /* ===============================
-       PAGE / JARAK HALAMAN
-    =============================== */
-
-    /* Jarak dari navbar ke tombol kembali/detail produk */
-    --product-detail-top-gap: 10px;
-
-    /* Jarak bawah halaman detail produk */
-    --product-detail-bottom-gap: 44px;
-
-    /* Lebar maksimal seluruh detail produk */
+    --product-detail-top-gap: 20px;
+    --product-detail-bottom-gap: 56px;
     --product-detail-max-width: 1240px;
-
-    /* Jarak antar card: card gambar, card info, deskripsi, informasi */
     --product-detail-gap: 14px;
-
-
-    /* ===============================
-       CARD / CONTAINER
-    =============================== */
-
-    /* Radius semua card detail produk */
-    --product-detail-card-radius: 8px;
-
-    /* Shadow semua card */
-    --product-detail-card-shadow: 0 12px 26px rgba(0, 0, 0, .12);
-
-    /* Padding dalam card */
-    --product-detail-card-padding: 22px;
-
-
-    /* ===============================
-       IMAGE CONTAINER / FOTO PRODUK
-    =============================== */
-
-    /* Ratio container foto.
-       1 / 1 = kotak
-       3 / 4 = portrait
-       4 / 3 = landscape
-    */
+    --product-detail-card-radius: 18px;
+    --product-detail-card-shadow: none;
+    --product-detail-card-padding: 28px;
     --product-detail-media-ratio: 1 / 1;
-
-    /* Tinggi minimal container foto */
     --product-detail-media-min-height: 360px;
-
-    /* Tinggi maksimal container foto */
-    --product-detail-media-max-height: 520px;
-
-    /* Padding dalam container foto */
+    --product-detail-media-max-height: 540px;
     --product-detail-media-padding: 0px;
-
-    /* Object fit gambar.
-       contain = gambar full kelihatan, tidak kepotong
-       cover = gambar memenuhi container, tapi bisa kepotong
-    */
     --product-detail-image-fit: contain;
-
-    /* Lebar gambar di dalam container */
     --product-detail-image-width: 100%;
-
-    /* Tinggi gambar di dalam container */
     --product-detail-image-height: 100%;
-
-    /* Skala gambar.
-       1 = normal penuh
-       .9 = lebih kecil
-       .8 = lebih kecil lagi
-    */
-    --product-detail-image-scale: .92;
-
-    /* Background area gambar */
+    --product-detail-image-scale: .9;
     --product-detail-image-bg: #ffffff;
-
-
-    /* ===============================
-       TEXT SIZE / UKURAN FONT
-    =============================== */
-
-    /* Font brand/kicker kecil di atas nama produk */
-    --product-detail-brand-size: 12px;
-
-    /* Font judul/nama produk */
-    --product-detail-title-size: 24px;
-
-    /* Font badge kategori, stok, SKU */
-    --product-detail-meta-size: 10px;
-
-    /* Font harga utama */
-    --product-detail-price-size: 22px;
-
-    /* Font harga coret */
+    --product-detail-brand-size: 11px;
+    --product-detail-title-size: 22px;
+    --product-detail-meta-size: 11px;
+    --product-detail-price-size: 28px;
     --product-detail-old-price-size: 13px;
-
-    /* Font deskripsi pendek */
-    --product-detail-desc-size: 12px;
-
-    /* Font label jumlah */
-    --product-detail-label-size: 12px;
-
-
-    /* ===============================
-       FORM / BUTTON ACTION
-    =============================== */
-
-    /* Tinggi input quantity dan tombol */
-    --product-detail-control-height: 34px;
-
-    /* Radius tombol dan input */
-    --product-detail-button-radius: 4px;
-
-    /* Ukuran font tombol */
-    --product-detail-button-size: 13px;
-
-    /* Lebar input jumlah di desktop */
-    --product-detail-qty-width: 124px;
-
-    /* Jarak antara form action dan elemen lain */
-    --product-detail-action-gap: 12px;
-
-    /* Posisi tombol action.
-       auto = tombol turun ke bawah card kanan
-       12px = tombol langsung setelah deskripsi pendek
-    */
+    --product-detail-desc-size: 13px;
+    --product-detail-label-size: 11px;
+    --product-detail-control-height: 42px;
+    --product-detail-button-radius: 10px;
+    --product-detail-button-size: 13.5px;
+    --product-detail-qty-width: 110px;
+    --product-detail-action-gap: 10px;
     --product-detail-action-margin-top: auto;
-
-
-    /* ===============================
-    SERVICE BOX / GARANSI DLL
-    =============================== */
-
-    /* Tinggi minimal box service. Pakai auto kalau mau ngikut isi */
-    --product-detail-service-min-height: 88px;
-
-    /* Padding dalam box service */
-    --product-detail-service-padding-y: 14px;
-    --product-detail-service-padding-x: 12px;
-
-    /* Jarak antar box service */
-    --product-detail-service-gap: 12px;
-
-    /* Jarak antara judul dan teks dalam box */
-    --product-detail-service-text-gap: 10px;
-
-    /* Font judul box service */
+    --product-detail-service-min-height: auto;
+    --product-detail-service-padding-y: 12px;
+    --product-detail-service-padding-x: 14px;
+    --product-detail-service-gap: 8px;
+    --product-detail-service-text-gap: 4px;
     --product-detail-service-title-size: 12px;
-
-    /* Font isi box service */
     --product-detail-service-text-size: 11px;
-
-    /* Tinggi baris teks service */
-    --product-detail-service-line-height: 1.65;
-
-
-    /* ===============================
-       BOTTOM SECTION / DESKRIPSI
-    =============================== */
-
-    /* Lebar card informasi produk di kanan bawah */
-    --product-detail-bottom-side-width: 360px;
-
-    /* Tinggi minimal deskripsi dan informasi produk */
-    --product-detail-bottom-min-height: 210px;
-
-    /* Font judul Deskripsi Lengkap dan Informasi Produk */
+    --product-detail-service-line-height: 1.55;
+    --product-detail-bottom-side-width: 300px;
+    --product-detail-bottom-min-height: 0;
     --product-detail-section-title-size: 18px;
-
-    /* Font isi informasi produk */
-    --product-detail-info-size: 12px;
-
-    /* Jarak antara judul deskripsi dan isi deskripsi */
-    --product-detail-description-gap: 18px;
-
-    /* Font isi deskripsi */
-    --product-detail-description-text-size: 13px;
-
-    /* Line height isi deskripsi */
-    --product-detail-description-line-height: 1.8;
+    --product-detail-info-size: 13px;
+    --product-detail-description-gap: 16px;
+    --product-detail-description-text-size: 14px;
+    --product-detail-description-line-height: 1.78;
 }
 
 
@@ -207,6 +73,12 @@
 .product-detail-flash {
     width: min(var(--product-detail-max-width), 100%);
     margin: 0 auto 14px;
+    padding: 13px 18px;
+    border-radius: 10px;
+    background: #ecfff3;
+    color: #147a39;
+    font-weight: 700;
+    font-size: 13.5px;
 }
 
 
@@ -216,22 +88,20 @@
 
 .product-detail-back {
     width: max-content;
-    margin-bottom: 12px;
+    margin-bottom: 18px;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    color: var(--shop-text);
+    gap: 6px;
+    color: rgba(14, 10, 16, 0.45);
     font-size: 13px;
-    font-weight: 900;
-    opacity: .78;
-    transition:
-        opacity .2s ease,
-        transform .2s ease;
+    font-weight: 700;
+    letter-spacing: 0.1px;
+    text-decoration: none;
+    transition: color 0.18s ease;
 }
 
 .product-detail-back:hover {
-    opacity: 1;
-    transform: translateX(-2px);
+    color: #0e0a10;
 }
 
 
@@ -241,9 +111,9 @@
 
 .product-detail-main {
     display: grid;
-    grid-template-columns: minmax(320px, .86fr) minmax(0, 1.14fr);
+    grid-template-columns: minmax(320px, .9fr) minmax(0, 1.1fr);
     gap: var(--product-detail-gap);
-    align-items: stretch;
+    align-items: start;
 }
 
 .product-detail-media-card,
@@ -252,7 +122,8 @@
 .product-detail-side-card {
     border-radius: var(--product-detail-card-radius);
     background: var(--shop-white);
-    box-shadow: var(--product-detail-card-shadow);
+    border: 0.5px solid rgba(0, 0, 0, 0.1);
+    box-shadow: none;
 }
 
 
@@ -269,6 +140,7 @@
     display: grid;
     place-items: center;
     overflow: hidden;
+    background: var(--product-detail-image-bg);
 }
 
 .product-detail-media-card img {
@@ -277,38 +149,35 @@
     object-fit: var(--product-detail-image-fit);
     object-position: center;
     display: block;
-    background: var(--product-detail-image-bg);
     transform: scale(var(--product-detail-image-scale));
 }
 
 .product-detail-placeholder {
-    width: 150px;
-    height: 150px;
-    border-radius: 14px;
-    background: var(--shop-black);
-    color: var(--shop-white);
+    width: 120px;
+    height: 120px;
+    border-radius: 16px;
+    background: #0e0a10;
+    color: #fff;
     display: grid;
     place-items: center;
-    font-size: 38px;
-    font-weight: 950;
+    font-size: 32px;
+    font-weight: 900;
 }
 
 .product-detail-discount {
     position: absolute;
-    top: 18px;
-    left: 18px;
+    top: 14px;
+    left: 14px;
     z-index: 2;
-    min-width: 38px;
-    min-height: 20px;
-    padding: 0 9px;
-    border-radius: 7px;
-    background: #ff0000;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: #0e0a10;
     color: #ffffff;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: 950;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.2px;
 }
 
 
@@ -324,67 +193,91 @@
 }
 
 .product-detail-brand {
-    margin: 0 0 7px;
-    color: var(--shop-muted);
+    margin: 0 0 8px;
+    color: rgba(14, 10, 16, 0.38);
     font-size: var(--product-detail-brand-size);
-    font-weight: 950;
+    font-weight: 800;
     text-transform: uppercase;
+    letter-spacing: 1.2px;
 }
 
 .product-detail-info-card h1 {
     margin: 0;
-    color: var(--shop-text);
+    color: #0e0a10;
     font-size: var(--product-detail-title-size);
-    line-height: 1.15;
-    font-weight: 950;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -0.4px;
 }
 
 .product-detail-meta {
-    margin-top: 9px;
+    margin-top: 12px;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 9px;
+    gap: 6px;
 }
 
 .product-detail-meta span {
-    min-height: 22px;
+    min-height: 24px;
     padding: 0 10px;
-    border-radius: 5px;
-    background: #e9e9e9;
-    color: #777777;
+    border-radius: 999px;
+    background: #f0f0ee;
+    color: rgba(14, 10, 16, 0.52);
     display: inline-flex;
     align-items: center;
     font-size: var(--product-detail-meta-size);
-    font-weight: 950;
+    font-weight: 700;
+}
+
+/* Separator tipis setelah meta */
+.product-detail-info-card h1 + .product-detail-meta {
+    margin-bottom: 0;
 }
 
 .product-detail-price {
-    margin-top: 10px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 0.5px solid rgba(0, 0, 0, 0.08);
     display: grid;
     gap: 3px;
 }
 
 .product-detail-price small {
-    color: #777777;
+    color: rgba(14, 10, 16, 0.32);
     font-size: var(--product-detail-old-price-size);
-    font-weight: 750;
+    font-weight: 600;
     text-decoration: line-through;
 }
 
 .product-detail-price strong {
-    color: var(--shop-text);
+    color: #0e0a10;
     font-size: var(--product-detail-price-size);
-    line-height: 1.1;
-    font-weight: 850;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+}
+
+.product-detail-price-source {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    width: fit-content;
+    margin-top: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #fff0f0;
+    color: #b91c1c;
+    font-size: 11px;
+    font-weight: 800;
 }
 
 .product-detail-short-desc {
     max-width: 620px;
-    margin: 7px 0 0;
-    color: var(--shop-muted);
+    margin: 10px 0 0;
+    color: rgba(14, 10, 16, 0.5);
     font-size: var(--product-detail-desc-size);
-    line-height: 1.55;
+    line-height: 1.65;
 }
 
 
@@ -394,7 +287,7 @@
 
 .product-detail-actions {
     margin-top: var(--product-detail-action-margin-top);
-    padding-top: 14px;
+    padding-top: 18px;
     display: grid;
     gap: var(--product-detail-action-gap);
 }
@@ -403,7 +296,7 @@
     display: grid;
     grid-template-columns: var(--product-detail-qty-width) 1fr;
     align-items: end;
-    gap: 14px;
+    gap: 12px;
 }
 
 .product-detail-qty {
@@ -412,29 +305,37 @@
 }
 
 .product-detail-qty span {
-    color: var(--shop-text);
+    color: rgba(14, 10, 16, 0.4);
     font-size: var(--product-detail-label-size);
-    font-weight: 950;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
 }
 
 .product-detail-qty input {
     width: 100%;
     height: var(--product-detail-control-height);
-    border: 2px solid #0e0a10;
+    border: 0.5px solid rgba(0, 0, 0, 0.18);
     border-radius: var(--product-detail-button-radius);
-    background: var(--shop-white);
-    color: var(--shop-text);
+    background: #f8f8f6;
+    color: #0e0a10;
     text-align: center;
     font-family: inherit;
-    font-size: 14px;
-    font-weight: 900;
+    font-size: 15px;
+    font-weight: 700;
     outline: none;
+    transition: border-color 0.15s;
+}
+
+.product-detail-qty input:focus {
+    border-color: rgba(0, 0, 0, 0.4);
+    background: #fff;
 }
 
 .product-detail-button-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 8px;
 }
 
 .product-detail-buy,
@@ -444,43 +345,46 @@
     border-radius: var(--product-detail-button-radius);
     font-family: inherit;
     font-size: var(--product-detail-button-size);
-    font-weight: 850;
+    font-weight: 800;
     cursor: pointer;
-    transition:
-        transform .18s ease,
-        background .18s ease,
-        color .18s ease,
-        border-color .18s ease;
+    transition: opacity 0.18s ease;
+    letter-spacing: 0.1px;
 }
 
-.product-detail-buy,
-.product-detail-cart {
-    border: 1px solid #0e0a10;
+.product-detail-buy {
+    border: none;
     background: #0e0a10;
     color: #ffffff;
 }
 
+.product-detail-cart {
+    border: 0.5px solid rgba(0, 0, 0, 0.2);
+    background: #fff;
+    color: #0e0a10;
+}
+
 .product-detail-wishlist {
     width: 100%;
-    border: 2px solid #0e0a10;
+    border: 0.5px solid rgba(0, 0, 0, 0.15);
     background: transparent;
-    color: #0e0a10;
+    color: rgba(14, 10, 16, 0.6);
 }
 
 .product-detail-wishlist.active {
     background: #0e0a10;
     color: #ffffff;
+    border-color: #0e0a10;
 }
 
 .product-detail-buy:hover,
 .product-detail-cart:hover,
 .product-detail-wishlist:hover {
-    transform: translateY(-1px);
+    opacity: 0.78;
 }
 
 .product-detail-buy:disabled,
 .product-detail-cart:disabled {
-    opacity: .45;
+    opacity: 0.32;
     cursor: not-allowed;
 }
 
@@ -491,7 +395,6 @@
 
 .product-detail-service-grid {
     margin-top: 14px;
-    padding-top: 0;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--product-detail-service-gap);
@@ -500,32 +403,26 @@
 .product-detail-service-grid div {
     min-height: var(--product-detail-service-min-height);
     padding: var(--product-detail-service-padding-y) var(--product-detail-service-padding-x);
-    border-radius: 6px;
-    background: #e9e9e9;
-
+    border-radius: 12px;
+    background: #f8f8f6;
     display: block;
 }
 
 .product-detail-service-grid strong {
     display: block;
     margin: 0 0 var(--product-detail-service-text-gap);
-    color: var(--shop-text);
+    color: #0e0a10;
     font-size: var(--product-detail-service-title-size);
-    font-weight: 950;
+    font-weight: 800;
     line-height: 1.35;
 }
 
 .product-detail-service-grid span {
     display: block;
-    max-width: 100%;
-    color: #666666;
+    color: rgba(14, 10, 16, 0.48);
     font-size: var(--product-detail-service-text-size);
     line-height: var(--product-detail-service-line-height);
     font-weight: 500;
-
-    white-space: normal;
-    overflow-wrap: normal;
-    word-break: normal;
 }
 
 
@@ -542,47 +439,46 @@
 
 .product-detail-description-card {
     min-height: var(--product-detail-bottom-min-height);
-    padding: 22px;
+    padding: var(--product-detail-card-padding);
 }
 
-.product-detail-description-card p {
+.product-detail-description-card > p {
     margin: 0 0 4px;
-    color: var(--shop-text);
-    font-size: 12px;
-    font-weight: 850;
+    color: rgba(14, 10, 16, 0.35);
+    font-size: 11px;
+    font-weight: 800;
     text-transform: uppercase;
+    letter-spacing: 1.2px;
 }
 
 .product-detail-description-card h2 {
     margin: 0 0 var(--product-detail-description-gap);
-    color: var(--shop-text);
+    color: #0e0a10;
     font-size: var(--product-detail-section-title-size);
-    line-height: 1.15;
-    font-weight: 950;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -0.3px;
 }
 
-.product-detail-description-card div {
+.product-detail-description-card > div {
     max-width: 100%;
-    color: var(--shop-muted);
+    color: rgba(14, 10, 16, 0.55);
     font-size: var(--product-detail-description-text-size);
     line-height: var(--product-detail-description-line-height);
     font-weight: 500;
-
-    white-space: normal;
-    overflow-wrap: normal;
-    word-break: normal;
 }
 
 .product-detail-side-card {
     min-height: var(--product-detail-bottom-min-height);
-    padding: 22px 20px;
+    padding: 24px 22px;
 }
 
 .product-detail-side-card h3 {
-    margin: 0 0 16px;
-    color: var(--shop-text);
-    font-size: var(--product-detail-section-title-size);
-    font-weight: 950;
+    margin: 0 0 14px;
+    color: #0e0a10;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -0.2px;
 }
 
 .product-detail-info-list {
@@ -590,24 +486,29 @@
 }
 
 .product-detail-info-list div {
-    min-height: 38px;
-    border-bottom: 1px solid rgba(0, 0, 0, .28);
+    min-height: 40px;
+    padding: 0;
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.07);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 14px;
 }
 
+.product-detail-info-list div:last-child {
+    border-bottom: none;
+}
+
 .product-detail-info-list span {
-    color: #b8b8b8;
+    color: rgba(14, 10, 16, 0.4);
     font-size: var(--product-detail-info-size);
-    font-weight: 850;
+    font-weight: 600;
 }
 
 .product-detail-info-list strong {
-    color: #4a4a4a;
+    color: #0e0a10;
     font-size: var(--product-detail-info-size);
-    font-weight: 950;
+    font-weight: 700;
     text-align: right;
 }
 
@@ -618,11 +519,8 @@
 
 @media (max-width: 1100px) {
     :root {
-        /* Container foto saat tablet */
         --product-detail-media-min-height: 340px;
         --product-detail-media-max-height: 460px;
-
-        /* Card informasi bawah jadi full width */
         --product-detail-bottom-side-width: 1fr;
     }
 
@@ -639,24 +537,15 @@
 
 @media (max-width: 760px) {
     :root {
-        /* Jarak atas mobile */
         --product-detail-top-gap: 14px;
-
-        /* Font mobile */
-        --product-detail-title-size: 22px;
-        --product-detail-price-size: 20px;
-
-        /* Card mobile */
-        --product-detail-card-padding: 18px;
-
-        /* Foto mobile */
+        --product-detail-title-size: 20px;
+        --product-detail-price-size: 24px;
+        --product-detail-card-padding: 20px;
         --product-detail-media-ratio: 1 / 1;
-        --product-detail-media-min-height: 300px;
-        --product-detail-media-max-height: 420px;
-        --product-detail-image-scale: .92;
-
-        /* Button mobile */
-        --product-detail-control-height: 38px;
+        --product-detail-media-min-height: 280px;
+        --product-detail-media-max-height: 380px;
+        --product-detail-image-scale: .9;
+        --product-detail-control-height: 44px;
     }
 
     .product-detail-cart-form {
@@ -667,24 +556,4 @@
     .product-detail-service-grid {
         grid-template-columns: 1fr;
     }
-
-    .product-detail-service-grid div {
-        min-height: auto;
-    }
-
-    .product-detail-info-list span,
-    .product-detail-info-list strong {
-        font-size: 14px;
-    }
 }
-
-.product-detail-price-source {
-    width: fit-content;
-    padding: 5px 10px;
-    border-radius: 6px;
-    background: rgba(255, 101, 101, .14);
-    color: #b91c1c;
-    font-size: 12px;
-    font-weight: 900;
-}
-

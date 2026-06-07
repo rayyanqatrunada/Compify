@@ -177,7 +177,7 @@ class extends Component {
 ?>
 
 <div>
-    <h1>Kelola Brand</h1>
+    <!-- <h1>Kelola Brand</h1> -->
 
     @if(session('success'))
         <div class="flash-success">{{ session('success') }}</div>
@@ -201,7 +201,7 @@ class extends Component {
                 >
                 <small style="font-weight:400;opacity:.6;">Brand diurutkan berdasarkan Sort Order lalu Nama.</small>
             </label>
-            <button class="admin-btn" type="button" wire:click="saveNavbarLimit">
+            <button class="admin-btn" style="margin-left: auto;" type="button" wire:click="saveNavbarLimit">
                 Simpan Pengaturan
             </button>
         </div>
@@ -214,7 +214,8 @@ class extends Component {
         <div class="admin-grid">
 
             <label>
-                Nama Brand <span style="color:#e53e3e">*</span>
+                Nama Brand 
+                <!-- <span style="color:#e53e3e">*</span> -->
                 <input type="text" wire:model.live="name" placeholder="Contoh: ASUS, MSI, Corsair">
                 @error('name') <span class="error-text">{{ $message }}</span> @enderror
             </label>
@@ -223,12 +224,6 @@ class extends Component {
                 Slug
                 <input type="text" wire:model="slug" placeholder="auto-generate dari nama">
                 @error('slug') <span class="error-text">{{ $message }}</span> @enderror
-            </label>
-
-            <label>
-                Website Resmi
-                <input type="url" wire:model="website_url" placeholder="https://www.asus.com">
-                @error('website_url') <span class="error-text">{{ $message }}</span> @enderror
             </label>
 
             <label>
@@ -291,13 +286,14 @@ class extends Component {
                 <tr>
                     <th style="width:36px;">#</th>
                     <th style="width:64px;">Logo</th>
-                    <th>Nama</th>
-                    <th>Slug</th>
-                    <th>Website</th>
+                    <th style="width:140px;">Nama</th>
+                    <th style="width:120px;">Slug</th>
+                    <!-- <th>Website</th> -->
                     <th style="width:70px;">Produk</th>
                     <th style="width:80px;">Urutan</th>
                     <th style="width:90px;">Status</th>
-                    <th style="width:140px;">Aksi</th>
+                    <th style="width:80px;">Aksi</th>
+                    <th style="width:140px;">Ubah</th>
                 </tr>
             </thead>
             <tbody id="brandsSortable">

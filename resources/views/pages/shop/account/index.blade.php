@@ -177,17 +177,18 @@ class extends Component {
             </div>
 
             <div class="account-actions">
+                <form method="POST" action="{{ route('customer.logout') }}" class="account-logout-area">
+                    @csrf
+
+                    <button type="submit" class="account-logout-btn">
+                        Keluar dari Akun
+                    </button>
+                </form>
+
                 <a href="{{ route('home') }}" wire:navigate>Kembali</a>
-                <button type="submit">Simpan Perubahan</button>
+                <button class="account-submit-btn" type="submit">Simpan Perubahan</button>
             </div>
         </form>
 
     </section>
-    <form method="POST" action="{{ route('customer.logout') }}" class="account-logout-area">
-        @csrf
-
-        <button type="submit" class="account-logout-btn">
-            Keluar dari Akun
-        </button>
-    </form>
 </div>

@@ -209,7 +209,7 @@
                             aria-haspopup="true"
                             aria-expanded="false">
                         Kategori
-                        <span class="nav-chevron" aria-hidden="true">▾</span>
+                        <!-- <span class="nav-chevron" aria-hidden="true">▾</span> -->
                     </button>
 
                     <div class="mega-menu" role="menu">
@@ -254,7 +254,7 @@
                             aria-haspopup="true"
                             aria-expanded="false">
                         Merk
-                        <span class="nav-chevron" aria-hidden="true">▾</span>
+                        <!-- <span class="nav-chevron" aria-hidden="true">▾</span> -->
                     </button>
 
                     <div class="mega-menu mega-menu-small" role="menu">

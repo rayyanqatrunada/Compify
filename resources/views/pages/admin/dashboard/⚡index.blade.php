@@ -175,7 +175,7 @@ class extends Component {
                 <strong>{{ $this->totalOrders }}</strong>
                 <span>Total Orders</span>
             </div>
-            <i>▧</i>
+            <!-- <i>▧</i> -->
         </div>
 
         <div class="admin-stat-card-v2">
@@ -183,7 +183,7 @@ class extends Component {
                 <strong>{{ $this->totalCustomers }}</strong>
                 <span>Total Customers</span>
             </div>
-            <i>☻</i>
+            <!-- <i>☻</i> -->
         </div>
 
         <div class="admin-stat-card-v2">
@@ -191,7 +191,7 @@ class extends Component {
                 <strong>Rp {{ number_format($this->totalRevenue, 0, ',', '.') }}</strong>
                 <span>Total Revenue</span>
             </div>
-            <i>◎</i>
+            <!-- <i>◎</i> -->
         </div>
 
         <div class="admin-stat-card-v2">
@@ -199,7 +199,7 @@ class extends Component {
                 <strong>{{ $this->totalProducts }}</strong>
                 <span>Total Products</span>
             </div>
-            <i>▤</i>
+            <!-- <i>▤</i> -->
         </div>
 
         <div class="admin-stat-card-v2">
@@ -207,7 +207,7 @@ class extends Component {
                 <strong>{{ $this->totalAdmins }}</strong>
                 <span>Total Admin</span>
             </div>
-            <i>♙</i>
+            <!-- <i>♙</i> -->
         </div>
     </section>
 

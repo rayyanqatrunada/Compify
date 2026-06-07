@@ -81,6 +81,7 @@
 
 .admin-ring-v2 strong {
     display: block;
+    text-align: center;
     color: var(--admin-text);
     font-size: 23px;
     font-weight: 950;

@@ -25,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
     }
+    
 
     /**
      * Configure default behaviors for production-ready applications.

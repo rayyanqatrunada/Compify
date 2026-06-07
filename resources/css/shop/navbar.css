@@ -119,19 +119,19 @@
 }
 
 /* Remove old underline pseudo-element */
-.nav-link::after { display: none; }
+/* .nav-link::after { display: none; } */
 
 /* Dropdown chevron */
-.nav-link .nav-chevron {
+/* .nav-link .nav-chevron {
     font-size: 9px;
     opacity: .4;
     transition: transform .2s ease, opacity .2s;
-}
+} */
 
-.nav-dropdown:hover > .nav-link .nav-chevron {
+/* .nav-dropdown:hover > .nav-link .nav-chevron {
     transform: rotate(180deg);
     opacity: .8;
-}
+} */
 
 /* ── Dropdown wrapper ── */
 .nav-dropdown {
@@ -285,7 +285,7 @@
     align-items: center;
     background: rgba(255,255,255,.06);
     border: 0.5px solid rgba(255,255,255,.14);
-    border-radius: 999px;
+    border-radius: 8px;
     padding: 0 16px;
     height: 36px;
     gap: 8px;
@@ -308,6 +308,14 @@
 
 .main-nav .search-box input::placeholder {
     color: rgba(255,255,255,.35);
+    background: transparent;
+
+}
+
+.main-nav .search-box input:active {
+    color: rgba(255,255,255,.35);
+    background: transparent;
+
 }
 
 .main-nav .search-box button {
