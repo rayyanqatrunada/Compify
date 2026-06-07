@@ -14,6 +14,7 @@ use App\Models\EventSetting;
 use App\Services\CartService;
 use App\Models\NewsletterSubscriber;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\Admin\AdminContactController;
 
 /*
 |--------------------------------------------------------------------------
@@ -304,9 +305,16 @@ Route::middleware(['auth:admin', 'admin'])
                 Route::livewire('/cards', 'pages::admin.content.about.cards')->name('cards');
                 Route::livewire('/testimonial', 'pages::admin.content.about.testimonial')->name('testimonial');
             });
- 
-            // Static Pages
-            Route::livewire('/pages', 'pages::admin.content.pages.index')->name('pages');
+
+        });
+
+        Route::prefix('content/contact')->name('contact.')->group(function () {
+            Route::livewire('/', 'pages::admin.contact.index')->name('index');
+            Route::get('/settings',           [AdminContactController::class, 'settings'])      ->name('settings');
+            Route::post('/settings',          [AdminContactController::class, 'settingsUpdate'])->name('settings.update');
+            Route::get('/{message}',          [AdminContactController::class, 'show'])          ->name('show');
+            Route::patch('/{message}/status', [AdminContactController::class, 'updateStatus'])  ->name('status');
+            Route::delete('/{message}',       [AdminContactController::class, 'destroy'])       ->name('destroy');
         });
  
         // Home Layout (grouped under Content visually, kept under layout.* route prefix)

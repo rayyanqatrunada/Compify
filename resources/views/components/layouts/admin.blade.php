@@ -191,9 +191,12 @@
                             </div>
                         </details>
 
-                        <a href="{{ route('admin.content.pages') }}" wire:navigate
-                           @class(['active' => request()->routeIs('admin.content.pages')])>
-                            Static Pages
+                        <a href="{{ route('admin.contact.index') }}" wire:navigate
+                        @class(['active' => request()->routeIs('admin.contact.*')])>
+                            Contact / Pesan Masuk
+                            @if($unreadCount > 0)
+                                <span class="badge">{{ $unreadCount }}</span>
+                            @endif
                         </a>
 
                     </div>

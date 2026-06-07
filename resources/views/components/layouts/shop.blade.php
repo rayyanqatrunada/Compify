@@ -287,6 +287,7 @@
                 <a href="{{ route('products.index') }}" class="nav-link" wire:navigate>Produk</a>
                 <a href="{{ route('event.index') }}"    class="nav-link" wire:navigate>Event</a>
                 <a href="{{ route('about') }}"          class="nav-link" wire:navigate>About Us</a>
+                <a href="{{ route('contact') }}" class="nav-link" wire:navigate>Contact Us</a>
 
             </div>
 
