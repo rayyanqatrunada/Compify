@@ -41,6 +41,7 @@ class DatabaseSeeder extends Seeder
             HomeSectionSeeder::class,
             ShippingMethodSeeder::class,
             AboutSectionSeeder::class,
+            BrandLogoSeeder::class,
         ]);
     }
 }

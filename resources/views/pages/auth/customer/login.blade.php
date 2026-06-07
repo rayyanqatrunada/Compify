@@ -146,7 +146,7 @@ class extends Component {
                     </svg>
                 </a>
 
-                <button type="button" class="auth-social-icon" title="Facebook login belum dikonfigurasi">
+                {{-- <button type="button" class="auth-social-icon" title="Facebook login belum dikonfigurasi">
                     <svg viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="10" fill="#18ACFE"/>
                         <path fill="#fff" d="M13.5 12.7h2.4l.4-2.8h-2.8V8.6c0-.8.2-1.4 1.4-1.4h1.5V4.7c-.7-.1-1.5-.2-2.2-.2-2.2 0-3.7 1.4-3.7 3.9v1.5H8v2.8h2.5V20h3v-7.3Z"/>
@@ -156,7 +156,7 @@ class extends Component {
                 <button type="button" class="auth-social-icon apple" title="Apple login belum dikonfigurasi">
                     <svg viewBox="0 0 24 24">
                         <path d="M16.4 13.1c0-2.2 1.8-3.3 1.9-3.4-1-1.5-2.6-1.7-3.1-1.7-1.3-.1-2.6.8-3.3.8-.7 0-1.7-.8-2.8-.8-1.5 0-2.9.9-3.7 2.2-1.6 2.8-.4 6.9 1.1 9.2.8 1.1 1.7 2.3 2.9 2.3 1.1 0 1.6-.7 3-.7s1.8.7 3 .7c1.2 0 2-1.1 2.8-2.2.9-1.3 1.2-2.5 1.2-2.6-.1 0-2.9-1.1-3-3.8ZM14.3 6.6c.6-.8 1-1.8.9-2.9-.9 0-1.9.6-2.6 1.3-.6.7-1.1 1.8-1 2.8 1 .1 2-.5 2.7-1.2Z"/>
-                    </svg>
+                    </svg> --}}
                 </button>
             </div>
         </div>
