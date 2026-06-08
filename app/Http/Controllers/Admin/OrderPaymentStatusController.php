@@ -18,19 +18,37 @@ class OrderPaymentStatusController extends Controller
 
         try {
             $payload = $midtrans->getStatus($order);
-            $updatedOrder = $paymentStatusService->applyMidtransPayload($order, $payload);
+            $updatedOrder = $paymentStatusService->applyMidtransPayload($order, $payload, 'admin_midtrans_check');
 
             return back()->with(
                 'success',
                 'Status Midtrans berhasil dicek. Status pembayaran sekarang: ' . ucfirst($updatedOrder->payment_status) . '.'
             );
         } catch (\Throwable $e) {
+            $errorMessage = $e->getMessage();
+            $isNotFound = str_contains($errorMessage, 'Transaction doesn\'t exist')
+                || str_contains($errorMessage, '"status_code":"404"')
+                || str_contains($errorMessage, 'HTTP status code: 404');
+
+            if ($isNotFound) {
+                logger()->info('Order Midtrans tidak ditemukan saat cek detail order.', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'message' => $errorMessage,
+                ]);
+
+                return back()->with(
+                    'warning',
+                    'Order ini belum ditemukan di Midtrans. Biasanya karena order testing lama, Snap gagal dibuat saat checkout, atau key/environment Midtrans tidak cocok.'
+                );
+            }
+
             report($e);
 
             $message = 'Gagal mengecek status Midtrans.';
 
             if (config('app.debug')) {
-                $message .= ' Detail: ' . $e->getMessage();
+                $message .= ' Detail: ' . $errorMessage;
             }
 
             return back()->with('error', $message);

@@ -7,6 +7,7 @@ use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Transaction;
 use RuntimeException;
+use App\Support\MidtransPaymentChannel;
 
 class MidtransPaymentService
 {
@@ -73,7 +74,7 @@ class MidtransPaymentService
             throw new RuntimeException('Total order tidak valid untuk Midtrans.');
         }
 
-        return [
+        $params = [
             'transaction_details' => [
                 'order_id' => $order->order_number,
                 'gross_amount' => $grossAmount,
@@ -89,6 +90,9 @@ class MidtransPaymentService
 
             'item_details' => $this->itemDetails($order, $grossAmount),
 
+            'custom_field1' => $order->payment_channel ?: $order->paymentMethod?->midtrans_channel_code,
+            'custom_field2' => $order->payment_channel_label ?: $order->paymentMethod?->midtrans_channel_label,
+
             /*
             |--------------------------------------------------------------------------
             | Finish URL
@@ -100,6 +104,16 @@ class MidtransPaymentService
                 'finish' => route('checkout.payment', $order),
             ],
         ];
+
+        $enabledPayments = MidtransPaymentChannel::enabledPayments(
+            $order->paymentMethod?->midtrans_enabled_payments
+        );
+
+        if ($enabledPayments !== []) {
+            $params['enabled_payments'] = $enabledPayments;
+        }
+
+        return $params;
     }
 
     private function itemDetails(Order $order, int $grossAmount): array

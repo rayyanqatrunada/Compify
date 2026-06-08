@@ -1,8 +1,8 @@
 <?php
 
 use App\Models\Order;
-use App\Services\WhatsAppOrderMessageService;
 use Illuminate\Support\Facades\Storage;
+use App\Support\MidtransPaymentChannel;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -36,9 +36,21 @@ class extends Component
     {
         $method = $this->order->paymentMethod;
 
-        return $method
-            && $method->type === 'api'
-            && strtolower((string) $method->api_provider) === 'midtrans';
+        return $this->order->payment_gateway === 'midtrans'
+            || $this->order->payment_type === 'midtrans_snap'
+            || ($method && $method->type === 'api' && strtolower((string) $method->api_provider) === 'midtrans');
+    }
+
+    public function paymentDisplayLabel(): string
+    {
+        if ($this->isMidtrans()) {
+            $label = $this->order->payment_channel_label
+                ?: MidtransPaymentChannel::label($this->order->payment_channel ?: $this->order->paymentMethod?->midtrans_channel_code);
+
+            return trim($label . ' via Midtrans');
+        }
+
+        return $this->order->paymentMethod?->name ?? 'Pembayaran Manual';
     }
 
     public function paymentUrl(): ?string
@@ -47,22 +59,6 @@ class extends Component
 
         return $this->order->payment_redirect_url
             ?: (data_get($method, 'payment_url') ?? data_get($method, 'url'));
-    }
-
-    public function whatsappUrl(): ?string
-    {
-        $method = $this->order->paymentMethod;
-
-        if (! $method || $method->type !== 'whatsapp') {
-            return null;
-        }
-
-        if ($this->order->payment_redirect_url) {
-            return $this->order->payment_redirect_url;
-        }
-
-        return app(WhatsAppOrderMessageService::class)
-            ->urlForOrder($this->order, $method);
     }
 
     public function statusLabel(?string $status): string
@@ -134,22 +130,22 @@ class extends Component
 
                     <div>
                         <span>Metode Pembayaran</span>
-                        <strong>{{ $method?->name ?? 'Pembayaran Manual' }}</strong>
+                        <strong>{{ $this->paymentDisplayLabel() }}</strong>
                     </div>
                 </div>
 
                 @if($this->isMidtrans())
                     @if($paymentUrl)
                         <div class="payment-midtrans-box">
-                            <h2>Pembayaran Midtrans</h2>
+                            <h2>{{ $this->paymentDisplayLabel() }}</h2>
 
                             <p>
-                                Klik tombol di bawah untuk membuka halaman pembayaran Midtrans.
+                                Klik tombol di bawah untuk membuka halaman pembayaran sesuai metode yang dipilih.
                                 Setelah pembayaran selesai, status order akan diperbarui otomatis melalui notifikasi Midtrans. Jika status belum berubah, admin tetap bisa mengecek ulang dari dashboard.
                             </p>
 
                             <a href="{{ $paymentUrl }}" target="_blank" class="payment-url-button">
-                                Lanjutkan Pembayaran Midtrans
+                                Lanjutkan Pembayaran
                             </a>
                         </div>
                     @else
@@ -162,24 +158,6 @@ class extends Component
                     <a href="{{ $paymentUrl }}" target="_blank" class="payment-url-button">
                         Buka Link Pembayaran
                     </a>
-                @endif
-
-                @if($this->whatsappUrl())
-                    <div class="payment-whatsapp-box">
-                        <h2>Konfirmasi via WhatsApp</h2>
-
-                        <p>
-                            Detail order sudah disiapkan otomatis. Klik tombol di bawah untuk membuka WhatsApp dan kirim pesan ke admin.
-                        </p>
-
-                        <a href="{{ $this->whatsappUrl() }}" target="_blank" class="payment-url-button payment-whatsapp-button">
-                            Kirim Detail Order ke WhatsApp
-                        </a>
-
-                        <small>
-                            Jika WhatsApp tidak terbuka otomatis, pastikan WhatsApp Web sudah login atau aplikasi WhatsApp tersedia di perangkat Anda.
-                        </small>
-                    </div>
                 @endif
 
                 @if($qrImage)

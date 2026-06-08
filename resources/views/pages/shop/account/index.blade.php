@@ -21,6 +21,7 @@ class extends Component {
     public string $email = '';
     public string $phone = '';
     public string $address = '';
+    public string $district = '';
     public string $city = '';
     public string $province = '';
     public string $postal_code = '';
@@ -39,6 +40,7 @@ class extends Component {
         $this->email = $user->email ?? '';
         $this->phone = $user->phone ?? '';
         $this->address = $user->address ?? '';
+        $this->district = $user->district ?? '';
         $this->city = $user->city ?? '';
         $this->province = $user->province ?? '';
         $this->postal_code = $user->postal_code ?? '';
@@ -79,6 +81,7 @@ class extends Component {
             ],
             'phone' => ['nullable', 'string', 'max:30'],
             'address' => ['nullable', 'string', 'max:1000'],
+            'district' => ['nullable', 'string', 'max:100'],
             'city' => ['nullable', 'string', 'max:100'],
             'province' => ['nullable', 'string', 'max:100'],
             'postal_code' => ['nullable', 'string', 'max:20'],
@@ -162,6 +165,12 @@ class extends Component {
                     Nomor HP
                     <input type="text" wire:model="phone" placeholder="Opsional">
                     @error('phone') <small>{{ $message }}</small> @enderror
+                </label>
+
+                <label>
+                    Kecamatan
+                    <input type="text" wire:model="district" placeholder="Opsional">
+                    @error('district') <small>{{ $message }}</small> @enderror
                 </label>
 
                 <label>

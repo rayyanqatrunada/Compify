@@ -9,7 +9,6 @@ use App\Models\ShippingMethod;
 use App\Models\ShippingSetting;
 use App\Services\CartService;
 use App\Services\MidtransPaymentService;
-use App\Services\WhatsAppOrderMessageService;
 use App\Services\FonnteMessageService;
 use App\Services\OrderInventoryService;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +18,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use App\Services\UniversalDiscountService;
+use App\Support\MidtransPaymentChannel;
 
 new
 #[Layout('components.layouts.shop')]
@@ -26,6 +26,8 @@ new
 class extends Component {
     public string $email = '';
     public bool $newsletter = false;
+    public bool $save_to_profile = false;
+    public ?string $autofill_source = null;
 
     public string $country = 'Indonesia';
     public string $first_name = '';
@@ -45,17 +47,127 @@ class extends Component {
 
     public function mount(): void
     {
-        $user = auth('customer')->user();
-
-        $this->email = $user?->email ?? '';
-        $this->first_name = $user?->name ? explode(' ', $user->name)[0] : '';
-        $this->last_name = $user?->name && str_contains($user->name, ' ')
-            ? trim(str_replace($this->first_name, '', $user->name))
-            : '';
+        $this->fillCheckoutFromCustomerData();
 
         if (empty(session('cart', []))) {
             $this->redirectRoute('cart.index', navigate: true);
         }
+    }
+
+    private function splitCustomerName(?string $name): array
+    {
+        $name = trim((string) $name);
+
+        if ($name === '') {
+            return ['', ''];
+        }
+
+        $parts = preg_split('/\s+/', $name) ?: [];
+        $firstName = array_shift($parts) ?: '';
+
+        return [$firstName, trim(implode(' ', $parts))];
+    }
+
+    private function fillCheckoutFields(array $data, bool $overwrite = true): bool
+    {
+        $used = false;
+
+        foreach ($data as $field => $value) {
+            if (! property_exists($this, $field)) {
+                continue;
+            }
+
+            $value = trim((string) ($value ?? ''));
+
+            if ($value === '') {
+                continue;
+            }
+
+            if (! $overwrite && trim((string) $this->{$field}) !== '') {
+                continue;
+            }
+
+            $this->{$field} = $value;
+            $used = true;
+        }
+
+        return $used;
+    }
+
+    private function profileNeedsCheckoutData($user): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        foreach (['phone', 'address', 'district', 'city', 'province', 'postal_code'] as $field) {
+            if (blank($user->{$field} ?? null)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function fillCheckoutFromCustomerData(): void
+    {
+        $user = auth('customer')->user();
+        $sources = [];
+
+        $this->country = 'Indonesia';
+        $this->province = 'Jawa Tengah';
+        $this->save_to_profile = $this->profileNeedsCheckoutData($user);
+
+        $lastOrder = $user
+            ? Order::query()
+                ->where('user_id', $user->id)
+                ->where(function ($query) {
+                    $query->whereNotNull('shipping_address')
+                        ->orWhereNotNull('customer_phone')
+                        ->orWhereNotNull('shipping_city');
+                })
+                ->latest()
+                ->first()
+            : null;
+
+        if ($lastOrder) {
+            [$firstName, $lastName] = $this->splitCustomerName($lastOrder->customer_name);
+
+            if ($this->fillCheckoutFields([
+                'email' => $lastOrder->customer_email,
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'phone' => $lastOrder->customer_phone,
+                'address' => $lastOrder->shipping_address,
+                'district' => $lastOrder->shipping_district,
+                'city' => $lastOrder->shipping_city,
+                'province' => $lastOrder->shipping_province,
+                'postal_code' => $lastOrder->shipping_postal_code,
+            ])) {
+                $sources[] = 'riwayat checkout terakhir';
+            }
+        }
+
+        if ($user) {
+            [$firstName, $lastName] = $this->splitCustomerName($user->name);
+
+            if ($this->fillCheckoutFields([
+                'email' => $user->email,
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'phone' => $user->phone,
+                'address' => $user->address,
+                'district' => $user->district,
+                'city' => $user->city,
+                'province' => $user->province,
+                'postal_code' => $user->postal_code,
+            ])) {
+                $sources[] = 'profil customer';
+            }
+        }
+
+        $sources = array_values(array_unique($sources));
+        $this->autofill_source = $sources ? implode(' dan ', $sources) : null;
     }
 
     #[Computed]
@@ -84,9 +196,23 @@ class extends Component {
     {
         return PaymentMethod::query()
             ->where('is_active', true)
+            ->where('type', '!=', 'whatsapp')
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();
+    }
+
+    #[Computed]
+    public function groupedPaymentMethods()
+    {
+        return $this->paymentMethods
+            ->groupBy(fn ($method) => MidtransPaymentChannel::groupForPaymentMethod($method))
+            ->sortBy(fn ($methods, $group) => MidtransPaymentChannel::groupSort((string) $group));
+    }
+
+    public function paymentGroupDescription(string $group): string
+    {
+        return MidtransPaymentChannel::groupDescriptionForPaymentMethodGroup($group);
     }
 
     #[Computed]
@@ -101,6 +227,7 @@ class extends Component {
     public function selectedPaymentMethod()
     {
         return PaymentMethod::active()
+            ->where('type', '!=', 'whatsapp')
             ->find($this->payment_method_id);
     }
 
@@ -201,6 +328,50 @@ class extends Component {
         }
 
         return $paymentMethod?->type ?? 'manual';
+    }
+
+    public function paymentMethodSubtitle($paymentMethod): string
+    {
+        if ($this->isMidtransMethod($paymentMethod)) {
+            return $paymentMethod->description
+                ?: MidtransPaymentChannel::description($paymentMethod->midtrans_channel_code);
+        }
+
+        return $paymentMethod?->description
+            ?: $paymentMethod?->instructions
+            ?: 'Pilih metode pembayaran.';
+    }
+
+    public function paymentMethodBadge($paymentMethod): string
+    {
+        if ($this->isMidtransMethod($paymentMethod)) {
+            return 'via Midtrans';
+        }
+
+        return strtoupper((string) ($paymentMethod?->type ?: 'manual'));
+    }
+
+    private function paymentGatewayForMethod($paymentMethod): ?string
+    {
+        return $this->isMidtransMethod($paymentMethod) ? 'midtrans' : null;
+    }
+
+    private function paymentChannelForMethod($paymentMethod): ?string
+    {
+        if ($this->isMidtransMethod($paymentMethod)) {
+            return $paymentMethod->midtrans_channel_code;
+        }
+
+        return null;
+    }
+
+    private function paymentChannelLabelForMethod($paymentMethod): ?string
+    {
+        if ($this->isMidtransMethod($paymentMethod)) {
+            return $paymentMethod->midtrans_channel_label;
+        }
+
+        return $paymentMethod?->name;
     }
 
     private function createOrderItemSnapshot(Order $order, array $item): void
@@ -347,6 +518,42 @@ class extends Component {
         }
     }
 
+    private function saveCheckoutDataToProfile(): void
+    {
+        if (! $this->save_to_profile) {
+            return;
+        }
+
+        $user = auth('customer')->user();
+
+        if (! $user) {
+            return;
+        }
+
+        $email = strtolower(trim($this->email));
+        $fullName = trim($this->first_name . ' ' . $this->last_name);
+
+        $data = [
+            'name' => $fullName ?: $user->name,
+            'phone' => trim($this->phone) ?: null,
+            'address' => trim($this->address) ?: null,
+            'district' => trim($this->district) ?: null,
+            'city' => trim($this->city) ?: null,
+            'province' => trim($this->province) ?: null,
+            'postal_code' => trim($this->postal_code) ?: null,
+        ];
+
+        if (
+            filter_var($email, FILTER_VALIDATE_EMAIL)
+            && $email !== strtolower((string) $user->email)
+            && ! \App\Models\User::where('email', $email)->whereKeyNot($user->id)->exists()
+        ) {
+            $data['email'] = $email;
+        }
+
+        $user->update($data);
+    }
+
     private function notifyOrderCreated(Order $order): void
     {
         try {
@@ -380,6 +587,7 @@ class extends Component {
             'shipping_method_id' => ['required', 'exists:shipping_methods,id'],
             'payment_method_id' => ['required', 'exists:payment_methods,id'],
             'billing_type' => ['required', 'in:same'],
+            'save_to_profile' => ['boolean'],
         ]);
 
         if ($this->cartItems->isEmpty()) {
@@ -445,6 +653,9 @@ class extends Component {
                 'total_amount' => $totalAmount,
 
                 'payment_type' => $this->paymentTypeForMethod($paymentMethod),
+                'payment_gateway' => $this->paymentGatewayForMethod($paymentMethod),
+                'payment_channel' => $this->paymentChannelForMethod($paymentMethod),
+                'payment_channel_label' => $this->paymentChannelLabelForMethod($paymentMethod),
                 'payment_reference' => null,
                 'payment_redirect_url' => null,
 
@@ -472,30 +683,9 @@ class extends Component {
         ]);
 
         $this->subscribeToNewsletter($order);
+        $this->saveCheckoutDataToProfile();
 
         $paymentMethod = $order->paymentMethod;
-
-        if ($paymentMethod?->type === 'whatsapp') {
-            $whatsappUrl = app(WhatsAppOrderMessageService::class)
-                ->urlForOrder($order, $paymentMethod);
-
-            if ($whatsappUrl) {
-                $order->update([
-                    'payment_type' => 'whatsapp',
-                    'payment_redirect_url' => $whatsappUrl,
-                ]);
-
-                $this->notifyOrderCreated($order);
-
-                app(CartService::class)->clear();
-
-                if ((bool) $paymentMethod->auto_redirect) {
-                    return $this->redirect($whatsappUrl, navigate: false);
-                }
-
-                return redirect()->route('checkout.payment', $order);
-            }
-        }
 
         if ($this->isMidtransMethod($paymentMethod)) {
             try {
@@ -511,6 +701,9 @@ class extends Component {
 
                 $order->update([
                     'payment_type' => 'midtrans_snap',
+                    'payment_gateway' => 'midtrans',
+                    'payment_channel' => $this->paymentChannelForMethod($paymentMethod),
+                    'payment_channel_label' => $this->paymentChannelLabelForMethod($paymentMethod),
                     'payment_reference' => $snapToken ?: $order->order_number,
                     'payment_redirect_url' => $redirectUrl,
                 ]);
@@ -525,6 +718,9 @@ class extends Component {
 
                 $order->update([
                     'payment_type' => 'midtrans_snap',
+                    'payment_gateway' => 'midtrans',
+                    'payment_channel' => $this->paymentChannelForMethod($paymentMethod),
+                    'payment_channel_label' => $this->paymentChannelLabelForMethod($paymentMethod),
                     'payment_reference' => $order->order_number,
                     'payment_redirect_url' => route('checkout.payment', $order),
                 ]);
@@ -637,6 +833,11 @@ class extends Component {
                     <input type="text" wire:model.live="phone" placeholder="Telepon">
                 </label>
 
+                <label class="checkout-check checkout-save-profile-check">
+                    <input type="checkbox" wire:model="save_to_profile">
+                    <span>Simpan kontak dan alamat ini ke profil saya untuk checkout berikutnya</span>
+                </label>
+
                 @error('cart')
                     <small class="checkout-error">{{ $message }}</small>
                 @enderror
@@ -690,37 +891,71 @@ class extends Component {
                     @enderror
                 </div>
 
-                <div class="checkout-section">
+                <div class="checkout-section checkout-payment-section">
                     <h2>Pembayaran</h2>
-                    <p>Semua transaksi sudah diamankan. Detail pembayaran akan muncul setelah order dibuat.</p>
+                    <p>Pilih kategori pembayaran yang paling nyaman. Semua channel otomatis tetap diproses melalui Midtrans.</p>
 
-                    <div class="checkout-method-list">
-                        @forelse($this->paymentMethods as $method)
-                            @php
-                                $logo = data_get($method, 'logo');
-                            @endphp
+                    @if($this->groupedPaymentMethods->isNotEmpty())
+                        <div class="checkout-payment-groups">
+                            @foreach($this->groupedPaymentMethods as $group => $methods)
+                                @php
+                                    $isGroupActive = $methods->contains(fn ($method) => (int) $payment_method_id === $method->id);
+                                    $shouldOpen = $isGroupActive || ($loop->first && blank($payment_method_id));
+                                @endphp
 
-                            <label @class([
-                                'checkout-method-card',
-                                'active' => (int) $payment_method_id === $method->id,
-                            ])>
-                                <input type="radio" wire:model.live="payment_method_id" value="{{ $method->id }}">
+                                <details class="checkout-payment-group checkout-payment-group--dropdown" @if($shouldOpen) open @endif>
+                                    <summary class="checkout-payment-group-head">
+                                        <div>
+                                            <strong>{{ $group }}</strong>
+                                            <small>
+                                                @if($isGroupActive)
+                                                    Dipilih: {{ optional($methods->first(fn ($method) => (int) $payment_method_id === $method->id))->name }}
+                                                @else
+                                                    {{ $this->paymentGroupDescription((string) $group) }}
+                                                @endif
+                                            </small>
+                                        </div>
 
-                                <div>
-                                    <strong>{{ $method->name }}</strong>
-                                    <small>{{ data_get($method, 'description') ?: 'Pilih metode pembayaran' }}</small>
-                                </div>
+                                        <span>
+                                            {{ $methods->count() }} opsi
+                                            <b aria-hidden="true"></b>
+                                        </span>
+                                    </summary>
 
-                                @if($logo)
-                                    <img src="{{ Storage::url($logo) }}" alt="{{ $method->name }}">
-                                @endif
-                            </label>
-                        @empty
-                            <div class="checkout-muted-box">
-                                Belum ada metode pembayaran aktif.
-                            </div>
-                        @endforelse
-                    </div>
+                                    <div class="checkout-method-list checkout-method-list--compact">
+                                        @foreach($methods as $method)
+                                            @php
+                                                $logo = data_get($method, 'logo');
+                                            @endphp
+
+                                            <label @class([
+                                                'checkout-method-card',
+                                                'checkout-method-card--compact',
+                                                'active' => (int) $payment_method_id === $method->id,
+                                            ])>
+                                                <input type="radio" wire:model.live="payment_method_id" value="{{ $method->id }}">
+
+                                                <div>
+                                                    <strong>{{ $method->name }}</strong>
+                                                    <small>{{ $this->paymentMethodSubtitle($method) }}</small>
+                                                </div>
+
+                                                <span class="checkout-payment-pill">{{ $this->paymentMethodBadge($method) }}</span>
+
+                                                @if($logo)
+                                                    <img src="{{ Storage::url($logo) }}" alt="{{ $method->name }}">
+                                                @endif
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </details>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="checkout-muted-box">
+                            Belum ada metode pembayaran aktif.
+                        </div>
+                    @endif
 
                     @error('payment_method_id')
                         <small class="checkout-error">{{ $message }}</small>
@@ -735,8 +970,6 @@ class extends Component {
                             <input type="radio" wire:model="billing_type" value="same">
                             <span>Sama dengan alamat pengiriman</span>
                         </label>
-
-                        <p class="checkout-billing-note">Alamat penagihan saat ini disamakan dengan alamat pengiriman agar data order tetap konsisten.</p>
                     </div>
                 </div>
 

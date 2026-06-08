@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Models\Order;
+use App\Models\OrderStatusLog;
 use App\Support\OrderPaymentStatus;
 use App\Support\OrderStatus;
+use App\Support\MidtransPaymentChannel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -31,26 +33,50 @@ class OrderPaymentStatusService
             throw new NotFoundHttpException('Order tidak ditemukan.');
         }
 
-        return $this->applyMidtransPayload($order, $payload);
+        return $this->applyMidtransPayload($order, $payload, 'midtrans_webhook');
     }
 
-    public function applyMidtransPayload(Order $order, array|object $payload): Order
+    public function applyMidtransPayload(Order $order, array|object $payload, string $source = 'midtrans_sync'): Order
     {
         $payload = json_decode(json_encode($payload), true) ?: [];
+
+        $oldPaymentStatus = $order->payment_status;
+        $oldOrderStatus = $order->order_status;
 
         $transactionStatus = strtolower((string) Arr::get($payload, 'transaction_status', ''));
         $fraudStatus = strtolower((string) Arr::get($payload, 'fraud_status', ''));
         $paymentType = Arr::get($payload, 'payment_type') ?: $order->payment_type;
         $transactionId = Arr::get($payload, 'transaction_id') ?: $order->payment_reference;
+        $actualChannel = MidtransPaymentChannel::actualCodeFromPayload($payload);
+        $selectedChannel = $order->payment_channel ?: $order->paymentMethod?->midtrans_channel_code ?: $actualChannel;
+        $selectedChannelLabel = $order->payment_channel_label ?: MidtransPaymentChannel::label($selectedChannel);
+        $midtransBank = MidtransPaymentChannel::bankFromPayload($payload);
+        $midtransVaNumber = MidtransPaymentChannel::vaNumberFromPayload($payload);
 
         $baseUpdate = [
-            'payment_type' => $paymentType,
+            'payment_type' => 'midtrans_snap',
+            'payment_gateway' => 'midtrans',
+            'payment_channel' => $selectedChannel,
+            'payment_channel_label' => $selectedChannelLabel,
+            'midtrans_payment_type' => $paymentType,
+            'midtrans_transaction_id' => $transactionId,
+            'midtrans_bank' => $midtransBank,
+            'midtrans_va_number' => $midtransVaNumber,
             'payment_reference' => $transactionId,
             'payment_notification_payload' => $payload,
         ];
 
         if ($transactionStatus === 'settlement' || ($transactionStatus === 'capture' && $fraudStatus === 'accept')) {
-            return $this->markPaid($order, $baseUpdate);
+            $updated = $this->markPaid($order, $baseUpdate);
+
+            return $this->recordStatusChange(
+                $updated,
+                $oldPaymentStatus,
+                $oldOrderStatus,
+                $source,
+                'Pembayaran Midtrans terkonfirmasi lunas.',
+                $payload
+            );
         }
 
         if ($transactionStatus === 'pending') {
@@ -59,23 +85,68 @@ class OrderPaymentStatusService
                 'payment_status' => OrderPaymentStatus::PENDING,
             ])->save();
 
-            return $order->fresh();
+            $updated = $order->fresh();
+
+            return $this->recordStatusChange(
+                $updated,
+                $oldPaymentStatus,
+                $oldOrderStatus,
+                $source,
+                'Status Midtrans masih pending.',
+                $payload
+            );
         }
 
         if ($transactionStatus === 'expire') {
-            return $this->markFailedOrExpired($order, OrderPaymentStatus::EXPIRED, $baseUpdate);
+            $updated = $this->markFailedOrExpired($order, OrderPaymentStatus::EXPIRED, $baseUpdate);
+
+            return $this->recordStatusChange(
+                $updated,
+                $oldPaymentStatus,
+                $oldOrderStatus,
+                $source,
+                'Pembayaran Midtrans expired.',
+                $payload
+            );
         }
 
         if (in_array($transactionStatus, ['cancel', 'deny'], true)) {
-            return $this->markFailedOrExpired($order, OrderPaymentStatus::CANCELLED, $baseUpdate);
+            $updated = $this->markFailedOrExpired($order, OrderPaymentStatus::CANCELLED, $baseUpdate);
+
+            return $this->recordStatusChange(
+                $updated,
+                $oldPaymentStatus,
+                $oldOrderStatus,
+                $source,
+                'Pembayaran Midtrans dibatalkan/ditolak.',
+                $payload
+            );
         }
 
         if (in_array($transactionStatus, ['failure', 'failed'], true)) {
-            return $this->markFailedOrExpired($order, OrderPaymentStatus::FAILED, $baseUpdate);
+            $updated = $this->markFailedOrExpired($order, OrderPaymentStatus::FAILED, $baseUpdate);
+
+            return $this->recordStatusChange(
+                $updated,
+                $oldPaymentStatus,
+                $oldOrderStatus,
+                $source,
+                'Pembayaran Midtrans gagal.',
+                $payload
+            );
         }
 
         if (str_starts_with($transactionStatus, 'refund')) {
-            return $this->markFailedOrExpired($order, OrderPaymentStatus::REFUNDED, $baseUpdate);
+            $updated = $this->markFailedOrExpired($order, OrderPaymentStatus::REFUNDED, $baseUpdate);
+
+            return $this->recordStatusChange(
+                $updated,
+                $oldPaymentStatus,
+                $oldOrderStatus,
+                $source,
+                'Pembayaran Midtrans refund.',
+                $payload
+            );
         }
 
         Log::warning('Midtrans notification received with unmapped status.', [
@@ -86,7 +157,16 @@ class OrderPaymentStatusService
 
         $order->forceFill($baseUpdate)->save();
 
-        return $order->fresh();
+        $updated = $order->fresh();
+
+        return $this->recordStatusChange(
+            $updated,
+            $oldPaymentStatus,
+            $oldOrderStatus,
+            $source,
+            'Status Midtrans diterima, tetapi belum dipetakan otomatis.',
+            $payload
+        );
     }
 
     public function markPaid(Order $order, array $extra = []): Order
@@ -143,6 +223,42 @@ class OrderPaymentStatusService
         }
 
         return $updated->fresh();
+    }
+
+    private function recordStatusChange(
+        Order $order,
+        ?string $oldPaymentStatus,
+        ?string $oldOrderStatus,
+        string $source,
+        ?string $note = null,
+        array $payload = []
+    ): Order {
+        $order = $order->fresh();
+
+        if ($oldPaymentStatus === $order->payment_status && $oldOrderStatus === $order->order_status) {
+            return $order;
+        }
+
+        OrderStatusLog::create([
+            'order_id' => $order->id,
+            'user_id' => auth('admin')->id(),
+            'source' => $source,
+            'old_payment_status' => $oldPaymentStatus,
+            'new_payment_status' => $order->payment_status,
+            'old_order_status' => $oldOrderStatus,
+            'new_order_status' => $order->order_status,
+            'note' => $note,
+            'meta' => [
+                'transaction_status' => Arr::get($payload, 'transaction_status'),
+                'fraud_status' => Arr::get($payload, 'fraud_status'),
+                'payment_type' => Arr::get($payload, 'payment_type'),
+                'payment_channel' => MidtransPaymentChannel::actualCodeFromPayload($payload),
+                'transaction_id' => Arr::get($payload, 'transaction_id'),
+                'status_code' => Arr::get($payload, 'status_code'),
+            ],
+        ]);
+
+        return $order;
     }
 
     private function assertValidMidtransSignature(array $payload): void

@@ -128,6 +128,31 @@
 }
 
 
+
+.checkout-autofill-box {
+    margin: -4px 0 18px;
+    padding: 13px 14px;
+    border: 1px solid rgba(22, 8, 133, 0.22);
+    border-radius: var(--checkout-field-radius);
+    background: rgba(22, 8, 133, 0.06);
+    color: rgba(14, 10, 16, .78);
+    display: grid;
+    gap: 3px;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.checkout-autofill-box strong {
+    color: var(--checkout-black);
+    font-size: 14px;
+    font-weight: 850;
+}
+
+.checkout-save-profile-check {
+    margin-top: -4px;
+    margin-bottom: 2px;
+}
+
 /* Form */
 
 .checkout-form {
@@ -1339,4 +1364,321 @@
     font-size: 13px;
     font-weight: 700;
     line-height: 1.5;
+}
+
+
+/* =========================================================
+   CHECKOUT MIDTRANS CHANNEL COMPACT
+========================================================= */
+
+.checkout-payment-pill {
+    min-width: max-content;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(22, 8, 133, .08);
+    color: var(--checkout-purple);
+    font-size: 11px;
+    line-height: 1;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+}
+
+.checkout-method-card.active .checkout-payment-pill {
+    background: var(--checkout-purple);
+    color: #fff;
+}
+
+@media (max-width: 640px) {
+    .checkout-payment-pill {
+        justify-self: start;
+    }
+}
+
+
+/* =========================================================
+   CHECKOUT PAYMENT GROUPS COMPACT
+========================================================= */
+
+.checkout-payment-section {
+    display: grid;
+    gap: 12px;
+}
+
+.checkout-payment-section > p {
+    margin-bottom: 0;
+}
+
+.checkout-payment-groups {
+    display: grid;
+    gap: 12px;
+}
+
+.checkout-payment-group {
+    border: 1px solid rgba(14, 10, 16, .12);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .46);
+    overflow: hidden;
+}
+
+.checkout-payment-group-head {
+    padding: 11px 12px;
+    border-bottom: 1px solid rgba(14, 10, 16, .10);
+    background: rgba(14, 10, 16, .035);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.checkout-payment-group-head strong {
+    display: block;
+    color: var(--checkout-black);
+    font-size: 14px;
+    line-height: 1.2;
+    font-weight: 900;
+}
+
+.checkout-payment-group-head small {
+    display: block;
+    margin-top: 3px;
+    color: rgba(14, 10, 16, .62);
+    font-size: 11px;
+    line-height: 1.35;
+    font-weight: 700;
+}
+
+.checkout-payment-group-head > span {
+    min-width: max-content;
+    padding: 5px 8px;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid rgba(14, 10, 16, .12);
+    color: rgba(14, 10, 16, .64);
+    font-size: 10px;
+    font-weight: 900;
+}
+
+.checkout-method-list--compact {
+    gap: 0;
+}
+
+.checkout-payment-group .checkout-method-card {
+    min-height: 56px;
+    padding: 10px 12px;
+    border: 0;
+    border-radius: 0;
+    background: rgba(241, 241, 241, .42);
+    border-bottom: 1px solid rgba(14, 10, 16, .08);
+}
+
+.checkout-payment-group .checkout-method-card:last-child {
+    border-bottom: 0;
+}
+
+.checkout-payment-group .checkout-method-card.active {
+    border: 0;
+    border-left: 4px solid var(--checkout-purple);
+    background: rgba(22, 8, 133, .06);
+}
+
+.checkout-method-card--compact strong {
+    font-size: 14px;
+}
+
+.checkout-method-card--compact small {
+    margin-top: 2px;
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.checkout-method-card--compact .checkout-payment-pill {
+    padding: 5px 8px;
+    font-size: 10px;
+}
+
+.checkout-method-card--compact img {
+    max-width: 44px;
+    max-height: 24px;
+}
+
+@media (max-width: 640px) {
+    .checkout-payment-group-head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .checkout-payment-group .checkout-method-card {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .checkout-method-card--compact .checkout-payment-pill,
+    .checkout-method-card--compact img {
+        grid-column: 2;
+        justify-self: start;
+    }
+}
+
+
+/* =========================================================
+   CHECKOUT PAYMENT GROUP DROPDOWN
+========================================================= */
+
+.checkout-payment-group--dropdown {
+    display: block;
+}
+
+.checkout-payment-group--dropdown > summary {
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkout-payment-group--dropdown > summary::-webkit-details-marker {
+    display: none;
+}
+
+.checkout-payment-group--dropdown .checkout-payment-group-head {
+    transition: background .18s ease, border-color .18s ease;
+}
+
+.checkout-payment-group--dropdown[open] .checkout-payment-group-head {
+    background: rgba(22, 8, 133, .055);
+}
+
+.checkout-payment-group--dropdown .checkout-payment-group-head > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.checkout-payment-group--dropdown .checkout-payment-group-head > span b {
+    width: 22px;
+    height: 22px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 999px;
+    /* background: rgba(14, 10, 16, .055); */
+    color: rgba(14, 10, 16, .72);
+    font-size: 14px;
+    font-weight: 950;
+    line-height: 1;
+    transition: transform .18s ease, background .18s ease;
+}
+
+.checkout-payment-group--dropdown[open] .checkout-payment-group-head > span b {
+    transform: rotate(180deg);
+    /* background: rgba(22, 8, 133, .10); */
+    color: var(--checkout-purple);
+}
+
+.checkout-payment-group--dropdown:not([open]) .checkout-method-list--compact {
+    display: none;
+}
+
+.checkout-payment-group--dropdown[open] .checkout-method-list--compact {
+    animation: checkoutPaymentDropdownIn .16s ease;
+}
+
+@keyframes checkoutPaymentDropdownIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.checkout-payment-group--dropdown .checkout-method-card:first-child {
+    border-top: 0;
+}
+
+
+/* =========================================================
+   CHECKOUT PAYMENT DROPDOWN ALIGNMENT FIX
+   Merapikan pill "opsi" dan posisi panah.
+========================================================= */
+
+.checkout-payment-group--dropdown {
+    border-radius: 13px;
+}
+
+.checkout-payment-group--dropdown .checkout-payment-group-head {
+    min-height: 68px;
+    padding: 12px 14px;
+    align-items: center;
+}
+
+.checkout-payment-group--dropdown .checkout-payment-group-head > div {
+    min-width: 0;
+}
+
+.checkout-payment-group--dropdown .checkout-payment-group-head > span {
+    min-width: 76px;
+    height: 36px;
+    padding: 0 8px 0 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.checkout-payment-group--dropdown .checkout-payment-group-head > span b {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    margin: 0;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0;
+    line-height: 1;
+    transform: none;
+}
+
+.checkout-payment-group--dropdown .checkout-payment-group-head > span b::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: translateY(-1px) rotate(45deg);
+    transition: transform .18s ease;
+}
+
+.checkout-payment-group--dropdown[open] .checkout-payment-group-head > span b {
+    transform: none;
+}
+
+.checkout-payment-group--dropdown[open] .checkout-payment-group-head > span b::before {
+    transform: translateY(1px) rotate(225deg);
+}
+
+.checkout-payment-group--dropdown[open] {
+    border-color: rgba(22, 8, 133, .18);
+    box-shadow: 0 10px 24px rgba(14, 10, 16, .04);
+}
+
+.checkout-payment-group--dropdown[open] .checkout-payment-group-head {
+    border-bottom-color: rgba(22, 8, 133, .13);
+}
+
+@media (max-width: 640px) {
+    .checkout-payment-group--dropdown .checkout-payment-group-head {
+        min-height: auto;
+        align-items: flex-start;
+    }
+
+    .checkout-payment-group--dropdown .checkout-payment-group-head > span {
+        min-width: 72px;
+        height: 34px;
+    }
 }

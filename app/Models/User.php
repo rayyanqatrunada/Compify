@@ -23,6 +23,7 @@ use Illuminate\Support\Str;
     'role',
     'phone',
     'address',
+    'district',
     'city',
     'province',
     'postal_code',

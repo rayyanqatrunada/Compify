@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Support\MidtransPaymentChannel;
 
 class Order extends Model
 {
@@ -32,6 +33,13 @@ class Order extends Model
         'payment_status',
         'order_status',
         'payment_type',
+        'payment_gateway',
+        'payment_channel',
+        'payment_channel_label',
+        'midtrans_payment_type',
+        'midtrans_transaction_id',
+        'midtrans_bank',
+        'midtrans_va_number',
         'payment_reference',
         'payment_redirect_url',
         'payment_notification_payload',
@@ -107,6 +115,38 @@ class Order extends Model
     public function statusLogs(): HasMany
     {
         return $this->hasMany(OrderStatusLog::class);
+    }
+
+
+    public function getIsMidtransAttribute(): bool
+    {
+        $method = $this->paymentMethod;
+
+        return $this->payment_gateway === 'midtrans'
+            || $this->payment_type === 'midtrans_snap'
+            || ($method && $method->type === 'api' && strtolower((string) $method->api_provider) === 'midtrans');
+    }
+
+    public function getPaymentChannelDisplayAttribute(): string
+    {
+        if ($this->is_midtrans) {
+            $label = $this->payment_channel_label
+                ?: MidtransPaymentChannel::label($this->payment_channel ?: $this->paymentMethod?->midtrans_channel_code);
+
+            return trim($label . ' via Midtrans');
+        }
+
+        return $this->paymentMethod?->name ?: ucfirst((string) ($this->payment_type ?: 'Manual'));
+    }
+
+    public function getPaymentChannelShortAttribute(): string
+    {
+        if ($this->is_midtrans) {
+            return $this->payment_channel_label
+                ?: MidtransPaymentChannel::label($this->payment_channel ?: $this->paymentMethod?->midtrans_channel_code);
+        }
+
+        return $this->paymentMethod?->name ?: ucfirst((string) ($this->payment_type ?: 'Manual'));
     }
 
 }
