@@ -270,7 +270,7 @@
 }
 
 .an-kpi-value {
-    font-size: 1.5rem;
+    font-size: 14px;
     font-weight: 950;
     letter-spacing: -0.025em;
     color: var(--admin-text, #0f172a);
