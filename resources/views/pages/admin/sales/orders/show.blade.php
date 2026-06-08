@@ -1,12 +1,14 @@
 <?php
 
 use App\Models\Order;
+use App\Models\OrderStatusLog;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use App\Services\WhatsAppOrderMessageService;
-use App\Models\Product;
+use App\Services\OrderInventoryService;
+use App\Services\OrderPaymentStatusService;
 use Illuminate\Support\Facades\DB;
 
 new
@@ -28,6 +30,7 @@ class extends Component
             'paymentMethod',
             'shippingMethod',
             'user',
+            'statusLogs.user',
         ]);
 
         $this->payment_status = $this->order->payment_status ?: 'pending';
@@ -37,16 +40,50 @@ class extends Component
     public function saveStatuses(): void
     {
         $this->validate([
-            'payment_status' => ['required', 'in:pending,paid,failed,expired,refunded'],
+            'payment_status' => ['required', 'in:pending,paid,failed,expired,cancelled,refunded'],
             'order_status' => ['required', 'in:pending,processing,shipped,completed,cancelled'],
         ]);
 
-        $this->order->update([
-            'payment_status' => $this->payment_status,
-            'order_status' => $this->order_status,
-        ]);
+        $oldPaymentStatus = $this->order->payment_status;
+        $oldOrderStatus = $this->order->order_status;
 
+        $paymentService = app(OrderPaymentStatusService::class);
+
+        if ($this->payment_status === 'paid') {
+            $this->order = $paymentService->markPaid($this->order);
+        } elseif (in_array($this->payment_status, ['failed', 'expired', 'cancelled', 'refunded'], true)) {
+            $this->order = $paymentService->markFailedOrExpired($this->order, $this->payment_status);
+        } elseif ($this->order_status === 'cancelled') {
+            $this->order = $paymentService->markFailedOrExpired($this->order, 'cancelled');
+        } else {
+            $this->order->update(['payment_status' => $this->payment_status]);
+            $this->order->refresh();
+        }
+
+        $finalOrderStatus = in_array($this->payment_status, ['expired', 'cancelled'], true)
+            ? 'cancelled'
+            : $this->order_status;
+
+        $this->order->update(['order_status' => $finalOrderStatus]);
         $this->order->refresh();
+
+        $this->order_status = $this->order->order_status;
+        $this->payment_status = $this->order->payment_status;
+
+        if ($oldPaymentStatus !== $this->order->payment_status || $oldOrderStatus !== $this->order->order_status) {
+            OrderStatusLog::create([
+                'order_id' => $this->order->id,
+                'user_id' => auth('admin')->id(),
+                'source' => 'admin',
+                'old_payment_status' => $oldPaymentStatus,
+                'new_payment_status' => $this->order->payment_status,
+                'old_order_status' => $oldOrderStatus,
+                'new_order_status' => $this->order->order_status,
+                'note' => 'Status diubah dari halaman admin.',
+            ]);
+        }
+
+        $this->order->load('statusLogs.user');
 
         session()->flash('success', 'Status order berhasil diperbarui.');
     }
@@ -57,6 +94,7 @@ class extends Component
             'paid' => 'Lunas',
             'failed' => 'Gagal',
             'expired' => 'Expired',
+            'cancelled' => 'Dibatalkan',
             'refunded' => 'Refund',
             default => 'Pending',
         };
@@ -122,49 +160,13 @@ class extends Component
         }
 
         DB::transaction(function () {
-            $this->order->loadMissing('items');
-
-            foreach ($this->order->items as $item) {
-                $this->restoreStockFromOrderItem($item);
-            }
-
+            app(OrderInventoryService::class)->restore($this->order);
             $this->order->delete();
         });
 
         session()->flash('success', 'Order berhasil dihapus dan stok dikembalikan.');
 
         return $this->redirectRoute('admin.sales.orders', navigate: true);
-    }
-
-    private function restoreStockFromOrderItem($item): void
-    {
-        if ($item->item_type === 'product' || $item->item_type === 'event_flash_sale') {
-            if ($item->product_id) {
-                Product::whereKey($item->product_id)->increment('stock', (int) $item->quantity);
-            }
-
-            return;
-        }
-
-        if ($item->item_type === 'combo_package') {
-            $children = collect($item->snapshot_data['children'] ?? []);
-
-            foreach ($children as $child) {
-                $productId = $child['product_id'] ?? null;
-
-                if (! $productId) {
-                    continue;
-                }
-
-                $restoreQty = (int) ($child['total_quantity'] ?? 0);
-
-                if ($restoreQty < 1) {
-                    $restoreQty = (int) ($child['quantity_per_package'] ?? 1) * (int) $item->quantity;
-                }
-
-                Product::whereKey($productId)->increment('stock', $restoreQty);
-            }
-        }
     }
 };
 ?>
@@ -283,6 +285,7 @@ class extends Component
                         <option value="paid">Lunas</option>
                         <option value="failed">Gagal</option>
                         <option value="expired">Expired</option>
+                        <option value="cancelled">Dibatalkan</option>
                         <option value="refunded">Refund</option>
                     </select>
                 </label>
@@ -303,6 +306,12 @@ class extends Component
                         Simpan Status
                     </button>
 
+                    @if($order->payment_type === 'midtrans_snap')
+                        <button type="submit" form="admin-check-midtrans-form" class="admin-btn-v2">
+                            Cek Status Midtrans
+                        </button>
+                    @endif
+
                     @if($this->canDeleteOrder())
                         <button
                             type="button"
@@ -316,6 +325,12 @@ class extends Component
                 </div>
 
             </form>
+
+            @if($order->payment_type === 'midtrans_snap')
+                <form id="admin-check-midtrans-form" method="POST" action="{{ route('admin.sales.orders.check-payment-status', $order) }}">
+                    @csrf
+                </form>
+            @endif
         </section>
     </div>
 
@@ -398,6 +413,25 @@ class extends Component
                 </article>
             @endforeach
         </div>
+    </section>
+
+    <section class="admin-panel-v2 admin-order-logs-v2">
+        <h3>Riwayat Status</h3>
+
+        @forelse($order->statusLogs->sortByDesc('created_at') as $log)
+            <div class="admin-order-log-row-v2">
+                <div>
+                    <strong>{{ ucfirst($log->source) }}</strong>
+                    <small>{{ $log->created_at?->format('d M Y H:i') }} oleh {{ $log->user?->name ?? 'Sistem' }}</small>
+                </div>
+                <p>
+                    Pembayaran: {{ $log->old_payment_status ?: '-' }} → {{ $log->new_payment_status ?: '-' }}<br>
+                    Order: {{ $log->old_order_status ?: '-' }} → {{ $log->new_order_status ?: '-' }}
+                </p>
+            </div>
+        @empty
+            <p>Belum ada riwayat perubahan status.</p>
+        @endforelse
     </section>
 
     <section class="admin-panel-v2 admin-order-summary-v2">

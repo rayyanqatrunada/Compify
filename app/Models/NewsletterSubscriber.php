@@ -11,13 +11,16 @@ class NewsletterSubscriber extends Model
         'email',
         'customer_id',
         'source',
+        'status',
         'ip_address',
         'user_agent',
         'subscribed_at',
+        'unsubscribed_at',
     ];
 
     protected $casts = [
         'subscribed_at' => 'datetime',
+        'unsubscribed_at' => 'datetime',
     ];
 
     public function customer(): BelongsTo

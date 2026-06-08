@@ -24,7 +24,7 @@ class extends Component {
             'email' => $this->email,
             'password' => $this->password,
             'role' => 'customer',
-        ], true)) {
+        ], false)) {
             $this->addError('email', 'Email atau password salah.');
             return;
         }
@@ -33,9 +33,7 @@ class extends Component {
 
         Auth::shouldUse('customer');
 
-        session()->forget('url.intended');
-
-        $this->redirectRoute('home', navigate: true);
+        $this->redirect($this->safeCustomerRedirectUrl(), navigate: true);
     }
 
     private function safeCustomerRedirectUrl(): string

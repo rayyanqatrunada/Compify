@@ -3,6 +3,7 @@
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PaymentMethod;
+use App\Models\NewsletterSubscriber;
 use App\Models\Product;
 use App\Models\ShippingMethod;
 use App\Models\ShippingSetting;
@@ -10,6 +11,7 @@ use App\Services\CartService;
 use App\Services\MidtransPaymentService;
 use App\Services\WhatsAppOrderMessageService;
 use App\Services\FonnteMessageService;
+use App\Services\OrderInventoryService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
@@ -246,7 +248,11 @@ class extends Component {
                 ],
             ]);
 
-            Product::whereKey($item['product_id'])->decrement('stock', $item['quantity']);
+            app(OrderInventoryService::class)->reserveProductStock(
+                productId: (int) $item['product_id'],
+                quantity: (int) $item['quantity'],
+                name: (string) $item['name'],
+            );
 
             return;
         }
@@ -303,11 +309,41 @@ class extends Component {
                     continue;
                 }
 
-                Product::whereKey($child['product_id'])->decrement(
-                    'stock',
-                    (int) $child['quantity'] * (int) $item['quantity']
+                app(OrderInventoryService::class)->reserveProductStock(
+                    productId: (int) $child['product_id'],
+                    quantity: (int) $child['quantity'] * (int) $item['quantity'],
+                    name: (string) ($child['name'] ?? 'Produk paket'),
                 );
             }
+        }
+    }
+
+    private function subscribeToNewsletter(Order $order): void
+    {
+        if (! $this->newsletter || ! filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
+            return;
+        }
+
+        $subscriber = NewsletterSubscriber::firstOrCreate(
+            ['email' => strtolower(trim($this->email))],
+            [
+                'customer_id' => $order->user_id,
+                'source' => 'checkout',
+                'status' => 'subscribed',
+                'ip_address' => request()->ip(),
+                'user_agent' => substr((string) request()->userAgent(), 0, 1000),
+                'subscribed_at' => now(),
+            ]
+        );
+
+        if (! $subscriber->wasRecentlyCreated) {
+            $subscriber->update([
+                'customer_id' => $subscriber->customer_id ?: $order->user_id,
+                'status' => 'subscribed',
+                'source' => $subscriber->source ?: 'checkout',
+                'unsubscribed_at' => null,
+                'subscribed_at' => $subscriber->subscribed_at ?: now(),
+            ]);
         }
     }
 
@@ -343,7 +379,7 @@ class extends Component {
             'phone' => ['required', 'string', 'max:30'],
             'shipping_method_id' => ['required', 'exists:shipping_methods,id'],
             'payment_method_id' => ['required', 'exists:payment_methods,id'],
-            'billing_type' => ['required', 'in:same,different'],
+            'billing_type' => ['required', 'in:same'],
         ]);
 
         if ($this->cartItems->isEmpty()) {
@@ -424,8 +460,7 @@ class extends Component {
                 $this->createOrderItemSnapshot($order, $item);
             }
 
-            app(UniversalDiscountService::class)
-                ->recordUsage($order, $universalDiscount);
+            app(OrderInventoryService::class)->markReserved($order);
 
             return $order;
         });
@@ -435,6 +470,8 @@ class extends Component {
             'paymentMethod',
             'shippingMethod',
         ]);
+
+        $this->subscribeToNewsletter($order);
 
         $paymentMethod = $order->paymentMethod;
 
@@ -699,10 +736,7 @@ class extends Component {
                             <span>Sama dengan alamat pengiriman</span>
                         </label>
 
-                        <label @class(['active' => $billing_type === 'different'])>
-                            <input type="radio" wire:model="billing_type" value="different">
-                            <span>Pakai alamat penagihan lain</span>
-                        </label>
+                        <p class="checkout-billing-note">Alamat penagihan saat ini disamakan dengan alamat pengiriman agar data order tetap konsisten.</p>
                     </div>
                 </div>
 
@@ -751,10 +785,11 @@ class extends Component {
                     </div>
                 @endforeach
 
-                <div class="checkout-discount-row">
-                    <input type="text" placeholder="Kode diskon">
-                    <button type="button">Pakai</button>
-                </div>
+                @if(($this->universalDiscount['reason'] ?? null) === 'minimum_not_reached')
+                    <div class="checkout-muted-box">
+                        Diskon otomatis akan muncul jika minimum belanja terpenuhi.
+                    </div>
+                @endif
 
                 <div class="checkout-price-list">
                     <div>

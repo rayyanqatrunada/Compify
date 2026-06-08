@@ -1330,3 +1330,13 @@
 .checkout-discount-row {
     display: none !important;
 }
+.checkout-billing-note {
+    margin: 0;
+    padding: 16px 24px;
+    border-top: 1px solid var(--checkout-black);
+    background: #f8f8f8;
+    color: #5f5f5f;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.5;
+}

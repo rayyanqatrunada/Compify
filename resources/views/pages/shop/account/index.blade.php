@@ -1,8 +1,10 @@
 <?php
 
+use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -41,6 +43,17 @@ class extends Component {
         $this->province = $user->province ?? '';
         $this->postal_code = $user->postal_code ?? '';
         $this->currentAvatar = $user->avatar;
+    }
+
+    #[Computed]
+    public function recentOrders()
+    {
+        return Order::query()
+            ->withCount('items')
+            ->where('user_id', Auth::guard('customer')->id())
+            ->latest()
+            ->limit(5)
+            ->get();
     }
 
     public function save(): void
@@ -177,18 +190,50 @@ class extends Component {
             </div>
 
             <div class="account-actions">
-                <form method="POST" action="{{ route('customer.logout') }}" class="account-logout-area">
-                    @csrf
-
-                    <button type="submit" class="account-logout-btn">
-                        Keluar dari Akun
-                    </button>
-                </form>
+                <button type="submit" form="customer-logout-form" class="account-logout-btn">
+                    Keluar dari Akun
+                </button>
 
                 <a href="{{ route('home') }}" wire:navigate>Kembali</a>
                 <button class="account-submit-btn" type="submit">Simpan Perubahan</button>
             </div>
         </form>
 
+        <form id="customer-logout-form" method="POST" action="{{ route('customer.logout') }}" class="account-logout-area">
+            @csrf
+        </form>
+
+    </section>
+
+    <section class="account-card account-orders-card">
+        <div class="account-orders-heading">
+            <div>
+                <h2>Riwayat Pesanan Terbaru</h2>
+                <p>Pantau status pembayaran dan pengiriman dari akun kamu.</p>
+            </div>
+            <a href="{{ route('cart.index') }}" wire:navigate>Belanja Lagi</a>
+        </div>
+
+        @forelse($this->recentOrders as $order)
+            <div class="account-order-row">
+                <div>
+                    <strong>{{ $order->order_number }}</strong>
+                    <small>{{ $order->created_at?->format('d M Y H:i') }} • {{ $order->items_count }} item</small>
+                </div>
+
+                <div>
+                    <span>Pembayaran: {{ ucfirst($order->payment_status ?? 'pending') }}</span>
+                    <span>Order: {{ ucfirst($order->order_status ?? 'pending') }}</span>
+                </div>
+
+                <strong>Rp {{ number_format((float) $order->total_amount, 0, ',', '.') }}</strong>
+
+                <a href="{{ route('checkout.payment', $order) }}">Detail</a>
+            </div>
+        @empty
+            <div class="account-empty-orders">
+                Kamu belum memiliki pesanan. Produk yang sudah checkout akan muncul di sini.
+            </div>
+        @endforelse
     </section>
 </div>

@@ -17,6 +17,25 @@ class extends Component {
     public string $password = '';
     public string $password_confirmation = '';
 
+    private function safeCustomerRedirectUrl(): string
+    {
+        $intended = session()->pull('url.intended', route('home'));
+
+        $path = trim((string) parse_url($intended, PHP_URL_PATH), '/');
+
+        $adminPanelPath = trim((string) config('compify.admin_panel_path'), '/');
+        $adminLoginPath = trim((string) config('compify.admin_login_path'), '/');
+
+        if (
+            ($adminPanelPath !== '' && str_starts_with($path, $adminPanelPath)) ||
+            ($adminLoginPath !== '' && str_starts_with($path, $adminLoginPath))
+        ) {
+            return route('home');
+        }
+
+        return $intended ?: route('home');
+    }
+
     public function register(): void
     {
         $data = $this->validate([
@@ -34,15 +53,13 @@ class extends Component {
             'role' => 'customer',
         ]);
 
-        Auth::guard('customer')->login($user, true);
+        Auth::guard('customer')->login($user, false);
 
         request()->session()->regenerate();
 
         Auth::shouldUse('customer');
 
-        session()->forget('url.intended');
-
-        $this->redirectRoute('home', navigate: true);
+        $this->redirect($this->safeCustomerRedirectUrl(), navigate: true);
     }
 };
 ?>

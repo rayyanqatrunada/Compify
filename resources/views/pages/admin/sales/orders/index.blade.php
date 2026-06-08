@@ -66,6 +66,7 @@ class extends Component
             'paid' => 'Lunas',
             'failed' => 'Gagal',
             'expired' => 'Expired',
+            'cancelled' => 'Dibatalkan',
             'refunded' => 'Refund',
             default => 'Pending',
         };
@@ -126,6 +127,7 @@ class extends Component
                     <option value="paid">Lunas</option>
                     <option value="failed">Gagal</option>
                     <option value="expired">Expired</option>
+                    <option value="cancelled">Dibatalkan</option>
                     <option value="refunded">Refund</option>
                 </select>
             </label>

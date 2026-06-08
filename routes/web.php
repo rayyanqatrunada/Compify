@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\ProductExcelController;
+use App\Http\Controllers\Admin\OrderPaymentStatusController;
+use App\Http\Controllers\Payment\MidtransNotificationController;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
@@ -49,11 +51,11 @@ Route::livewire('/terms-and-conditions', 'pages::shop.help.terms')->name('terms'
 */
 
 Route::livewire('/sign-in', 'pages::auth.customer.login')
-    ->middleware('guest:customer')
+    ->middleware(['guest:customer', 'throttle:10,1'])
     ->name('customer.login');
 
 Route::livewire('/sign-up', 'pages::auth.customer.register')
-    ->middleware('guest:customer')
+    ->middleware(['guest:customer', 'throttle:5,1'])
     ->name('customer.register');
 
 Route::livewire('/account', 'pages::shop.account.index')
@@ -66,7 +68,7 @@ Route::post('/customer/logout', function (Request $request) {
     $request->session()->regenerateToken();
 
     return redirect()->route('home');
-})->name('customer.logout');
+})->middleware('customer.auth')->name('customer.logout');
 
 
 /*
@@ -120,13 +122,23 @@ Route::get('/auth/google/callback', function () {
     Auth::guard('admin')->logout();
     Auth::guard('web')->logout();
 
-    Auth::guard('customer')->login($user, true);
+    Auth::guard('customer')->login($user, false);
 
     request()->session()->regenerate();
 
-    session()->forget('url.intended');
+    $intended = session()->pull('url.intended', route('home'));
+    $path = trim((string) parse_url($intended, PHP_URL_PATH), '/');
+    $adminPanelPath = trim((string) config('compify.admin_panel_path'), '/');
+    $adminLoginPath = trim((string) config('compify.admin_login_path'), '/');
 
-    return redirect()->route('home');
+    if (
+        ($adminPanelPath !== '' && str_starts_with($path, $adminPanelPath)) ||
+        ($adminLoginPath !== '' && str_starts_with($path, $adminLoginPath))
+    ) {
+        $intended = route('home');
+    }
+
+    return redirect($intended ?: route('home'));
 })->middleware('guest:customer')->name('customer.google.callback');
 
 
@@ -212,6 +224,9 @@ Route::livewire('/checkout', 'pages::shop.checkout.index')
     ->middleware('customer.auth')
     ->name('checkout.index');
 
+Route::post('/payment/midtrans/notification', MidtransNotificationController::class)
+    ->name('payment.midtrans.notification');
+
 Route::livewire('/checkout/payment/{order}', 'pages::shop.checkout.payment')
     ->middleware('customer.auth')
     ->name('checkout.payment');
@@ -272,6 +287,7 @@ Route::middleware(['auth:admin', 'admin'])
         Route::prefix('sales')->name('sales.')->group(function () {
             Route::livewire('/orders', 'pages::admin.sales.orders.index')->name('orders');
             Route::livewire('/orders/{order}', 'pages::admin.sales.orders.show')->name('orders.show');
+            Route::post('/orders/{order}/check-payment-status', [OrderPaymentStatusController::class, 'check'])->name('orders.check-payment-status');
         });
  
         Route::prefix('catalog')->name('catalog.')->group(function () {
@@ -392,6 +408,7 @@ Route::post('/newsletter/subscribe', function (Request $request) {
         [
             'customer_id'  => auth('customer')->id(),
             'source'       => 'footer',
+            'status'       => 'subscribed',
             'ip_address'   => $request->ip(),
             'user_agent'   => substr((string) $request->userAgent(), 0, 1000),
             'subscribed_at' => now(),
@@ -399,9 +416,19 @@ Route::post('/newsletter/subscribe', function (Request $request) {
     );
  
     if (! $subscriber->wasRecentlyCreated) {
+        if (($subscriber->status ?? 'subscribed') !== 'subscribed') {
+            $subscriber->update([
+                'status' => 'subscribed',
+                'unsubscribed_at' => null,
+                'subscribed_at' => $subscriber->subscribed_at ?: now(),
+            ]);
+
+            return back()->with('newsletter_success', 'Email kamu berhasil diaktifkan kembali.');
+        }
+
         return back()->with('newsletter_info', 'Email ini sudah terdaftar di newsletter.');
     }
  
     return back()->with('newsletter_success', 'Terima kasih! Email kamu berhasil didaftarkan.');
-})->name('newsletter.subscribe');
+})->middleware('throttle:5,1')->name('newsletter.subscribe');
  

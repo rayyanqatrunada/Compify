@@ -43,7 +43,7 @@ class AppServiceProvider extends ServiceProvider
 
     protected function shareAdminViewData(): void
     {
-        View::composer('components.layouts.admin', function ($view) {
+        View::composer(['components.layouts.admin', 'layouts.admin'], function ($view) {
             $unreadCount = 0;
 
             // Hanya query kalau tabel sudah ada (aman saat migration belum jalan)

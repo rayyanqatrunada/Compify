@@ -72,6 +72,7 @@ class extends Component
             'pending' => 'Pending',
             'failed' => 'Failed',
             'expired' => 'Expired',
+            'cancelled' => 'Cancelled',
             'refunded' => 'Refunded',
             default => ucfirst((string) ($status ?: 'pending')),
         };
@@ -143,8 +144,8 @@ class extends Component
                             <h2>Pembayaran Midtrans</h2>
 
                             <p>
-                                Klik tombol di bawah untuk membuka halaman pembayaran Midtrans Sandbox.
-                                Setelah pembayaran selesai, status order masih bisa dicek manual dari dashboard Midtrans sampai fitur cek status otomatis ditambahkan.
+                                Klik tombol di bawah untuk membuka halaman pembayaran Midtrans.
+                                Setelah pembayaran selesai, status order akan diperbarui otomatis melalui notifikasi Midtrans. Jika status belum berubah, admin tetap bisa mengecek ulang dari dashboard.
                             </p>
 
                             <a href="{{ $paymentUrl }}" target="_blank" class="payment-url-button">
@@ -263,8 +264,15 @@ class extends Component
 
             @if((float) $order->discount_amount > 0)
                 <div class="payment-summary-item">
-                    <span>Total Diskon</span>
+                    <span>Total Diskon Produk</span>
                     <strong>- {{ $this->formatRupiah($order->discount_amount) }}</strong>
+                </div>
+            @endif
+
+            @if((float) $order->universal_discount_amount > 0)
+                <div class="payment-summary-item">
+                    <span>{{ $order->universal_discount_label ?: 'Diskon Belanja' }}</span>
+                    <strong>- {{ $this->formatRupiah($order->universal_discount_amount) }}</strong>
                 </div>
             @endif
 

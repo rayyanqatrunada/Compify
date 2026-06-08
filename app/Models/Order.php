@@ -34,6 +34,11 @@ class Order extends Model
         'payment_type',
         'payment_reference',
         'payment_redirect_url',
+        'payment_notification_payload',
+        'stock_reserved_at',
+        'stock_restored_at',
+        'paid_at',
+        'cancelled_at',
 
         'universal_discount_eligible_subtotal',
         'universal_discount_amount',
@@ -52,7 +57,12 @@ class Order extends Model
         'universal_discount_amount' => 'decimal:2',
         'universal_discount_percent' => 'decimal:2',
         'universal_discount_snapshot' => 'array',
-        
+        'payment_notification_payload' => 'array',
+        'stock_reserved_at' => 'datetime',
+        'stock_restored_at' => 'datetime',
+        'paid_at' => 'datetime',
+        'cancelled_at' => 'datetime',
+
         'total_amount' => 'decimal:2',
     ];
 
@@ -94,4 +104,9 @@ class Order extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function statusLogs(): HasMany
+    {
+        return $this->hasMany(OrderStatusLog::class);
+    }
+
 }
