@@ -110,6 +110,18 @@
     flex: 1;
 }
 
+.shop-product-card__cart-form button {
+    width: 100%;
+    min-height: var(--shop-product-button-height);
+    border: none;
+    border-radius: 999px;
+    background: #111;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
 .shop-product-card__cart-btn {
     width: 100%;
     min-height: var(--shop-product-button-height);
