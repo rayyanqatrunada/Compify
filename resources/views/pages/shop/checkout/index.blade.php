@@ -183,6 +183,17 @@ class extends Component {
     }
 
     #[Computed]
+    public function cartWeightGram(): int
+    {
+        return app(CartService::class)->totalWeightGram();
+    }
+
+    public function formatWeightGram(int|float|null $value): string
+    {
+        return app(CartService::class)->formatWeightGram($value);
+    }
+
+    #[Computed]
     public function shippingMethods()
     {
         return ShippingMethod::active()
@@ -396,6 +407,8 @@ class extends Component {
                 'price_label' => $item['price_label'] ?? null,
 
                 'quantity' => $item['quantity'],
+                'weight_gram' => $item['weight_gram'] ?? 0,
+                'line_weight_gram' => $item['line_weight_gram'] ?? 0,
                 'total' => $item['line_total'],
 
                 'snapshot_data' => [
@@ -416,6 +429,8 @@ class extends Component {
                     'original_price' => $item['original_price'],
                     'discount_amount' => $item['discount_amount'] ?? 0,
                     'discount_percent' => $item['discount_percent'] ?? null,
+                    'weight_gram' => $item['weight_gram'] ?? 0,
+                    'line_weight_gram' => $item['line_weight_gram'] ?? 0,
                 ],
             ]);
 
@@ -441,6 +456,9 @@ class extends Component {
                     'unit_price' => (int) $child['unit_price'],
                     'line_total_per_package' => (int) $child['line_total'],
                     'line_total_all_package' => (int) $child['line_total'] * (int) $item['quantity'],
+                    'weight_gram' => (int) ($child['weight_gram'] ?? 0),
+                    'line_weight_gram_per_package' => (int) ($child['line_weight_gram'] ?? 0),
+                    'line_weight_gram_all_package' => (int) ($child['line_weight_gram'] ?? 0) * (int) $item['quantity'],
                 ];
             })->values()->all();
 
@@ -461,6 +479,8 @@ class extends Component {
                 'price_label' => $item['price_label'] ?? 'Paket Bundling',
 
                 'quantity' => $item['quantity'],
+                'weight_gram' => $item['weight_gram'] ?? 0,
+                'line_weight_gram' => $item['line_weight_gram'] ?? 0,
                 'total' => $item['line_total'],
 
                 'snapshot_data' => [
@@ -471,6 +491,8 @@ class extends Component {
                     'original_price' => $item['original_price'],
                     'discount_amount' => $item['discount_amount'] ?? 0,
                     'discount_percent' => $item['discount_percent'] ?? null,
+                    'weight_gram' => $item['weight_gram'] ?? 0,
+                    'line_weight_gram' => $item['line_weight_gram'] ?? 0,
                     'children' => $children,
                 ],
             ]);
@@ -641,6 +663,7 @@ class extends Component {
 
                 'subtotal' => $this->subtotal,
                 'shipping_cost' => $shippingCost,
+                'total_weight_gram' => $this->cartWeightGram,
                 'discount_amount' => $this->cartDiscountTotal(),
 
                 'universal_discount_eligible_subtotal' => $universalDiscount['eligible_subtotal'] ?? 0,
@@ -845,6 +868,13 @@ class extends Component {
                 <div class="checkout-section">
                     <h2>Metode Pengiriman</h2>
 
+                    <div class="checkout-weight-box">
+                        <div>
+                            <strong>Total berat paket</strong>
+                        </div>
+                        <span>{{ $this->formatWeightGram($this->cartWeightGram) }}</span>
+                    </div>
+
                     @if(! $this->isAddressReady)
                         <div class="checkout-muted-box">
                             Masukkan alamat pengiriman Anda untuk melihat metode pengiriman yang tersedia.
@@ -1028,6 +1058,11 @@ class extends Component {
                     <div>
                         <span>Subtotal</span>
                         <strong>Rp {{ number_format($this->subtotal, 0, ',', '.') }}</strong>
+                    </div>
+
+                    <div class="checkout-price-list-muted">
+                        <span>Berat paket</span>
+                        <strong>{{ $this->formatWeightGram($this->cartWeightGram) }}</strong>
                     </div>
 
                     @if($this->universalDiscountAmount > 0)

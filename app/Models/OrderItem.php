@@ -24,6 +24,8 @@ class OrderItem extends Model
         'price_label',
 
         'quantity',
+        'weight_gram',
+        'line_weight_gram',
         'total',
         'snapshot_data',
     ];
@@ -34,6 +36,8 @@ class OrderItem extends Model
         'discount_amount' => 'decimal:2',
         'total' => 'decimal:2',
         'quantity' => 'integer',
+        'weight_gram' => 'integer',
+        'line_weight_gram' => 'integer',
         'snapshot_data' => 'array',
     ];
 
@@ -86,4 +90,16 @@ class OrderItem extends Model
     {
         return 'Rp ' . number_format((float) $this->total, 0, ',', '.');
     }
+
+    public function getFormattedLineWeightAttribute(): string
+    {
+        $weight = max(0, (int) $this->line_weight_gram);
+
+        if ($weight >= 1000) {
+            return number_format($weight / 1000, $weight % 1000 === 0 ? 0 : 2, ',', '.') . ' kg';
+        }
+
+        return number_format($weight, 0, ',', '.') . ' g';
+    }
+
 }

@@ -18,6 +18,10 @@ class Product extends Model
         'price',
         'sale_price',
         'stock',
+        'weight_gram',
+        'length_cm',
+        'width_cm',
+        'height_cm',
         'image',
         'is_featured',
         'is_new',
@@ -31,6 +35,10 @@ class Product extends Model
         'price' => 'decimal:2',
         'sale_price' => 'decimal:2',
         'stock' => 'integer',
+        'weight_gram' => 'integer',
+        'length_cm' => 'integer',
+        'width_cm' => 'integer',
+        'height_cm' => 'integer',
         'is_featured' => 'boolean',
         'is_new' => 'boolean',
         'is_active' => 'boolean',
@@ -165,4 +173,30 @@ class Product extends Model
     {
         return app(ProductPricingService::class)->activeFlashSaleItemForProduct($this);
     }
+
+    public function getShippingWeightGramAttribute(): int
+    {
+        return max(1, (int) ($this->weight_gram ?: 1000));
+    }
+
+    public function getFormattedWeightAttribute(): string
+    {
+        $weight = $this->shipping_weight_gram;
+
+        if ($weight >= 1000) {
+            return number_format($weight / 1000, $weight % 1000 === 0 ? 0 : 2, ',', '.') . ' kg';
+        }
+
+        return number_format($weight, 0, ',', '.') . ' g';
+    }
+
+    public function getDimensionsLabelAttribute(): string
+    {
+        if (! $this->length_cm && ! $this->width_cm && ! $this->height_cm) {
+            return 'Dimensi belum diisi';
+        }
+
+        return ($this->length_cm ?: 0) . ' × ' . ($this->width_cm ?: 0) . ' × ' . ($this->height_cm ?: 0) . ' cm';
+    }
+
 }

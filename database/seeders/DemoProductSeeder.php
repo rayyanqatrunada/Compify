@@ -235,6 +235,8 @@ class DemoProductSeeder extends Seeder
                 $isNew,
             ] = $item;
 
+            $shippingProfile = $this->shippingProfileForCategory($categoryName, $name);
+
             $slug = Str::slug($name);
             $imagePath = $this->seedProductImage($slug);
 
@@ -247,6 +249,10 @@ class DemoProductSeeder extends Seeder
                 'price' => $price,
                 'sale_price' => $salePrice,
                 'stock' => $stock,
+                'weight_gram' => $shippingProfile['weight_gram'],
+                'length_cm' => $shippingProfile['length_cm'],
+                'width_cm' => $shippingProfile['width_cm'],
+                'height_cm' => $shippingProfile['height_cm'],
                 'is_featured' => $isFeatured,
                 'is_new' => $isNew,
                 'is_active' => true,
@@ -268,6 +274,47 @@ class DemoProductSeeder extends Seeder
                 $payload
             );
         }
+    }
+
+
+    private function shippingProfileForCategory(string $category, string $name): array
+    {
+        $name = strtolower($name);
+
+        $profile = match ($category) {
+            'Motherboard' => [1200, 28, 25, 7],
+            'Processor' => [300, 13, 12, 8],
+            'VGA / GPU' => [1800, 34, 22, 9],
+            'RAM' => [150, 17, 7, 3],
+            'Power Supply' => [2500, 24, 21, 12],
+            'Casing' => [6000, 50, 45, 25],
+            'Cooling' => [1200, 26, 20, 14],
+            'SSD & Storage' => [150, 12, 8, 3],
+            'Hard Drive' => [600, 16, 12, 5],
+            'Keyboard' => [1200, 46, 18, 5],
+            'Mouse' => [350, 15, 10, 6],
+            'Headset' => [700, 22, 20, 10],
+            'Speaker' => [1200, 28, 18, 16],
+            'Monitor' => [4500, 62, 45, 14],
+            'Router' => [800, 24, 18, 7],
+            'LAN Cable' => [300, 18, 14, 5],
+            default => [1000, null, null, null],
+        };
+
+        if ($category === 'Cooling' && (str_contains($name, 'aio') || str_contains($name, 'kraken') || str_contains($name, '240mm'))) {
+            $profile = [1800, 32, 24, 15];
+        }
+
+        if ($category === 'LAN Cable' && str_contains($name, '20 meter')) {
+            $profile = [550, 20, 16, 6];
+        }
+
+        return [
+            'weight_gram' => $profile[0],
+            'length_cm' => $profile[1],
+            'width_cm' => $profile[2],
+            'height_cm' => $profile[3],
+        ];
     }
 
     private function seedProductImage(string $slug): ?string

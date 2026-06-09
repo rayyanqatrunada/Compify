@@ -27,6 +27,7 @@ class Order extends Model
 
         'subtotal',
         'shipping_cost',
+        'total_weight_gram',
         'discount_amount',
         'total_amount',
 
@@ -59,6 +60,7 @@ class Order extends Model
     protected $casts = [
         'subtotal' => 'decimal:2',
         'shipping_cost' => 'decimal:2',
+        'total_weight_gram' => 'integer',
         'discount_amount' => 'decimal:2',
         
         'universal_discount_eligible_subtotal' => 'decimal:2',
@@ -147,6 +149,18 @@ class Order extends Model
         }
 
         return $this->paymentMethod?->name ?: ucfirst((string) ($this->payment_type ?: 'Manual'));
+    }
+
+
+    public function getFormattedTotalWeightAttribute(): string
+    {
+        $weight = max(0, (int) $this->total_weight_gram);
+
+        if ($weight >= 1000) {
+            return number_format($weight / 1000, $weight % 1000 === 0 ? 0 : 2, ',', '.') . ' kg';
+        }
+
+        return number_format($weight, 0, ',', '.') . ' g';
     }
 
 }

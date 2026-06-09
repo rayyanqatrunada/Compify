@@ -247,6 +247,22 @@ class CartService
         return $this->availableItems()->sum(fn (array $item) => (int) $item['line_total']);
     }
 
+    public function totalWeightGram(): int
+    {
+        return $this->availableItems()->sum(fn (array $item) => (int) ($item['line_weight_gram'] ?? 0));
+    }
+
+    public function formatWeightGram(int|float|null $value): string
+    {
+        $weight = max(0, (int) $value);
+
+        if ($weight >= 1000) {
+            return number_format($weight / 1000, $weight % 1000 === 0 ? 0 : 2, ',', '.') . ' kg';
+        }
+
+        return number_format($weight, 0, ',', '.') . ' g';
+    }
+
     public function formatRupiah(int|float|null $value): string
     {
         return 'Rp ' . number_format((float) $value, 0, ',', '.');
@@ -281,6 +297,8 @@ class CartService
                 'discount_amount' => 0,
                 'discount_percent' => null,
                 'line_total' => 0,
+                'weight_gram' => 0,
+                'line_weight_gram' => 0,
                 'children' => collect(),
             ];
         }
@@ -324,6 +342,9 @@ class CartService
             'event_stock_reserved' => $eventStockInfo['event_stock_reserved'],
             'event_stock_remaining' => $eventStockInfo['event_stock_remaining'],
 
+            'weight_gram' => $isAvailable ? (int) $product->shipping_weight_gram : 0,
+            'line_weight_gram' => $isAvailable ? (int) $product->shipping_weight_gram * $quantity : 0,
+
             'line_total' => $isAvailable ? (int) $product->final_price * $quantity : 0,
             'children' => collect(),
         ];
@@ -350,6 +371,8 @@ class CartService
                 'discount_amount' => 0,
                 'discount_percent' => null,
                 'line_total' => 0,
+                'weight_gram' => 0,
+                'line_weight_gram' => 0,
                 'children' => collect(),
             ];
         }
@@ -385,6 +408,8 @@ class CartService
                 'quantity' => $childQty,
                 'unit_price' => $unitPrice,
                 'line_total' => $unitPrice * $childQty,
+                'weight_gram' => (int) ($product?->shipping_weight_gram ?? 0),
+                'line_weight_gram' => (int) ($product?->shipping_weight_gram ?? 0) * $childQty,
                 'is_available' => (bool) ($product && $product->is_active && $product->stock >= $childQty),
             ];
         });
@@ -415,6 +440,9 @@ class CartService
             'event_flash_sale_item_id' => null,
             'price_source' => 'combo_package',
             'price_label' => 'Paket Bundling',
+
+            'weight_gram' => (int) $children->sum('line_weight_gram'),
+            'line_weight_gram' => (int) $children->sum('line_weight_gram') * $quantity,
 
             'line_total' => $unitPrice * $quantity,
             'children' => $children,

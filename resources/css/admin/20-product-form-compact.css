@@ -1,0 +1,233 @@
+/* =========================================================
+   ADMIN PRODUCT FORM COMPACT
+   Form produk dibagi menjadi data wajib dan opsional.
+========================================================= */
+
+.admin-product-form-v3 {
+    display: grid;
+    gap: 16px;
+}
+
+.admin-product-form-head-v3,
+.admin-product-section-title-v3,
+.admin-product-options-v3 > summary {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.admin-product-form-head-v3 h2 {
+    margin: 0;
+}
+
+.admin-product-form-head-v3 p,
+.admin-product-section-title-v3 small,
+.admin-product-options-v3 summary small {
+    margin: 4px 0 0;
+    color: var(--admin-muted);
+    font-size: 12px;
+    line-height: 1.45;
+    font-weight: 750;
+}
+
+.admin-product-form-head-v3 > span,
+.admin-product-options-v3 summary > span {
+    min-width: max-content;
+    padding: 7px 11px;
+    border: 1px solid var(--admin-border);
+    border-radius: 999px;
+    background: rgba(236, 236, 236, .55);
+    color: var(--admin-muted);
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.admin-product-form-section-v3,
+.admin-product-options-v3 {
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .55);
+    overflow: hidden;
+}
+
+.admin-product-form-section-v3 {
+    padding: 16px;
+    display: grid;
+    gap: 14px;
+}
+
+.admin-product-section-title-v3 strong,
+.admin-product-options-v3 summary strong {
+    color: var(--admin-text);
+    font-size: 15px;
+    font-weight: 950;
+}
+
+.admin-product-required-grid-v3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-product-required-grid-v3 label:first-child {
+    grid-column: 1 / -1;
+}
+
+.admin-product-options-v3 > summary {
+    min-height: 58px;
+    padding: 14px 16px;
+    cursor: pointer;
+    list-style: none;
+    background: rgba(236, 236, 236, .45);
+    user-select: none;
+}
+
+.admin-product-options-v3 > summary::-webkit-details-marker {
+    display: none;
+}
+
+.admin-product-options-v3 summary > span::after {
+    content: "";
+    width: 7px;
+    height: 7px;
+    margin-left: 9px;
+    display: inline-block;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: translateY(-2px) rotate(45deg);
+    transition: transform .18s ease;
+}
+
+.admin-product-options-v3[open] summary > span::after {
+    transform: translateY(2px) rotate(225deg);
+}
+
+.admin-product-options-v3[open] > summary {
+    border-bottom: 1px solid var(--admin-border);
+    background: rgba(22, 8, 133, .055);
+}
+
+.admin-product-options-body-v3 {
+    padding: 16px;
+    display: grid;
+    gap: 16px;
+}
+
+.admin-product-description-v3 textarea {
+    min-height: 120px;
+}
+
+.admin-product-image-preview-v3 {
+    min-height: 78px;
+    padding: 12px;
+    border: 1px dashed var(--admin-border);
+    border-radius: 12px;
+    background: rgba(236, 236, 236, .35);
+}
+
+.admin-product-image-preview-v3 p {
+    margin: 0 0 8px;
+    color: var(--admin-text);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.admin-product-image-preview-v3 span {
+    color: var(--admin-muted);
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.admin-product-actions-v3 {
+    margin-top: 0;
+}
+
+@media (max-width: 900px) {
+    .admin-product-required-grid-v3 {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-product-form-head-v3,
+    .admin-product-section-title-v3,
+    .admin-product-options-v3 > summary {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .admin-product-form-head-v3 > span,
+    .admin-product-options-v3 summary > span {
+        width: fit-content;
+    }
+}
+
+
+/* =========================================================
+   ADMIN PRODUCT FORM TABS / BUTTON SWITCHER
+========================================================= */
+
+.admin-product-tab-switcher-v3 {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    max-width: 100%;
+    padding: 6px;
+    border: 1px solid var(--admin-border);
+    border-radius: 18px;
+    background: rgba(236, 236, 236, .48);
+    overflow-x: auto;
+}
+
+.admin-product-tab-btn-v3 {
+    min-height: 48px;
+    padding: 9px 14px;
+    border: 0;
+    border-radius: 14px;
+    background: transparent;
+    color: var(--admin-muted);
+    display: inline-grid;
+    gap: 2px;
+    align-items: center;
+    justify-items: start;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: background .18s ease, color .18s ease, box-shadow .18s ease;
+    white-space: nowrap;
+}
+
+.admin-product-tab-btn-v3 span {
+    line-height: 1.1;
+}
+
+.admin-product-tab-btn-v3 small {
+    color: inherit;
+    font-size: 11px;
+    font-weight: 800;
+    opacity: .84;
+}
+
+.admin-product-tab-btn-v3.is-active {
+    background: #fff;
+    color: var(--admin-text);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, .08);
+}
+
+.admin-product-form-section-v3--optional {
+    padding: 16px;
+}
+
+.admin-product-form-section-v3--optional .admin-product-section-title-v3 {
+    margin-bottom: 2px;
+}
+
+@media (max-width: 900px) {
+    .admin-product-tab-switcher-v3 {
+        width: 100%;
+    }
+
+    .admin-product-tab-btn-v3 {
+        flex: 1 0 auto;
+        min-width: 150px;
+    }
+}

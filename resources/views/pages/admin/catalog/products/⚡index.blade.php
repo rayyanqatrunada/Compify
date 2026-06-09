@@ -34,6 +34,10 @@ class extends Component {
     public string $sale_ends_at = '';
 
     public int $stock = 0;
+    public int $weight_gram = 1000;
+    public string $length_cm = '';
+    public string $width_cm = '';
+    public string $height_cm = '';
     public bool $is_featured = false;
     public bool $is_new = false;
     public bool $is_active = true;
@@ -52,6 +56,8 @@ class extends Component {
 
     public bool $showExportModal = false;
     public bool $showImportModal = false;
+
+    public string $formTab = 'required';
 
     public function updatedPerPage(): void
     {
@@ -148,6 +154,10 @@ class extends Component {
             'sale_starts_at' => ['nullable', 'date'],
             'sale_ends_at' => ['nullable', 'date', 'after_or_equal:sale_starts_at'],
             'stock' => ['required', 'integer', 'min:0'],
+            'weight_gram' => ['required', 'integer', 'min:1', 'max:200000'],
+            'length_cm' => ['nullable', 'integer', 'min:1', 'max:1000'],
+            'width_cm' => ['nullable', 'integer', 'min:1', 'max:1000'],
+            'height_cm' => ['nullable', 'integer', 'min:1', 'max:1000'],
             'is_featured' => ['boolean'],
             'is_new' => ['boolean'],
             'is_active' => ['boolean'],
@@ -178,6 +188,10 @@ class extends Component {
             'sale_starts_at' => $this->sale_starts_at ?: null,
             'sale_ends_at' => $this->sale_ends_at ?: null,
             'stock' => $this->stock,
+            'weight_gram' => $this->weight_gram,
+            'length_cm' => $this->length_cm !== '' ? (int) $this->length_cm : null,
+            'width_cm' => $this->width_cm !== '' ? (int) $this->width_cm : null,
+            'height_cm' => $this->height_cm !== '' ? (int) $this->height_cm : null,
             'is_featured' => (bool) $this->is_featured,
             'is_new' => (bool) $this->is_new,
             'is_active' => (bool) $this->is_active,
@@ -225,6 +239,10 @@ class extends Component {
             : '';
 
         $this->stock = $product->stock;
+        $this->weight_gram = $product->weight_gram ?: 1000;
+        $this->length_cm = $product->length_cm ? (string) $product->length_cm : '';
+        $this->width_cm = $product->width_cm ? (string) $product->width_cm : '';
+        $this->height_cm = $product->height_cm ? (string) $product->height_cm : '';
         $this->is_featured = (bool) $product->is_featured;
         $this->is_new = (bool) $product->is_new;
         $this->is_active = (bool) $product->is_active;
@@ -265,6 +283,10 @@ class extends Component {
         $this->sale_ends_at = '';
 
         $this->stock = 0;
+        $this->weight_gram = 1000;
+        $this->length_cm = '';
+        $this->width_cm = '';
+        $this->height_cm = '';
         $this->is_featured = false;
         $this->is_new = false;
         $this->is_active = true;
@@ -272,6 +294,7 @@ class extends Component {
 
         $this->imageFile = null;
         $this->currentImage = null;
+        $this->formTab = 'required';
 
         $this->resetValidation();
     }
@@ -310,136 +333,216 @@ class extends Component {
         </div>
     @endif
 
-    <form wire:submit="save" class="admin-panel-v2 admin-form">
-        <h2>{{ $editingId ? 'Edit Produk' : 'Tambah Produk' }}</h2>
-
-        <div class="admin-grid">
-            <label>
-                Nama Produk
-                <input type="text" wire:model="name" placeholder="Contoh: ASUS Prime B760M-A">
-                @error('name') <span class="error-text">{{ $message }}</span> @enderror
-            </label>
-
-            <label>
-                SKU
-                <input type="text" wire:model="sku" placeholder="Contoh: MB-ASUS-B760M">
-                @error('sku') <span class="error-text">{{ $message }}</span> @enderror
-            </label>
-
-            <label>
-                Kategori
-                <select wire:model="category_id">
-                    <option value="">Pilih kategori</option>
-
-                    @foreach($this->categories as $category)
-                        <option value="{{ $category->id }}">
-                            {{ $category->parent_id ? '— ' : '' }}{{ $category->name }}
-                        </option>
-                    @endforeach
-                </select>
-                @error('category_id') <span class="error-text">{{ $message }}</span> @enderror
-            </label>
-
-            <label>
-                Brand
-                <select wire:model="brand_id">
-                    <option value="">Tanpa brand</option>
-
-                    @foreach($this->brands as $brand)
-                        <option value="{{ $brand->id }}">
-                            {{ $brand->name }}
-                        </option>
-                    @endforeach
-                </select>
-                @error('brand_id') <span class="error-text">{{ $message }}</span> @enderror
-            </label>
-
-            <label>
-                Harga Normal
-                <input type="number" wire:model="price" min="0" placeholder="Contoh: 2450000">
-                @error('price') <span class="error-text">{{ $message }}</span> @enderror
-            </label>
-
-            <label>
-                Harga Diskon
-                <input type="number" wire:model="sale_price" min="0" placeholder="Kosongkan jika tidak diskon">
-                @error('sale_price') <span class="error-text">{{ $message }}</span> @enderror
-            </label>
-
-            <label>
-                Promo Mulai
-                <input type="datetime-local" wire:model="sale_starts_at">
-                @error('sale_starts_at') <span class="error-text">{{ $message }}</span> @enderror
-            </label>
-
-            <label>
-                Promo Selesai
-                <input type="datetime-local" wire:model="sale_ends_at">
-                @error('sale_ends_at') <span class="error-text">{{ $message }}</span> @enderror
-            </label>
-
-            <label>
-                Stok
-                <input type="number" wire:model="stock" min="0">
-                @error('stock') <span class="error-text">{{ $message }}</span> @enderror
-            </label>
-
-            <label>
-                Urutan Tampil
-                <input type="number" wire:model="sort_order" min="0">
-                @error('sort_order') <span class="error-text">{{ $message }}</span> @enderror
-            </label>
-
-            <label>
-                Produk Unggulan
-                <select wire:model="is_featured">
-                    <option value="0">Tidak</option>
-                    <option value="1">Ya</option>
-                </select>
-            </label>
-
-            <label>
-                Produk Baru
-                <select wire:model="is_new">
-                    <option value="0">Tidak</option>
-                    <option value="1">Ya</option>
-                </select>
-            </label>
-
-            <label>
-                Status Tampil
-                <select wire:model="is_active">
-                    <option value="1">Aktif</option>
-                    <option value="0">Nonaktif</option>
-                </select>
-            </label>
-
-            <label>
-                Gambar Produk
-                <input type="file" wire:model="imageFile" accept="image/*">
-                @error('imageFile') <span class="error-text">{{ $message }}</span> @enderror
-            </label>
-
+    <form wire:submit="save" class="admin-panel-v2 admin-form admin-product-form-v3">
+        <div class="admin-product-form-head-v3">
             <div>
-                @if($imageFile)
-                    <p>Preview gambar baru:</p>
-                    <img src="{{ $imageFile->temporaryUrl() }}" alt="Preview" class="admin-product-thumb-large">
-                @elseif($currentImage)
-                    <p>Gambar saat ini:</p>
-                    <img src="{{ Storage::url($currentImage) }}" alt="Current Image" class="admin-product-thumb-large">
-                @endif
+                <h2>{{ $editingId ? 'Edit Produk' : 'Tambah Produk' }}</h2>
             </div>
+
+            <span>{{ $editingId ? 'Mode Edit' : 'Produk Baru' }}</span>
         </div>
 
-        <br>
+        <div class="admin-product-tab-switcher-v3" role="tablist" aria-label="Bagian form produk">
+            <button
+                type="button"
+                wire:click="$set('formTab', 'required')"
+                @class([
+                    'admin-product-tab-btn-v3',
+                    'is-active' => $formTab === 'required',
+                ])
+            >
+                <span>Data Utama</span>
+                <small>5 field</small>
+            </button>
 
-        <label>
-            Deskripsi Produk
-            <textarea wire:model="description" rows="5" placeholder="Tulis deskripsi produk"></textarea>
-            @error('description') <span class="error-text">{{ $message }}</span> @enderror
-        </label>
+            <button
+                type="button"
+                wire:click="$set('formTab', 'optional')"
+                @class([
+                    'admin-product-tab-btn-v3',
+                    'is-active' => $formTab === 'optional',
+                ])
+            >
+                <span>Data Opsional</span>
+                <small>Tambahan</small>
+            </button>
+        </div>
 
-        <div class="admin-actions">
+        @if($formTab === 'required')
+            <section class="admin-product-form-section-v3">
+                <div class="admin-product-section-title-v3">
+                    <div>
+                        <strong>Data Utama</strong>
+                    </div>
+                </div>
+
+                <div class="admin-grid admin-product-required-grid-v3">
+                    <label>
+                        Nama Produk
+                        <input type="text" wire:model="name" placeholder="Contoh: ASUS Prime B760M-A">
+                        @error('name') <span class="error-text">{{ $message }}</span> @enderror
+                    </label>
+
+                    <label>
+                        Kategori
+                        <select wire:model="category_id">
+                            <option value="">Pilih kategori</option>
+
+                            @foreach($this->categories as $category)
+                                <option value="{{ $category->id }}">
+                                    {{ $category->parent_id ? '— ' : '' }}{{ $category->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('category_id') <span class="error-text">{{ $message }}</span> @enderror
+                    </label>
+
+                    <label>
+                        Harga Normal
+                        <input type="number" wire:model="price" min="0" placeholder="Contoh: 2450000">
+                        @error('price') <span class="error-text">{{ $message }}</span> @enderror
+                    </label>
+
+                    <label>
+                        Stok
+                        <input type="number" wire:model="stock" min="0">
+                        @error('stock') <span class="error-text">{{ $message }}</span> @enderror
+                    </label>
+
+                    <label>
+                        Berat Produk (gram)
+                        <input type="number" wire:model="weight_gram" min="1" placeholder="Contoh: 1000">
+                        @error('weight_gram') <span class="error-text">{{ $message }}</span> @enderror
+                    </label>
+                </div>
+            </section>
+        @else
+            <section class="admin-product-form-section-v3 admin-product-form-section-v3--optional">
+                <div class="admin-product-section-title-v3">
+                    <div>
+                        <strong>Data Opsional</strong>
+                        <small>SKU, brand, promo, dimensi, gambar, status, dan deskripsi.</small>
+                    </div>
+                </div>
+
+                <div class="admin-product-options-body-v3">
+                    <div class="admin-grid">
+                        <label>
+                            SKU
+                            <input type="text" wire:model="sku" placeholder="Contoh: MB-ASUS-B760M">
+                            @error('sku') <span class="error-text">{{ $message }}</span> @enderror
+                        </label>
+
+                        <label>
+                            Brand
+                            <select wire:model="brand_id">
+                                <option value="">Tanpa brand</option>
+
+                                @foreach($this->brands as $brand)
+                                    <option value="{{ $brand->id }}">
+                                        {{ $brand->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('brand_id') <span class="error-text">{{ $message }}</span> @enderror
+                        </label>
+
+                        <label>
+                            Harga Diskon
+                            <input type="number" wire:model="sale_price" min="0" placeholder="Kosongkan jika tidak diskon">
+                            @error('sale_price') <span class="error-text">{{ $message }}</span> @enderror
+                        </label>
+
+                        <label>
+                            Promo Mulai
+                            <input type="datetime-local" wire:model="sale_starts_at">
+                            @error('sale_starts_at') <span class="error-text">{{ $message }}</span> @enderror
+                        </label>
+
+                        <label>
+                            Promo Selesai
+                            <input type="datetime-local" wire:model="sale_ends_at">
+                            @error('sale_ends_at') <span class="error-text">{{ $message }}</span> @enderror
+                        </label>
+
+                        <label>
+                            Panjang (cm)
+                            <input type="number" wire:model="length_cm" min="1" placeholder="Opsional">
+                            @error('length_cm') <span class="error-text">{{ $message }}</span> @enderror
+                        </label>
+
+                        <label>
+                            Lebar (cm)
+                            <input type="number" wire:model="width_cm" min="1" placeholder="Opsional">
+                            @error('width_cm') <span class="error-text">{{ $message }}</span> @enderror
+                        </label>
+
+                        <label>
+                            Tinggi (cm)
+                            <input type="number" wire:model="height_cm" min="1" placeholder="Opsional">
+                            @error('height_cm') <span class="error-text">{{ $message }}</span> @enderror
+                        </label>
+
+                        <label>
+                            Urutan Tampil
+                            <input type="number" wire:model="sort_order" min="0">
+                            @error('sort_order') <span class="error-text">{{ $message }}</span> @enderror
+                        </label>
+
+                        <label>
+                            Produk Unggulan
+                            <select wire:model="is_featured">
+                                <option value="0">Tidak</option>
+                                <option value="1">Ya</option>
+                            </select>
+                        </label>
+
+                        <label>
+                            Produk Baru
+                            <select wire:model="is_new">
+                                <option value="0">Tidak</option>
+                                <option value="1">Ya</option>
+                            </select>
+                        </label>
+
+                        <label>
+                            Status Tampil
+                            <select wire:model="is_active">
+                                <option value="1">Aktif</option>
+                                <option value="0">Nonaktif</option>
+                            </select>
+                        </label>
+
+                        <label>
+                            Gambar Produk
+                            <input type="file" wire:model="imageFile" accept="image/*">
+                            @error('imageFile') <span class="error-text">{{ $message }}</span> @enderror
+                        </label>
+
+                        <div class="admin-product-image-preview-v3">
+                            @if($imageFile)
+                                <p>Preview gambar baru</p>
+                                <img src="{{ $imageFile->temporaryUrl() }}" alt="Preview" class="admin-product-thumb-large">
+                            @elseif($currentImage)
+                                <p>Gambar saat ini</p>
+                                <img src="{{ Storage::url($currentImage) }}" alt="Current Image" class="admin-product-thumb-large">
+                            @else
+                                <p>Belum ada gambar</p>
+                                <span>Upload gambar produk jika diperlukan.</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <label class="admin-product-description-v3">
+                        Deskripsi Produk
+                        <textarea wire:model="description" rows="5" placeholder="Tulis deskripsi produk"></textarea>
+                        @error('description') <span class="error-text">{{ $message }}</span> @enderror
+                    </label>
+                </div>
+            </section>
+        @endif
+
+        <div class="admin-actions admin-product-actions-v3">
             <button class="admin-btn" type="submit">
                 {{ $editingId ? 'Update Produk' : 'Simpan Produk' }}
             </button>
@@ -504,6 +607,7 @@ class extends Component {
                     <th>Brand</th>
                     <th>Harga</th>
                     <th>Stok</th>
+                    <th>Berat</th>
                     <th>Label</th>
                     <th>Status</th>
                     <th>Aksi</th>
@@ -568,6 +672,12 @@ class extends Component {
                         <td>{{ $product->stock }}</td>
 
                         <td>
+                            <strong>{{ $product->formatted_weight }}</strong>
+                            <br>
+                            <small>{{ $product->dimensions_label }}</small>
+                        </td>
+
+                        <td>
                             @if($product->is_new)
                                 <span>New</span>
                                 <br>
@@ -601,7 +711,7 @@ class extends Component {
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9">Belum ada produk.</td>
+                        <td colspan="10">Belum ada produk.</td>
                     </tr>
                 @endforelse
             </tbody>

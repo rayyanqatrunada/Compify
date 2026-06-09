@@ -1682,3 +1682,66 @@
         height: 34px;
     }
 }
+
+
+/* =========================================================
+   CHECKOUT SHIPPING WEIGHT INFO
+========================================================= */
+
+.checkout-weight-box {
+    margin: 0 0 12px;
+    padding: 12px 13px;
+    border: 1px solid rgba(14, 10, 16, .12);
+    border-radius: var(--checkout-field-radius);
+    background: rgba(255, 255, 255, .46);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.checkout-weight-box strong {
+    display: block;
+    color: var(--checkout-black);
+    font-size: 14px;
+    line-height: 1.2;
+    font-weight: 850;
+}
+
+.checkout-weight-box small {
+    display: block;
+    margin-top: 3px;
+    color: rgba(14, 10, 16, .62);
+    font-size: 11px;
+    line-height: 1.35;
+    font-weight: 650;
+}
+
+.checkout-weight-box span {
+    min-width: max-content;
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: rgba(22, 8, 133, .08);
+    color: var(--checkout-purple);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.checkout-summary-line--muted strong {
+    color: rgba(14, 10, 16, .72);
+    font-size: 13px;
+}
+
+@media (max-width: 640px) {
+    .checkout-weight-box {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 9px;
+    }
+}
+
+
+.checkout-price-list .checkout-price-list-muted strong {
+    color: rgba(14, 10, 16, .72);
+    font-size: 13px;
+}

@@ -193,13 +193,16 @@ class extends Component {
 
         if ($source === HomeLayoutSlot::SOURCE_BEST_SELLER) {
             $bestSellerIds = OrderItem::query()
-                ->whereNotNull('product_id')
-                ->select('product_id')
-                ->selectRaw('SUM(quantity) as total_sold')
-                ->groupBy('product_id')
+                ->join('orders', 'orders.id', '=', 'order_items.order_id')
+                ->whereNotNull('order_items.product_id')
+                ->where('orders.payment_status', 'paid')
+                ->whereNotIn('orders.order_status', ['cancelled'])
+                ->select('order_items.product_id')
+                ->selectRaw('SUM(order_items.quantity) as total_sold')
+                ->groupBy('order_items.product_id')
                 ->orderByDesc('total_sold')
                 ->limit(100)
-                ->pluck('product_id')
+                ->pluck('order_items.product_id')
                 ->values();
 
             if ($bestSellerIds->isEmpty()) {
