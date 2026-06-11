@@ -27,6 +27,8 @@ use Illuminate\Support\Str;
     'city',
     'province',
     'postal_code',
+    'shipping_destination_area_id',
+    'shipping_destination_label',
     'gender',
     'birth_date',
 ])]

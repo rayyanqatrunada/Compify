@@ -1559,7 +1559,7 @@
     display: inline-grid;
     place-items: center;
     border-radius: 999px;
-    /* background: rgba(14, 10, 16, .055); */
+    background: rgba(14, 10, 16, .055);
     color: rgba(14, 10, 16, .72);
     font-size: 14px;
     font-weight: 950;
@@ -1569,7 +1569,7 @@
 
 .checkout-payment-group--dropdown[open] .checkout-payment-group-head > span b {
     transform: rotate(180deg);
-    /* background: rgba(22, 8, 133, .10); */
+    background: rgba(22, 8, 133, .10);
     color: var(--checkout-purple);
 }
 
@@ -1741,7 +1741,375 @@
 }
 
 
-.checkout-price-list .checkout-price-list-muted strong {
-    color: rgba(14, 10, 16, .72);
+/* =========================================================
+   CHECKOUT SHIPPING DESTINATION SEARCH - STAGE 4
+========================================================= */
+
+.checkout-destination-search {
+    padding: 12px;
+    border: 1px solid rgba(14, 10, 16, .16);
+    border-radius: var(--checkout-field-radius);
+    background: rgba(241, 241, 241, .58);
+    display: grid;
+    gap: 10px;
+}
+
+.checkout-destination-search__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.checkout-destination-search__head strong {
+    display: block;
+    color: var(--checkout-black);
+    font-size: 14px;
+    line-height: 1.2;
+    font-weight: 900;
+}
+
+.checkout-destination-search__head small {
+    display: block;
+    margin-top: 3px;
+    color: rgba(14, 10, 16, .64);
+    font-size: 11px;
+    line-height: 1.35;
+    font-weight: 700;
+}
+
+.checkout-destination-search__head > span {
+    min-width: max-content;
+    padding: 5px 8px;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid rgba(14, 10, 16, .12);
+    color: rgba(14, 10, 16, .68);
+    font-size: 10px;
+    font-weight: 900;
+}
+
+.checkout-destination-search__form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 8px;
+}
+
+.checkout-destination-search__form input {
+    width: 100%;
+    min-height: 42px;
+    padding: 0 11px;
+    border: 1px solid var(--checkout-border);
+    border-radius: var(--checkout-field-radius);
+    background: #fff;
+    color: var(--checkout-black);
+    font-family: inherit;
     font-size: 13px;
+    font-weight: 700;
+    outline: none;
+}
+
+.checkout-destination-search__form button,
+.checkout-destination-results button {
+    font-family: inherit;
+}
+
+.checkout-destination-search__form button {
+    min-height: 42px;
+    padding: 0 14px;
+    border: 1px solid var(--checkout-black);
+    border-radius: var(--checkout-field-radius);
+    background: var(--checkout-black);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.checkout-destination-search__form button.is-light {
+    background: #fff;
+    color: var(--checkout-black);
+}
+
+.checkout-destination-selected {
+    padding: 9px 10px;
+    border: 1px solid rgba(22, 8, 133, .14);
+    border-radius: 10px;
+    background: rgba(22, 8, 133, .06);
+    display: grid;
+    gap: 2px;
+}
+
+.checkout-destination-selected strong {
+    color: var(--checkout-black);
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.checkout-destination-selected span {
+    color: rgba(14, 10, 16, .72);
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 750;
+}
+
+.checkout-destination-results {
+    display: grid;
+    gap: 7px;
+    max-height: 240px;
+    overflow: auto;
+}
+
+.checkout-destination-results button {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid rgba(14, 10, 16, .12);
+    border-radius: 10px;
+    background: #fff;
+    text-align: left;
+    cursor: pointer;
+    display: grid;
+    gap: 2px;
+}
+
+.checkout-destination-results button:hover {
+    border-color: rgba(22, 8, 133, .28);
+    background: rgba(22, 8, 133, .045);
+}
+
+.checkout-destination-results strong {
+    color: var(--checkout-black);
+    font-size: 12px;
+    line-height: 1.35;
+    font-weight: 900;
+}
+
+.checkout-destination-results small {
+    color: rgba(14, 10, 16, .62);
+    font-size: 11px;
+    font-weight: 750;
+}
+
+@media (max-width: 640px) {
+    .checkout-destination-search__head {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .checkout-destination-search__form {
+        grid-template-columns: 1fr;
+    }
+
+    .checkout-destination-search__form button {
+        width: 100%;
+    }
+}
+
+
+/* =========================================================
+   CHECKOUT SHIPPING API RATES - STAGE 5
+========================================================= */
+
+.checkout-shipping-api-box {
+    padding: 12px;
+    border: 1px solid rgba(22, 8, 133, .16);
+    border-radius: var(--checkout-field-radius);
+    background: rgba(22, 8, 133, .045);
+    display: grid;
+    gap: 10px;
+}
+
+.checkout-shipping-api-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.checkout-shipping-api-head strong,
+.checkout-shipping-manual-title strong {
+    display: block;
+    color: var(--checkout-black);
+    font-size: 14px;
+    line-height: 1.2;
+    font-weight: 900;
+}
+
+.checkout-shipping-api-head small,
+.checkout-shipping-manual-title small {
+    display: block;
+    margin-top: 3px;
+    color: rgba(14, 10, 16, .64);
+    font-size: 11px;
+    line-height: 1.35;
+    font-weight: 700;
+}
+
+.checkout-shipping-api-head button {
+    min-width: max-content;
+    min-height: 38px;
+    padding: 0 13px;
+    border: 1px solid var(--checkout-black);
+    border-radius: var(--checkout-field-radius);
+    background: var(--checkout-black);
+    color: #fff;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.checkout-shipping-api-head button:disabled {
+    cursor: not-allowed;
+    opacity: .45;
+}
+
+.checkout-shipping-rate-list {
+    display: grid;
+    gap: 8px;
+}
+
+.checkout-shipping-rate-card {
+    min-height: 58px;
+    padding: 10px 12px;
+    border: 1px solid rgba(14, 10, 16, .13);
+    border-radius: var(--checkout-field-radius);
+    background: #fff;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.checkout-shipping-rate-card.active {
+    border: 3px solid var(--checkout-purple);
+}
+
+.checkout-shipping-rate-card input {
+    width: 14px;
+    height: 14px;
+    accent-color: var(--checkout-purple);
+}
+
+.checkout-shipping-rate-card strong {
+    display: block;
+    color: var(--checkout-black);
+    font-size: 14px;
+    line-height: 1.25;
+    font-weight: 900;
+}
+
+.checkout-shipping-rate-card small {
+    display: block;
+    margin-top: 2px;
+    color: rgba(14, 10, 16, .64);
+    font-size: 11px;
+    line-height: 1.35;
+    font-weight: 700;
+}
+
+.checkout-shipping-rate-card b {
+    color: var(--checkout-black);
+    font-size: 13px;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.checkout-shipping-manual-title {
+    margin-top: 2px;
+    padding: 10px 12px;
+    border: 1px solid rgba(14, 10, 16, .10);
+    border-radius: var(--checkout-field-radius);
+    background: rgba(241, 241, 241, .42);
+}
+
+@media (max-width: 640px) {
+    .checkout-shipping-api-head {
+        flex-direction: column;
+    }
+
+    .checkout-shipping-api-head button {
+        width: 100%;
+    }
+
+    .checkout-shipping-rate-card {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .checkout-shipping-rate-card b {
+        grid-column: 2;
+    }
+}
+
+
+/* =========================================================
+   CHECKOUT AUTO SHIPPING STAGE 6
+   Form tetap biasa, ongkir dihitung otomatis dari wilayah.
+========================================================= */
+
+.checkout-auto-shipping-box {
+    padding: 11px 12px;
+    border: 1px solid rgba(14, 10, 16, .13);
+    border-radius: var(--checkout-field-radius);
+    background: rgba(241, 241, 241, .58);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.checkout-auto-shipping-box > div {
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+}
+
+.checkout-auto-shipping-box strong {
+    color: var(--checkout-black);
+    font-size: 13px;
+    font-weight: 950;
+}
+
+.checkout-auto-shipping-box span,
+.checkout-auto-shipping-box small {
+    color: rgba(14, 10, 16, .66);
+    font-size: 11px;
+    line-height: 1.35;
+    font-weight: 750;
+}
+
+.checkout-auto-shipping-box small {
+    color: var(--checkout-purple);
+    font-weight: 850;
+}
+
+.checkout-auto-shipping-box button {
+    min-width: max-content;
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--checkout-black);
+    border-radius: 999px;
+    background: var(--checkout-black);
+    color: #fff;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.checkout-shipping-api-box:has(.checkout-shipping-rate-card.active) {
+    border-color: rgba(22, 8, 133, .20);
+    background: rgba(22, 8, 133, .04);
+}
+
+@media (max-width: 640px) {
+    .checkout-auto-shipping-box {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .checkout-auto-shipping-box button {
+        width: 100%;
+    }
 }

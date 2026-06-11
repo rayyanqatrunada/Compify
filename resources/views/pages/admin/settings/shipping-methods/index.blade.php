@@ -3,6 +3,7 @@
 use App\Models\ShippingMethod;
 use App\Models\ShippingSetting;
 use Illuminate\Support\Str;
+use App\Services\Shipping\RajaOngkirShippingService;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -32,6 +33,20 @@ class extends Component {
     public string $district = 'Bangsri';
     public string $postal_code = '';
 
+    public string $shipping_api_provider = 'manual';
+    public bool $shipping_api_enabled = false;
+    public string $shipping_api_key = '';
+    public string $shipping_api_origin_area_id = '';
+    public string $shipping_api_origin_label = '';
+    public string $shipping_api_couriers = 'jne,jnt,sicepat,anteraja,pos';
+    public int $shipping_api_default_weight_gram = 1000;
+    public int $shipping_api_cache_minutes = 30;
+    public bool $shipping_api_fallback_manual = true;
+
+    public string $origin_search = '';
+    public array $origin_results = [];
+    public ?string $origin_search_error = null;
+
     public function mount(): void
     {
         $setting = ShippingSetting::firstOrCreate(
@@ -41,6 +56,11 @@ class extends Component {
                 'province' => 'Jawa Tengah',
                 'city' => 'Jepara',
                 'district' => 'Bangsri',
+                'shipping_api_provider' => config('shipping_api.default_provider', 'manual'),
+                'shipping_api_enabled' => (bool) config('shipping_api.enabled', false),
+                'shipping_api_fallback_manual' => (bool) config('shipping_api.fallback_manual', true),
+                'shipping_api_default_weight_gram' => 1000,
+                'shipping_api_cache_minutes' => (int) config('shipping_api.cache_minutes', 30),
             ]
         );
 
@@ -49,6 +69,16 @@ class extends Component {
         $this->city = $setting->city;
         $this->district = $setting->district;
         $this->postal_code = $setting->postal_code ?? '';
+
+        $this->shipping_api_provider = $setting->shipping_api_provider ?: 'manual';
+        $this->shipping_api_enabled = (bool) $setting->shipping_api_enabled;
+        $this->shipping_api_key = '';
+        $this->shipping_api_origin_area_id = $setting->shipping_api_origin_area_id ?? '';
+        $this->shipping_api_origin_label = $setting->shipping_api_origin_label ?? '';
+        $this->shipping_api_couriers = $setting->shipping_api_couriers ?: 'jne,jnt,sicepat,anteraja,pos';
+        $this->shipping_api_default_weight_gram = $setting->shipping_api_default_weight_gram ?: 1000;
+        $this->shipping_api_cache_minutes = $setting->shipping_api_cache_minutes ?? 30;
+        $this->shipping_api_fallback_manual = (bool) $setting->shipping_api_fallback_manual;
     }
 
     #[Computed]
@@ -60,6 +90,95 @@ class extends Component {
             ->get();
     }
 
+    public function providerOptions(): array
+    {
+        return [
+            'manual' => 'Manual dulu',
+            'rajaongkir' => 'RajaOngkir',
+            'biteship' => 'Biteship',
+        ];
+    }
+
+    public function apiKeyStatus(): string
+    {
+        $setting = ShippingSetting::find(1);
+        $provider = $this->shipping_api_provider;
+
+        if ($setting?->shipping_api_key) {
+            return 'API key tersimpan di database.';
+        }
+
+        if ($provider !== 'manual' && filled(config("shipping_api.providers.{$provider}.api_key"))) {
+            return 'API key terdeteksi dari .env.';
+        }
+
+        return 'API key belum diisi.';
+    }
+
+    public function apiReadinessLabel(): string
+    {
+        if ($this->shipping_api_provider === 'manual' || ! $this->shipping_api_enabled) {
+            return 'Mode manual aktif.';
+        }
+
+        if (blank($this->shipping_api_origin_area_id)) {
+            return 'Perlu Origin Area ID.';
+        }
+
+        if ($this->apiKeyStatus() === 'API key belum diisi.' && blank($this->shipping_api_key)) {
+            return 'Perlu API key.';
+        }
+
+        return 'Siap untuk tahap integrasi API.';
+    }
+
+    public function searchOriginArea(): void
+    {
+        $this->origin_search_error = null;
+        $this->origin_results = [];
+
+        if ($this->shipping_api_provider !== 'rajaongkir') {
+            $this->origin_search_error = 'Search origin tahap ini baru tersedia untuk RajaOngkir.';
+            return;
+        }
+
+        if (mb_strlen(trim($this->origin_search)) < 3) {
+            $this->origin_search_error = 'Ketik minimal 3 karakter lokasi toko.';
+            return;
+        }
+
+        try {
+            $this->origin_results = app(RajaOngkirShippingService::class)
+                ->searchDomesticDestination($this->origin_search, 8, 0);
+
+            if ($this->origin_results === []) {
+                $this->origin_search_error = 'Lokasi tidak ditemukan. Coba kata kunci lain, misalnya kota/kecamatan/kode pos.';
+            }
+        } catch (\Throwable $e) {
+            report($e);
+
+            $this->origin_search_error = config('app.debug')
+                ? $e->getMessage()
+                : 'Gagal menghubungi RajaOngkir. Cek API key dan koneksi.';
+        }
+    }
+
+    public function selectOriginArea(string $id, string $label): void
+    {
+        $this->shipping_api_origin_area_id = $id;
+        $this->shipping_api_origin_label = $label;
+        $this->origin_search = $label;
+        $this->origin_results = [];
+        $this->origin_search_error = null;
+    }
+
+    public function clearOriginSearch(): void
+    {
+        $this->origin_search = '';
+        $this->origin_results = [];
+        $this->origin_search_error = null;
+    }
+
     public function saveSetting(): void
     {
         $this->validate([
@@ -68,20 +187,44 @@ class extends Component {
             'city' => ['required', 'string', 'max:255'],
             'district' => ['required', 'string', 'max:255'],
             'postal_code' => ['nullable', 'string', 'max:20'],
+
+            'shipping_api_provider' => ['required', 'in:manual,rajaongkir,biteship'],
+            'shipping_api_enabled' => ['boolean'],
+            'shipping_api_key' => ['nullable', 'string', 'max:500'],
+            'shipping_api_origin_area_id' => ['nullable', 'string', 'max:100'],
+            'shipping_api_origin_label' => ['nullable', 'string', 'max:500'],
+            'shipping_api_couriers' => ['nullable', 'string', 'max:255'],
+            'shipping_api_default_weight_gram' => ['required', 'integer', 'min:1', 'max:200000'],
+            'shipping_api_cache_minutes' => ['required', 'integer', 'min:0', 'max:1440'],
+            'shipping_api_fallback_manual' => ['boolean'],
         ]);
 
-        ShippingSetting::updateOrCreate(
-            ['id' => 1],
-            [
-                'country' => $this->country,
-                'province' => $this->province,
-                'city' => $this->city,
-                'district' => $this->district,
-                'postal_code' => $this->postal_code ?: null,
-            ]
-        );
+        $payload = [
+            'country' => $this->country,
+            'province' => $this->province,
+            'city' => $this->city,
+            'district' => $this->district,
+            'postal_code' => $this->postal_code ?: null,
 
-        session()->flash('success', 'Base lokasi pengiriman berhasil disimpan.');
+            'shipping_api_provider' => $this->shipping_api_provider,
+            'shipping_api_enabled' => (bool) $this->shipping_api_enabled,
+            'shipping_api_origin_area_id' => $this->shipping_api_origin_area_id ?: null,
+            'shipping_api_origin_label' => $this->shipping_api_origin_label ?: null,
+            'shipping_api_couriers' => $this->shipping_api_couriers ?: null,
+            'shipping_api_default_weight_gram' => $this->shipping_api_default_weight_gram,
+            'shipping_api_cache_minutes' => $this->shipping_api_cache_minutes,
+            'shipping_api_fallback_manual' => (bool) $this->shipping_api_fallback_manual,
+        ];
+
+        if (filled($this->shipping_api_key)) {
+            $payload['shipping_api_key'] = $this->shipping_api_key;
+        }
+
+        ShippingSetting::updateOrCreate(['id' => 1], $payload);
+
+        $this->shipping_api_key = '';
+
+        session()->flash('success', 'Setting pengiriman berhasil disimpan.');
     }
 
     public function save(): void
@@ -180,39 +323,179 @@ class extends Component {
         <div class="flash-success">{{ session('success') }}</div>
     @endif
 
-    <section class="admin-panel-v2 admin-form">
-        <h2>Base Lokasi Toko</h2>
+    <section class="admin-panel-v2 admin-form admin-shipping-setting-v3">
+        <div class="admin-shipping-setting-head-v3">
+            <div>
+                <h2>Base Lokasi & API Ongkir</h2>
+                <p>Setting lokasi toko tetap dipakai untuk ongkir manual. Setting API disiapkan untuk tahap ongkir otomatis berikutnya.</p>
+            </div>
 
-        <div class="admin-grid">
-            <label>
-                Negara
-                <input type="text" wire:model="country">
-            </label>
+            <span>{{ $this->apiReadinessLabel() }}</span>
+        </div>
 
-            <label>
-                Provinsi
-                <input type="text" wire:model="province">
-            </label>
+        <div class="admin-shipping-setting-block-v3">
+            <div class="admin-shipping-block-title-v3">
+                <strong>Base Lokasi Toko</strong>
+                <small>Dipakai sebagai origin toko dan fallback ongkir manual.</small>
+            </div>
 
-            <label>
-                Kota / Kabupaten
-                <input type="text" wire:model="city">
-            </label>
+            <div class="admin-grid">
+                <label>
+                    Negara
+                    <input type="text" wire:model="country">
+                </label>
 
-            <label>
-                Kecamatan
-                <input type="text" wire:model="district">
-            </label>
+                <label>
+                    Provinsi
+                    <input type="text" wire:model="province">
+                </label>
 
-            <label>
-                Kode Pos
-                <input type="text" wire:model="postal_code">
-            </label>
+                <label>
+                    Kota / Kabupaten
+                    <input type="text" wire:model="city">
+                </label>
+
+                <label>
+                    Kecamatan
+                    <input type="text" wire:model="district">
+                </label>
+
+                <label>
+                    Kode Pos
+                    <input type="text" wire:model="postal_code">
+                </label>
+            </div>
+        </div>
+
+        <div class="admin-shipping-setting-block-v3">
+            <div class="admin-shipping-block-title-v3">
+                <strong>Persiapan API Ongkir</strong>
+            </div>
+
+            <div class="admin-shipping-api-note-v3">
+                <strong>Tahap 2</strong>
+                <span>Isi API key dan Origin Area ID sekarang. Tahap berikutnya baru checkout akan request ongkir otomatis.</span>
+            </div>
+
+            <div class="admin-grid admin-shipping-api-grid-v3">
+                <label>
+                    Provider API
+                    <select wire:model.live="shipping_api_provider">
+                        @foreach($this->providerOptions() as $value => $label)
+                            <option value="{{ $value }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </label>
+
+                <label>
+                    Status API
+                    <select wire:model="shipping_api_enabled">
+                        <option value="0">Nonaktif dulu</option>
+                        <option value="1">Aktif</option>
+                    </select>
+                </label>
+
+                <label>
+                    API Key
+                    <input
+                        type="password"
+                        wire:model="shipping_api_key"
+                        placeholder="{{ $this->apiKeyStatus() }}"
+                        autocomplete="off"
+                    >
+                    <small>Biarkan kosong jika ingin memakai key lama atau dari .env.</small>
+                </label>
+
+                <label>
+                    Origin Area ID
+                    <input type="text" wire:model="shipping_api_origin_area_id" placeholder="Contoh: area/destination id dari provider">
+                    <small>ID lokasi toko dari provider API.</small>
+                </label>
+
+                <div class="admin-shipping-origin-search-v3 admin-shipping-api-wide-v3">
+                    <label>
+                        Cari Origin Toko
+                        <input
+                            type="text"
+                            wire:model.live.debounce.500ms="origin_search"
+                            placeholder="Contoh: Bangsri, Jepara, 59453"
+                        >
+                        <small>Cari lokasi toko dari RajaOngkir, lalu pilih hasilnya untuk mengisi Origin Area ID.</small>
+                    </label>
+
+                    <div class="admin-shipping-origin-actions-v3">
+                        <button type="button" class="admin-btn secondary" wire:click="searchOriginArea">
+                            Cari Origin
+                        </button>
+
+                        <button type="button" class="admin-btn secondary" wire:click="clearOriginSearch">
+                            Bersihkan
+                        </button>
+                    </div>
+
+                    @if($origin_search_error)
+                        <div class="admin-shipping-api-error-v3">
+                            {{ $origin_search_error }}
+                        </div>
+                    @endif
+
+                    @if(! empty($origin_results))
+                        <div class="admin-shipping-origin-results-v3">
+                            @foreach($origin_results as $area)
+                                <button
+                                    type="button"
+                                    wire:click="selectOriginArea('{{ $area['id'] }}', @js($area['label']))"
+                                >
+                                    <strong>{{ $area['label'] }}</strong>
+                                    <small>
+                                        ID: {{ $area['id'] }}
+                                        @if($area['zip_code'])
+                                            · {{ $area['zip_code'] }}
+                                        @endif
+                                    </small>
+                                </button>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+
+                <label class="admin-shipping-api-wide-v3">
+                    Label Origin
+                    <input type="text" wire:model="shipping_api_origin_label" placeholder="Contoh: Bangsri, Jepara, Jawa Tengah">
+                </label>
+
+                <label>
+                    Kode Kurir
+                    <input type="text" wire:model="shipping_api_couriers" placeholder="jne,jnt,sicepat,anteraja,pos">
+                    <small>Pisahkan dengan koma.</small>
+                </label>
+
+                <label>
+                    Berat Default
+                    <input type="number" wire:model="shipping_api_default_weight_gram" min="1">
+                    <small>Dipakai jika item belum punya berat.</small>
+                </label>
+
+                <label>
+                    Cache Ongkir
+                    <input type="number" wire:model="shipping_api_cache_minutes" min="0">
+                    <small>Menit. 0 berarti tanpa cache.</small>
+                </label>
+
+                <label>
+                    Fallback Manual
+                    <select wire:model="shipping_api_fallback_manual">
+                        <option value="1">Aktif</option>
+                        <option value="0">Nonaktif</option>
+                    </select>
+                    <small>Jika API error, checkout bisa tetap pakai ongkir manual.</small>
+                </label>
+            </div>
         </div>
 
         <div class="admin-actions">
             <button type="button" wire:click="saveSetting" class="admin-btn">
-                Simpan Base Lokasi
+                Simpan Setting Pengiriman
             </button>
         </div>
     </section>

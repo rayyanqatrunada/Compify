@@ -19,6 +19,8 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use App\Services\UniversalDiscountService;
 use App\Support\MidtransPaymentChannel;
+use App\Services\Shipping\RajaOngkirShippingService;
+use App\Services\Shipping\ShippingApiSettingService;
 
 new
 #[Layout('components.layouts.shop')]
@@ -40,6 +42,19 @@ class extends Component {
     public string $postal_code = '';
     public string $phone = '';
 
+    public string $shipping_destination_area_id = '';
+    public string $shipping_destination_label = '';
+    public string $destination_search = '';
+    public array $destination_results = [];
+    public ?string $destination_search_error = null;
+
+    public array $shipping_api_rates = [];
+    public string $shipping_api_rate_key = '';
+    public ?string $shipping_api_error = null;
+    public bool $shipping_api_using_manual_fallback = false;
+    public string $shipping_auto_status = 'Lengkapi alamat untuk menghitung ongkir otomatis.';
+    public string $shipping_auto_fingerprint = '';
+
     public ?int $shipping_method_id = null;
     public ?int $payment_method_id = null;
 
@@ -52,6 +67,40 @@ class extends Component {
         if (empty(session('cart', []))) {
             $this->redirectRoute('cart.index', navigate: true);
         }
+    }
+
+    public function updatedShippingMethodId(): void
+    {
+        if ($this->shipping_method_id) {
+            $this->shipping_api_rate_key = '';
+        }
+    }
+
+    public function updatedShippingApiRateKey(): void
+    {
+        if ($this->shipping_api_rate_key !== '') {
+            $this->shipping_method_id = null;
+        }
+    }
+
+    public function updatedDistrict(): void
+    {
+        $this->autoPrepareShippingFromAddress();
+    }
+
+    public function updatedCity(): void
+    {
+        $this->autoPrepareShippingFromAddress();
+    }
+
+    public function updatedProvince(): void
+    {
+        $this->autoPrepareShippingFromAddress();
+    }
+
+    public function updatedPostalCode(): void
+    {
+        $this->autoPrepareShippingFromAddress();
     }
 
     private function splitCustomerName(?string $name): array
@@ -143,6 +192,9 @@ class extends Component {
                 'city' => $lastOrder->shipping_city,
                 'province' => $lastOrder->shipping_province,
                 'postal_code' => $lastOrder->shipping_postal_code,
+                'shipping_destination_area_id' => $lastOrder->shipping_destination_area_id ?? null,
+                'shipping_destination_label' => $lastOrder->shipping_destination_label ?? null,
+                'destination_search' => $lastOrder->shipping_destination_label ?? null,
             ])) {
                 $sources[] = 'riwayat checkout terakhir';
             }
@@ -161,6 +213,9 @@ class extends Component {
                 'city' => $user->city,
                 'province' => $user->province,
                 'postal_code' => $user->postal_code,
+                'shipping_destination_area_id' => $user->shipping_destination_area_id ?? null,
+                'shipping_destination_label' => $user->shipping_destination_label ?? null,
+                'destination_search' => $user->shipping_destination_label ?? null,
             ])) {
                 $sources[] = 'profil customer';
             }
@@ -251,9 +306,382 @@ class extends Component {
             && filled($this->address);
     }
 
+    private function addressFingerprintForShipping(): string
+    {
+        return md5(strtolower(trim(implode('|', [
+            $this->province,
+            $this->city,
+            $this->district,
+            $this->postal_code,
+        ]))));
+    }
+
+    private function isAddressReadyForAutoShipping(): bool
+    {
+        return filled($this->province)
+            && filled($this->city)
+            && filled($this->district)
+            && mb_strlen(trim($this->postal_code)) >= 4;
+    }
+
+    private function destinationSearchKeywordFromAddress(): string
+    {
+        return trim(collect([
+            $this->postal_code,
+            $this->district,
+            $this->city,
+            $this->province,
+        ])->filter(fn ($value) => filled($value))->implode(' '));
+    }
+
+    private function resetAutoShippingResult(bool $clearDestination = true): void
+    {
+        if ($clearDestination) {
+            $this->shipping_destination_area_id = '';
+            $this->shipping_destination_label = '';
+            $this->destination_search = '';
+        }
+
+        $this->destination_results = [];
+        $this->destination_search_error = null;
+        $this->shipping_api_rates = [];
+        $this->shipping_api_rate_key = '';
+        $this->shipping_api_error = null;
+        $this->shipping_api_using_manual_fallback = false;
+        $this->shipping_method_id = null;
+    }
+
+    public function autoPrepareShippingFromAddress(): void
+    {
+        $fingerprint = $this->addressFingerprintForShipping();
+
+        if ($fingerprint === $this->shipping_auto_fingerprint && ($this->shipping_destination_area_id || ! empty($this->shipping_api_rates))) {
+            return;
+        }
+
+        $this->shipping_auto_fingerprint = $fingerprint;
+        $this->resetAutoShippingResult();
+
+        if (! $this->isAddressReadyForAutoShipping()) {
+            $this->shipping_auto_status = 'Lengkapi kecamatan, kota, provinsi, dan kode pos untuk menghitung ongkir otomatis.';
+            return;
+        }
+
+        if (! $this->canUseShippingApi()) {
+            $this->shipping_auto_status = $this->shippingApiStatusMessage();
+            $this->shipping_api_using_manual_fallback = true;
+            return;
+        }
+
+        $this->shipping_auto_status = 'Mencari wilayah tujuan dari alamat...';
+
+        try {
+            $results = app(RajaOngkirShippingService::class)
+                ->searchDomesticDestination($this->destinationSearchKeywordFromAddress(), 8, 0);
+
+            $selected = $this->bestDestinationMatch($results);
+
+            if (! $selected) {
+                $this->shipping_auto_status = 'Wilayah tujuan belum ditemukan otomatis. Cek penulisan kecamatan/kota/kode pos.';
+                $this->shipping_api_using_manual_fallback = true;
+                return;
+            }
+
+            $this->selectDestinationArea(
+                (string) $selected['id'],
+                (string) $selected['label'],
+                (string) ($selected['province_name'] ?? ''),
+                (string) ($selected['city_name'] ?? ''),
+                (string) (($selected['district_name'] ?? '') ?: ($selected['subdistrict_name'] ?? '')),
+                (string) ($selected['zip_code'] ?? '')
+            );
+        } catch (\Throwable $e) {
+            report($e);
+
+            $this->shipping_auto_status = 'Ongkir otomatis belum tersedia. Fallback manual bisa digunakan.';
+            $this->shipping_api_error = config('app.debug')
+                ? $e->getMessage()
+                : 'Gagal mencari wilayah tujuan otomatis.';
+            $this->shipping_api_using_manual_fallback = true;
+        }
+    }
+
+    private function bestDestinationMatch(array $results): ?array
+    {
+        if ($results === []) {
+            return null;
+        }
+
+        $province = strtolower(trim($this->province));
+        $city = strtolower(trim($this->city));
+        $district = strtolower(trim($this->district));
+        $postalCode = preg_replace('/\D+/', '', $this->postal_code);
+
+        return collect($results)
+            ->map(function (array $area) use ($province, $city, $district, $postalCode) {
+                $label = strtolower((string) ($area['label'] ?? ''));
+                $areaProvince = strtolower((string) ($area['province_name'] ?? ''));
+                $areaCity = strtolower((string) ($area['city_name'] ?? ''));
+                $areaDistrict = strtolower((string) (($area['district_name'] ?? '') ?: ($area['subdistrict_name'] ?? '')));
+                $areaZip = preg_replace('/\D+/', '', (string) ($area['zip_code'] ?? ''));
+
+                $score = 0;
+
+                if ($postalCode !== '' && $areaZip === $postalCode) {
+                    $score += 40;
+                }
+
+                if ($district !== '' && (str_contains($areaDistrict, $district) || str_contains($label, $district))) {
+                    $score += 25;
+                }
+
+                if ($city !== '' && (str_contains($areaCity, $city) || str_contains($label, $city))) {
+                    $score += 18;
+                }
+
+                if ($province !== '' && (str_contains($areaProvince, $province) || str_contains($label, $province))) {
+                    $score += 10;
+                }
+
+                $area['_score'] = $score;
+
+                return $area;
+            })
+            ->sortByDesc('_score')
+            ->first();
+    }
+
+    public function searchDestinationArea(): void
+    {
+        $this->destination_search_error = null;
+        $this->destination_results = [];
+
+        if (mb_strlen(trim($this->destination_search)) < 3) {
+            $this->destination_search_error = 'Ketik minimal 3 karakter lokasi tujuan.';
+            return;
+        }
+
+        $setting = ShippingSetting::first();
+        $provider = $setting?->shipping_api_provider ?: config('shipping_api.default_provider', 'manual');
+
+        if ($provider !== 'rajaongkir') {
+            $this->destination_search_error = 'Search destination tahap ini memakai RajaOngkir. Pilih RajaOngkir di admin shipping setting.';
+            return;
+        }
+
+        try {
+            $this->destination_results = app(RajaOngkirShippingService::class)
+                ->searchDomesticDestination($this->destination_search, 8, 0);
+
+            if ($this->destination_results === []) {
+                $this->destination_search_error = 'Lokasi tidak ditemukan. Coba ketik kecamatan, kota, atau kode pos.';
+            }
+        } catch (\Throwable $e) {
+            report($e);
+
+            $this->destination_search_error = config('app.debug')
+                ? $e->getMessage()
+                : 'Gagal mencari lokasi. Cek API key RajaOngkir atau gunakan input alamat manual dulu.';
+        }
+    }
+
+    public function selectDestinationArea(
+        string $id,
+        string $label,
+        string $province = '',
+        string $city = '',
+        string $district = '',
+        string $postalCode = ''
+    ): void {
+        $this->shipping_destination_area_id = $id;
+        $this->shipping_destination_label = $label;
+        $this->destination_search = $label;
+
+        if ($province !== '') {
+            $this->province = $province;
+        }
+
+        if ($city !== '') {
+            $this->city = $city;
+        }
+
+        if ($district !== '') {
+            $this->district = $district;
+        }
+
+        if ($postalCode !== '') {
+            $this->postal_code = $postalCode;
+        }
+
+        $this->shipping_method_id = null;
+        $this->shipping_api_rate_key = '';
+        $this->shipping_api_rates = [];
+        $this->shipping_api_error = null;
+        $this->destination_results = [];
+        $this->destination_search_error = null;
+        $this->shipping_auto_status = 'Wilayah tujuan ditemukan. Menghitung ongkir otomatis...';
+
+        $this->loadShippingApiRates();
+    }
+
+    public function clearDestinationArea(): void
+    {
+        $this->shipping_destination_area_id = '';
+        $this->shipping_destination_label = '';
+        $this->destination_search = '';
+        $this->destination_results = [];
+        $this->destination_search_error = null;
+        $this->shipping_method_id = null;
+        $this->shipping_api_rate_key = '';
+        $this->shipping_api_rates = [];
+        $this->shipping_api_error = null;
+        $this->shipping_auto_status = 'Lengkapi alamat untuk menghitung ongkir otomatis.';
+        $this->shipping_auto_fingerprint = '';
+    }
+
+    public function canUseShippingApi(): bool
+    {
+        $settings = app(ShippingApiSettingService::class);
+
+        return $settings->provider() === 'rajaongkir'
+            && $settings->isReady();
+    }
+
+    public function shippingApiStatusMessage(): string
+    {
+        $settings = app(ShippingApiSettingService::class);
+        $setting = $settings->setting();
+
+        if ($settings->provider() !== 'rajaongkir') {
+            return 'Ongkir otomatis belum aktif. Pilih provider RajaOngkir di admin shipping setting.';
+        }
+
+        if (! $setting->shipping_api_enabled) {
+            return 'Ongkir otomatis masih nonaktif di admin shipping setting.';
+        }
+
+        if (blank($settings->apiKey())) {
+            return 'API key RajaOngkir belum diisi.';
+        }
+
+        if (blank($setting->shipping_api_origin_area_id)) {
+            return 'Origin Area ID toko belum dipilih.';
+        }
+
+        if (blank($this->shipping_destination_area_id)) {
+            return 'Lengkapi wilayah dan kode pos agar ongkir otomatis bisa dihitung.';
+        }
+
+        return 'Siap menghitung ongkir otomatis.';
+    }
+
+    public function selectedShippingApiRate(): ?array
+    {
+        if ($this->shipping_api_rate_key === '') {
+            return null;
+        }
+
+        return collect($this->shipping_api_rates)
+            ->firstWhere('key', $this->shipping_api_rate_key);
+    }
+
+    public function loadShippingApiRates(): void
+    {
+        $this->shipping_api_error = null;
+        $this->shipping_api_rates = [];
+        $this->shipping_api_rate_key = '';
+        $this->shipping_api_using_manual_fallback = false;
+
+        if (! $this->canUseShippingApi()) {
+            $this->shipping_api_error = $this->shippingApiStatusMessage();
+            $this->shipping_api_using_manual_fallback = true;
+            return;
+        }
+
+        if (blank($this->shipping_destination_area_id)) {
+            $this->shipping_api_error = 'Wilayah tujuan belum dikenali otomatis. Cek kecamatan, kota, provinsi, dan kode pos.';
+            $this->shipping_auto_status = 'Wilayah tujuan belum dikenali otomatis.';
+            $this->shipping_api_using_manual_fallback = true;
+            return;
+        }
+
+        $this->shipping_auto_status = 'Mengambil tarif ongkir dari RajaOngkir...';
+
+        $settings = app(ShippingApiSettingService::class);
+        $origin = $settings->origin()['area_id'] ?? null;
+        $destination = $this->shipping_destination_area_id;
+        $weight = max(1, (int) $this->cartWeightGram);
+        $rates = [];
+        $errors = [];
+
+        foreach ($settings->courierCodes() as $courier) {
+            try {
+                $courierRates = app(RajaOngkirShippingService::class)
+                    ->calculateDomesticCost($origin, $destination, $weight, $courier);
+
+                foreach ($courierRates as $rate) {
+                    $key = md5(implode('|', [
+                        $rate['code'] ?? $courier,
+                        $rate['service'] ?? '',
+                        $rate['cost'] ?? 0,
+                        $rate['etd'] ?? '',
+                    ]));
+
+                    $rates[] = [
+                        'key' => $key,
+                        'source' => 'rajaongkir',
+                        'name' => $rate['name'] ?: strtoupper($rate['code'] ?? $courier),
+                        'code' => strtolower($rate['code'] ?: $courier),
+                        'service' => $rate['service'] ?: '-',
+                        'description' => $rate['description'] ?: ($rate['service'] ?: 'Layanan kurir'),
+                        'cost' => (int) ($rate['cost'] ?? 0),
+                        'etd' => $rate['etd'] ?: '-',
+                        'raw' => $rate,
+                    ];
+                }
+            } catch (\Throwable $e) {
+                report($e);
+                $errors[] = strtoupper($courier);
+            }
+        }
+
+        $this->shipping_api_rates = collect($rates)
+            ->sortBy(['cost', 'name', 'service'])
+            ->values()
+            ->all();
+
+        if ($this->shipping_api_rates === []) {
+            $this->shipping_api_error = $errors
+                ? 'Gagal mengambil ongkir dari kurir: ' . implode(', ', $errors) . '. Kamu masih bisa pakai ongkir manual jika fallback aktif.'
+                : 'Tidak ada tarif ongkir yang tersedia dari RajaOngkir untuk tujuan ini.';
+            $this->shipping_auto_status = 'Tarif otomatis belum tersedia untuk tujuan ini.';
+            $this->shipping_api_using_manual_fallback = $settings->fallbackManualEnabled();
+            return;
+        }
+
+        $this->shipping_method_id = null;
+        $this->shipping_api_rate_key = (string) ($this->shipping_api_rates[0]['key'] ?? '');
+        $this->shipping_auto_status = 'Ongkir otomatis berhasil dihitung. Kamu bisa pilih layanan lain jika mau.';
+    }
+
+    public function resetShippingApiRates(): void
+    {
+        $this->shipping_api_rates = [];
+        $this->shipping_api_rate_key = '';
+        $this->shipping_api_error = null;
+        $this->shipping_api_using_manual_fallback = false;
+        $this->shipping_auto_status = 'Ongkir otomatis direset.';
+    }
+
     #[Computed]
     public function shippingCost(): ?int
     {
+        $apiRate = $this->selectedShippingApiRate();
+
+        if ($apiRate) {
+            return (int) $apiRate['cost'];
+        }
+
         if (! $this->selectedShippingMethod || ! $this->isAddressReady) {
             return null;
         }
@@ -563,6 +991,8 @@ class extends Component {
             'city' => trim($this->city) ?: null,
             'province' => trim($this->province) ?: null,
             'postal_code' => trim($this->postal_code) ?: null,
+            'shipping_destination_area_id' => trim($this->shipping_destination_area_id) ?: null,
+            'shipping_destination_label' => trim($this->shipping_destination_label) ?: null,
         ];
 
         if (
@@ -606,7 +1036,10 @@ class extends Component {
             'province' => ['required', 'string', 'max:255'],
             'postal_code' => ['nullable', 'string', 'max:20'],
             'phone' => ['required', 'string', 'max:30'],
-            'shipping_method_id' => ['required', 'exists:shipping_methods,id'],
+            'shipping_destination_area_id' => ['nullable', 'string', 'max:100'],
+            'shipping_destination_label' => ['nullable', 'string', 'max:500'],
+            'shipping_method_id' => ['nullable', 'exists:shipping_methods,id'],
+            'shipping_api_rate_key' => ['nullable', 'string', 'max:64'],
             'payment_method_id' => ['required', 'exists:payment_methods,id'],
             'billing_type' => ['required', 'in:same'],
             'save_to_profile' => ['boolean'],
@@ -631,11 +1064,20 @@ class extends Component {
             return;
         }
 
+        $selectedApiRate = $this->selectedShippingApiRate();
+
+        if (! $selectedApiRate && ! $this->selectedShippingMethod) {
+            $this->addError('shipping_method_id', 'Pilih ongkir otomatis atau metode pengiriman manual.');
+            return;
+        }
+
         $universalDiscount = app(UniversalDiscountService::class)
             ->calculateForCart($this->cartItems, auth('customer')->id());
 
         $universalDiscountAmount = (int) ($universalDiscount['amount'] ?? 0);
-        $shippingCost = $this->shippingCost ?? 0;
+        $shippingCost = $selectedApiRate
+            ? (int) $selectedApiRate['cost']
+            : ($this->shippingCost ?? 0);
         $totalAmount = max(0, $this->subtotal + $shippingCost - $universalDiscountAmount);
 
         $order = DB::transaction(function () use (
@@ -643,11 +1085,12 @@ class extends Component {
             $universalDiscount,
             $universalDiscountAmount,
             $shippingCost,
-            $totalAmount
+            $totalAmount,
+            $selectedApiRate
         ) {
             $order = Order::create([
                 'user_id' => auth('customer')->id(),
-                'shipping_method_id' => $this->shipping_method_id,
+                'shipping_method_id' => $selectedApiRate ? null : $this->shipping_method_id,
                 'payment_method_id' => $this->payment_method_id,
 
                 'order_number' => Order::generateOrderNumber(),
@@ -660,6 +1103,15 @@ class extends Component {
                 'shipping_city' => $this->city,
                 'shipping_district' => $this->district,
                 'shipping_postal_code' => $this->postal_code ?: null,
+                'shipping_destination_area_id' => $this->shipping_destination_area_id ?: null,
+                'shipping_destination_label' => $this->shipping_destination_label ?: null,
+                'shipping_rate_source' => $selectedApiRate ? 'rajaongkir' : 'manual',
+                'shipping_courier_code' => $selectedApiRate['code'] ?? null,
+                'shipping_courier_name' => $selectedApiRate['name'] ?? null,
+                'shipping_service_code' => $selectedApiRate['service'] ?? null,
+                'shipping_service_name' => $selectedApiRate['description'] ?? null,
+                'shipping_estimate' => $selectedApiRate['etd'] ?? null,
+                'shipping_rate_payload' => $selectedApiRate ?: null,
 
                 'subtotal' => $this->subtotal,
                 'shipping_cost' => $shippingCost,
@@ -805,6 +1257,13 @@ class extends Component {
                 </form>
             </div>
 
+            @if($autofill_source)
+                <div class="checkout-autofill-box">
+                    <strong>Data checkout otomatis terisi.</strong>
+                    <span>Diambil dari {{ $autofill_source }}. Kamu tetap bisa mengubahnya sebelum bayar.</span>
+                </div>
+            @endif
+
             <label class="checkout-check">
                 <input type="checkbox" wire:model="newsletter">
                 <span>Kirimi saya email berita dan penawaran</span>
@@ -848,9 +1307,28 @@ class extends Component {
                     </label>
 
                     <label class="checkout-field">
-                        <input type="text" wire:model.live="postal_code" placeholder="Kode Pos">
+                        <input type="text" wire:model.live.debounce.600ms="postal_code" placeholder="Kode Pos">
                     </label>
                 </div>
+
+                <div class="checkout-auto-shipping-box">
+                    <div>
+                        <strong>Ongkir otomatis</strong>
+                        <span>{{ $shipping_auto_status }}</span>
+
+                        @if($shipping_destination_label)
+                            <small>Tujuan: {{ $shipping_destination_label }}</small>
+                        @endif
+                    </div>
+
+                    <button type="button" wire:click="autoPrepareShippingFromAddress">
+                        Cek ulang
+                    </button>
+                </div>
+
+                @if($shipping_api_error)
+                    <small class="checkout-error">{{ $shipping_api_error }}</small>
+                @endif
 
                 <label class="checkout-field full">
                     <input type="text" wire:model.live="phone" placeholder="Telepon">
@@ -871,15 +1349,58 @@ class extends Component {
                     <div class="checkout-weight-box">
                         <div>
                             <strong>Total berat paket</strong>
+                            <small>Berat dan Area ID tujuan akan dipakai untuk ongkir API tahap berikutnya.</small>
                         </div>
                         <span>{{ $this->formatWeightGram($this->cartWeightGram) }}</span>
+                    </div>
+
+                    <div class="checkout-shipping-api-box">
+                        <div class="checkout-shipping-api-head">
+                            <div>
+                                <strong>Layanan pengiriman otomatis</strong>
+                                <small>{{ $this->shippingApiStatusMessage() }}</small>
+                            </div>
+
+                            <button
+                                type="button"
+                                wire:click="autoPrepareShippingFromAddress"
+                                @disabled(! $this->canUseShippingApi())
+                            >
+                                Cek ulang
+                            </button>
+                        </div>
+
+                        @if(! empty($shipping_api_rates))
+                            <div class="checkout-shipping-rate-list">
+                                @foreach($shipping_api_rates as $rate)
+                                    <label @class([
+                                        'checkout-shipping-rate-card',
+                                        'active' => $shipping_api_rate_key === $rate['key'],
+                                    ])>
+                                        <input type="radio" wire:model.live="shipping_api_rate_key" value="{{ $rate['key'] }}">
+
+                                        <div>
+                                            <strong>{{ $rate['name'] }} {{ $rate['service'] }}</strong>
+                                            <small>{{ $rate['description'] }} · Estimasi {{ $rate['etd'] }}</small>
+                                        </div>
+
+                                        <b>Rp {{ number_format($rate['cost'], 0, ',', '.') }}</b>
+                                    </label>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
 
                     @if(! $this->isAddressReady)
                         <div class="checkout-muted-box">
                             Masukkan alamat pengiriman Anda untuk melihat metode pengiriman yang tersedia.
                         </div>
-                    @else
+                    @elseif(empty($shipping_api_rates) || $shipping_api_using_manual_fallback)
+                        <div class="checkout-shipping-manual-title">
+                            <strong>Fallback ongkir manual</strong>
+                            <small>Ditampilkan hanya jika ongkir otomatis belum tersedia.</small>
+                        </div>
+
                         <div class="checkout-method-list">
                             @forelse($this->shippingMethods as $method)
                                 @php
@@ -917,6 +1438,10 @@ class extends Component {
                     @endif
 
                     @error('shipping_method_id')
+                        <small class="checkout-error">{{ $message }}</small>
+                    @enderror
+
+                    @error('shipping_api_rate_key')
                         <small class="checkout-error">{{ $message }}</small>
                     @enderror
                 </div>
@@ -1000,6 +1525,8 @@ class extends Component {
                             <input type="radio" wire:model="billing_type" value="same">
                             <span>Sama dengan alamat pengiriman</span>
                         </label>
+
+                        <p class="checkout-billing-note">Alamat penagihan saat ini disamakan dengan alamat pengiriman agar data order tetap konsisten.</p>
                     </div>
                 </div>
 
@@ -1058,11 +1585,6 @@ class extends Component {
                     <div>
                         <span>Subtotal</span>
                         <strong>Rp {{ number_format($this->subtotal, 0, ',', '.') }}</strong>
-                    </div>
-
-                    <div class="checkout-price-list-muted">
-                        <span>Berat paket</span>
-                        <strong>{{ $this->formatWeightGram($this->cartWeightGram) }}</strong>
                     </div>
 
                     @if($this->universalDiscountAmount > 0)

@@ -1,0 +1,191 @@
+/* =========================================================
+   SHIPPING API SETTINGS - STAGE 2
+   Scoped agar tidak mengganggu halaman admin lain.
+========================================================= */
+
+.admin-shipping-setting-v3 {
+    display: grid;
+    gap: 16px;
+}
+
+.admin-shipping-setting-head-v3,
+.admin-shipping-block-title-v3 {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.admin-shipping-setting-head-v3 h2 {
+    margin: 0;
+}
+
+.admin-shipping-setting-head-v3 p,
+.admin-shipping-block-title-v3 small,
+.admin-shipping-api-grid-v3 small {
+    margin: 4px 0 0;
+    color: var(--admin-muted);
+    font-size: 12px;
+    line-height: 1.45;
+    font-weight: 750;
+}
+
+.admin-shipping-setting-head-v3 > span {
+    min-width: max-content;
+    padding: 7px 11px;
+    border: 1px solid var(--admin-border);
+    border-radius: 999px;
+    background: rgba(236, 236, 236, .55);
+    color: var(--admin-muted);
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.admin-shipping-setting-block-v3 {
+    padding: 14px;
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .55);
+    display: grid;
+    gap: 14px;
+}
+
+.admin-shipping-block-title-v3 strong {
+    color: var(--admin-text);
+    font-size: 15px;
+    font-weight: 950;
+}
+
+.admin-shipping-api-note-v3 {
+    padding: 10px 12px;
+    border: 1px solid rgba(22, 8, 133, .14);
+    border-radius: 12px;
+    background: rgba(22, 8, 133, .055);
+    display: grid;
+    gap: 3px;
+}
+
+.admin-shipping-api-note-v3 strong {
+    color: var(--admin-text);
+    font-size: 12px;
+    font-weight: 950;
+}
+
+.admin-shipping-api-note-v3 span {
+    color: var(--admin-muted);
+    font-size: 12px;
+    line-height: 1.45;
+    font-weight: 750;
+}
+
+.admin-shipping-api-grid-v3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-shipping-api-wide-v3 {
+    grid-column: span 2;
+}
+
+@media (max-width: 1100px) {
+    .admin-shipping-api-grid-v3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-shipping-api-wide-v3 {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 720px) {
+    .admin-shipping-setting-head-v3,
+    .admin-shipping-block-title-v3 {
+        flex-direction: column;
+    }
+
+    .admin-shipping-setting-head-v3 > span {
+        width: fit-content;
+    }
+
+    .admin-shipping-api-grid-v3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* =========================================================
+   SHIPPING API ORIGIN SEARCH - STAGE 3
+========================================================= */
+
+.admin-shipping-origin-search-v3 {
+    display: grid;
+    gap: 10px;
+}
+
+.admin-shipping-origin-actions-v3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.admin-shipping-origin-actions-v3 .admin-btn {
+    min-height: 38px;
+    padding: 8px 12px;
+    font-size: 12px;
+}
+
+.admin-shipping-origin-results-v3 {
+    display: grid;
+    gap: 8px;
+    max-height: 260px;
+    overflow: auto;
+}
+
+.admin-shipping-origin-results-v3 button {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--admin-border);
+    border-radius: 12px;
+    background: #fff;
+    text-align: left;
+    cursor: pointer;
+    display: grid;
+    gap: 3px;
+    transition: border-color .18s ease, background .18s ease, transform .18s ease;
+}
+
+.admin-shipping-origin-results-v3 button:hover {
+    border-color: rgba(22, 8, 133, .24);
+    background: rgba(22, 8, 133, .045);
+    transform: translateY(-1px);
+}
+
+.admin-shipping-origin-results-v3 strong {
+    color: var(--admin-text);
+    font-size: 13px;
+    line-height: 1.35;
+    font-weight: 900;
+}
+
+.admin-shipping-origin-results-v3 small {
+    color: var(--admin-muted);
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.admin-shipping-api-error-v3 {
+    padding: 9px 11px;
+    border: 1px solid rgba(220, 38, 38, .16);
+    border-radius: 11px;
+    background: rgba(220, 38, 38, .08);
+    color: #b91c1c;
+    font-size: 12px;
+    line-height: 1.45;
+    font-weight: 800;
+}
+
+@media (max-width: 720px) {
+    .admin-shipping-origin-actions-v3 .admin-btn {
+        width: 100%;
+    }
+}
