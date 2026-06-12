@@ -1257,13 +1257,6 @@ class extends Component {
                 </form>
             </div>
 
-            @if($autofill_source)
-                <div class="checkout-autofill-box">
-                    <strong>Data checkout otomatis terisi.</strong>
-                    <span>Diambil dari {{ $autofill_source }}. Kamu tetap bisa mengubahnya sebelum bayar.</span>
-                </div>
-            @endif
-
             <label class="checkout-check">
                 <input type="checkbox" wire:model="newsletter">
                 <span>Kirimi saya email berita dan penawaran</span>
@@ -1349,7 +1342,6 @@ class extends Component {
                     <div class="checkout-weight-box">
                         <div>
                             <strong>Total berat paket</strong>
-                            <small>Berat dan Area ID tujuan akan dipakai untuk ongkir API tahap berikutnya.</small>
                         </div>
                         <span>{{ $this->formatWeightGram($this->cartWeightGram) }}</span>
                     </div>
@@ -1398,7 +1390,6 @@ class extends Component {
                     @elseif(empty($shipping_api_rates) || $shipping_api_using_manual_fallback)
                         <div class="checkout-shipping-manual-title">
                             <strong>Fallback ongkir manual</strong>
-                            <small>Ditampilkan hanya jika ongkir otomatis belum tersedia.</small>
                         </div>
 
                         <div class="checkout-method-list">
@@ -1448,7 +1439,6 @@ class extends Component {
 
                 <div class="checkout-section checkout-payment-section">
                     <h2>Pembayaran</h2>
-                    <p>Pilih kategori pembayaran yang paling nyaman. Semua channel otomatis tetap diproses melalui Midtrans.</p>
 
                     @if($this->groupedPaymentMethods->isNotEmpty())
                         <div class="checkout-payment-groups">
@@ -1526,7 +1516,6 @@ class extends Component {
                             <span>Sama dengan alamat pengiriman</span>
                         </label>
 
-                        <p class="checkout-billing-note">Alamat penagihan saat ini disamakan dengan alamat pengiriman agar data order tetap konsisten.</p>
                     </div>
                 </div>
 

@@ -372,11 +372,6 @@ class extends Component {
                 <strong>Persiapan API Ongkir</strong>
             </div>
 
-            <div class="admin-shipping-api-note-v3">
-                <strong>Tahap 2</strong>
-                <span>Isi API key dan Origin Area ID sekarang. Tahap berikutnya baru checkout akan request ongkir otomatis.</span>
-            </div>
-
             <div class="admin-grid admin-shipping-api-grid-v3">
                 <label>
                     Provider API
@@ -403,34 +398,33 @@ class extends Component {
                         placeholder="{{ $this->apiKeyStatus() }}"
                         autocomplete="off"
                     >
-                    <small>Biarkan kosong jika ingin memakai key lama atau dari .env.</small>
                 </label>
 
                 <label>
                     Origin Area ID
                     <input type="text" wire:model="shipping_api_origin_area_id" placeholder="Contoh: area/destination id dari provider">
-                    <small>ID lokasi toko dari provider API.</small>
                 </label>
 
                 <div class="admin-shipping-origin-search-v3 admin-shipping-api-wide-v3">
-                    <label>
-                        Cari Origin Toko
-                        <input
-                            type="text"
-                            wire:model.live.debounce.500ms="origin_search"
-                            placeholder="Contoh: Bangsri, Jepara, 59453"
-                        >
-                        <small>Cari lokasi toko dari RajaOngkir, lalu pilih hasilnya untuk mengisi Origin Area ID.</small>
-                    </label>
+                    <div class="admin-shipping-origin-search-row-v3">
+                        <label>
+                            Cari Origin Toko
+                            <input
+                                type="text"
+                                wire:model.live.debounce.500ms="origin_search"
+                                placeholder="Contoh: Bangsri, Jepara, 59453"
+                            >
+                        </label>
 
-                    <div class="admin-shipping-origin-actions-v3">
-                        <button type="button" class="admin-btn secondary" wire:click="searchOriginArea">
-                            Cari Origin
-                        </button>
+                        <div class="admin-shipping-origin-actions-v3">
+                            <button type="button" class="admin-btn secondary" wire:click="searchOriginArea">
+                                Cari Origin
+                            </button>
 
-                        <button type="button" class="admin-btn secondary" wire:click="clearOriginSearch">
-                            Bersihkan
-                        </button>
+                            <button type="button" class="admin-btn secondary" wire:click="clearOriginSearch">
+                                Bersihkan
+                            </button>
+                        </div>
                     </div>
 
                     @if($origin_search_error)
@@ -467,19 +461,16 @@ class extends Component {
                 <label>
                     Kode Kurir
                     <input type="text" wire:model="shipping_api_couriers" placeholder="jne,jnt,sicepat,anteraja,pos">
-                    <small>Pisahkan dengan koma.</small>
                 </label>
 
                 <label>
                     Berat Default
                     <input type="number" wire:model="shipping_api_default_weight_gram" min="1">
-                    <small>Dipakai jika item belum punya berat.</small>
                 </label>
 
                 <label>
                     Cache Ongkir
                     <input type="number" wire:model="shipping_api_cache_minutes" min="0">
-                    <small>Menit. 0 berarti tanpa cache.</small>
                 </label>
 
                 <label>
@@ -488,7 +479,6 @@ class extends Component {
                         <option value="1">Aktif</option>
                         <option value="0">Nonaktif</option>
                     </select>
-                    <small>Jika API error, checkout bisa tetap pakai ongkir manual.</small>
                 </label>
             </div>
         </div>

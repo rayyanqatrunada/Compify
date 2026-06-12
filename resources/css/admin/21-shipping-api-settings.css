@@ -189,3 +189,59 @@
         width: 100%;
     }
 }
+
+
+/* =========================================================
+   SHIPPING ORIGIN SEARCH BUTTON ALIGN FIX
+   Tombol Cari Origin dan Bersihkan sejajar di kanan input.
+========================================================= */
+
+.admin-shipping-origin-search-row-v3 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: end;
+}
+
+.admin-shipping-origin-search-row-v3 > label {
+    min-width: 0;
+}
+
+.admin-shipping-origin-search-row-v3 .admin-shipping-origin-actions-v3 {
+    align-self: end;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: nowrap;
+    padding-bottom: 0;
+}
+
+.admin-shipping-origin-search-row-v3 .admin-shipping-origin-actions-v3 .admin-btn {
+    height: 42px;
+    min-height: 42px;
+    padding: 0 13px;
+    border-radius: 12px;
+    white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+    .admin-shipping-origin-search-row-v3 {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-shipping-origin-search-row-v3 .admin-shipping-origin-actions-v3 {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 520px) {
+    .admin-shipping-origin-search-row-v3 .admin-shipping-origin-actions-v3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .admin-shipping-origin-search-row-v3 .admin-shipping-origin-actions-v3 .admin-btn {
+        width: 100%;
+    }
+}
